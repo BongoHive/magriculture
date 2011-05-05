@@ -1,8 +1,5 @@
-# python setup.py should be able to deal with these dependencies as well
-# working on that...
--e git+git://github.com/praekelt/python-ssmi.git#egg=python-ssmi
+# If you package python-smpp, make it available on PyPi you can specify it 
+# in Vumi's requirements.pip file and it'll be download automatically as part
+# of Vumi's package requirements.
 -e git+git://github.com/dmaclay/python-smpp.git#egg=python-smpp
--e git+git://github.com/smn/python-foneworx.git#egg=python-foneworx
-
-
 -e git+git://github.com/praekelt/vumi.git@develop#egg=vumi
