@@ -16,6 +16,7 @@ class MenuConsumer(Consumer):
     delivery_mode = 2
     queue_name = "magri.inbound.menu_trans.base" #TODO revise name
     routing_key = "magri.inbound.menu_trans.base" #TODO revise name
+    sessions = {}
 
     def __init__(self, publisher):
         self.publisher = publisher
@@ -23,6 +24,20 @@ class MenuConsumer(Consumer):
     def consume_message(self, message):
         log.msg("menu message %s consumed by %s" % (json.dumps(dictionary),self.__class__.__name__))
         #dictionary = message.get('short_message')
+
+    def call_for_json(self, MSISDN, farmer_name):
+        if 1 == 2:
+            pass
+        else:
+            log.msg("OMG the interwebs are broken!")
+            return None
+
+    def get_session(self, MSISDN):
+        session = self.sessions.get(MSISDN)
+        if not session:
+            session = Session()
+            self.sessions[MSISDN] = session
+        return session
 
 
 class MenuPublisher(Publisher):
