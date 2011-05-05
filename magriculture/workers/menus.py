@@ -3,6 +3,7 @@ from twisted.python.log import logging
 from twisted.internet.defer import inlineCallbacks, returnValue
 
 from vumi.service import Worker, Consumer, Publisher
+from vumi.session import VumiSession
 from vumi.message import Message, VUMI_DATE_FORMAT
 
 from twisted.python import log
@@ -36,7 +37,7 @@ class MenuConsumer(Consumer):
     def get_session(self, MSISDN):
         session = self.sessions.get(MSISDN)
         if not session:
-            session = Session()
+            session = VumiSession()
             self.sessions[MSISDN] = session
         return session
 
