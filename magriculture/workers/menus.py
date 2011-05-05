@@ -32,6 +32,7 @@ class MenuConsumer(Consumer):
             log.msg("OMG the interwebs are broken!")
             return None
 
+
     def get_session(self, MSISDN):
         session = self.sessions.get(MSISDN)
         if not session:
