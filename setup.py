@@ -13,7 +13,7 @@ setup(
     license = '?',
     description = "Tool to provide market information to "
                   "smallholding farmers in emerging markets.",
-    long_description = open('README','r').read(),
+    long_description = open('README.rst','r').read(),
     author = 'Praekelt Foundation',
     author_email = 'dev@praekeltfoundation.org',
     packages = find_packages(),
