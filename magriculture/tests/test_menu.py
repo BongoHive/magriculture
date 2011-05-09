@@ -17,7 +17,7 @@ class MenuTestCase(TestCase):
             url: 173.45.90.19/dis-uat/api/getFarmerDetails
             username: admin
             password: Admin1234
-            json:
+            json: >
 
         __start__:
             display:
@@ -72,6 +72,12 @@ class MenuTestCase(TestCase):
             display:
                 english: "Thank you! Your milk collection
                 was registered successfully."
+
+        __update__:
+            url: 173.45.90.19/dis-uat/api/addMilkCollections
+            username: admin
+            password: Admin1234
+            param: result
         '''
 
 
