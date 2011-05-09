@@ -17,6 +17,8 @@ class MenuTestCase(TestCase):
             url: 173.45.90.19/dis-uat/api/getFarmerDetails
             username: admin
             password: Admin1234
+            params:
+                - telNo
             json: >
 
         __start__:
@@ -73,11 +75,12 @@ class MenuTestCase(TestCase):
                 english: "Thank you! Your milk collection
                 was registered successfully."
 
-        __update__:
+        __post__:
             url: 173.45.90.19/dis-uat/api/addMilkCollections
             username: admin
             password: Admin1234
-            param: result
+            params:
+                - result
         '''
 
 
@@ -99,7 +102,9 @@ class MenuTestCase(TestCase):
         repr(sc.gsdt("456789").question())
         sc.gsdt("456789").answer(3)
         repr(sc.gsdt("456789").question())
-        sc.gsdt("456789").answer("03/03/2011")
+        #sc.gsdt("456789").answer("03/03/2011")
+        sc.gsdt("456789").answer(0)
+        print repr(sc.post_back_json("456789"))
         repr(sc.gsdt("456789").finish())
 
         print ''
