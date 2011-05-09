@@ -14,36 +14,10 @@ class MenuTestCase(TestCase):
 
         test_yaml = '''
         __data__:
-            url:
-            username:
-            password:
-            json: >
-                {
-                    "farmers": [
-                        {
-                            "name": "Richard",
-                            "cows": [
-                                {
-                                    "name": "dairy",
-                                    "quantityMilked": 0,
-                                    "milkTimestamp": 0,
-                                    "cowRegId": "reg1",
-                                    "quantitySold": 0
-                                },
-                                {
-                                    "name": "dell",
-                                    "quantityMilked": 0,
-                                    "milkTimestamp": 0,
-                                    "cowRegId": "reg2",
-                                    "quantitySold": 0
-                                }
-                            ],
-                            "timestamp": "1294843761",
-                            "farmerRegId": "frm1"
-                        }
-                    ],
-                    "msisdn": "456789"
-                }
+            url: 173.45.90.19/dis-uat/api/getFarmerDetails
+            username: admin
+            password: Admin1234
+            json:
 
         __start__:
             display:
