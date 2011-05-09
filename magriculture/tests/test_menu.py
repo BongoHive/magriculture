@@ -72,8 +72,7 @@ class MenuTestCase(TestCase):
 
         __finish__:
             display:
-                english: "Thank you! Your milk collection
-                was registered successfully."
+                english: "Thank you! Your milk collection was registered successfully."
 
         __post__:
             url: 173.45.90.19/dis-uat/api/addMilkCollections
@@ -90,6 +89,7 @@ class MenuTestCase(TestCase):
         dt4 = sess4.get_decision_tree()
 
         sc.gsdt("456789").echo_on()
+        print repr(sc.gsdt("456789").get_data())
         repr(sc.gsdt("456789").start())
         #repr(sc.gsdt("456789").question())
         #sc.gsdt("456789").answer(1)
