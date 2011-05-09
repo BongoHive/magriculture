@@ -103,7 +103,7 @@ class MenuTestCase(TestCase):
 
         sess_cons = MenuConsumer(None)
         sess_cons.set_yaml_template(test_yaml)
-        sess4 = sess_cons.get_session("12345")
+        sess4 = sess_cons.get_session("456789")
         dt4 = sess4.get_decision_tree()
 
         dt4.echo_on()
