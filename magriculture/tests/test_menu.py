@@ -84,35 +84,59 @@ class MenuTestCase(TestCase):
 
 
         sc = MenuConsumer(None)
+        sc.r_server.flushall()
         sc.set_yaml_template(test_yaml)
-        sess4 = sc.get_session("456789")
-        dt4 = sess4.get_decision_tree()
 
-        sc.gsdt("456789").echo_on()
-        print repr(sc.gsdt("456789").get_data())
-        repr(sc.gsdt("456789").start())
-        #repr(sc.gsdt("456789").question())
-        #sc.gsdt("456789").answer(1)
-        repr(sc.gsdt("456789").question())
-        sc.gsdt("456789").answer(1)
-        repr(sc.gsdt("456789").question())
-        sc.gsdt("456789").answer('milk')
-        repr(sc.gsdt("456789").question())
-        sc.gsdt("456789").answer(42)
-        repr(sc.gsdt("456789").question())
-        sc.gsdt("456789").answer(23)
-        repr(sc.gsdt("456789").question())
-        sc.gsdt("456789").answer(3)
-        repr(sc.gsdt("456789").question())
-        sc.gsdt("456789").answer("03/03/2011")
-        print repr(sc.post_back_json("456789"))
-        repr(sc.gsdt("456789").finish())
+        sess = sc.get_session("456789")
+        sess.get_decision_tree().echo_on()
+        sess.get_decision_tree().get_data()
+        print sess.get_decision_tree().dump_json_data()
+        sess.get_decision_tree().start()
+        sess.get_decision_tree().question()
+        sess.save()
+        sess = None
+        # after persisting to redis, retrieve afresh
+        sess = sc.get_session("456789")
+        sess.get_decision_tree().answer(1)
+        sess.get_decision_tree().question()
+        sess.save()
+        sess = None
+        # after persisting to redis, retrieve afresh
+        sess = sc.get_session("456789")
+        sess.get_decision_tree().answer('milk')
+        sess.get_decision_tree().question()
+        sess.save()
+        sess = None
+        # after persisting to redis, retrieve afresh
+        sess = sc.get_session("456789")
+        sess.get_decision_tree().answer(42)
+        sess.get_decision_tree().question()
+        sess.save()
+        sess = None
+        # after persisting to redis, retrieve afresh
+        sess = sc.get_session("456789")
+        sess.get_decision_tree().answer(23)
+        sess.get_decision_tree().question()
+        sess.save()
+        sess = None
+        # after persisting to redis, retrieve afresh
+        sess = sc.get_session("456789")
+        sess.get_decision_tree().answer(3)
+        sess.get_decision_tree().question()
+        sess.save()
+        sess = None
+        # after persisting to redis, retrieve afresh
+        sess = sc.get_session("456789")
+        sess.get_decision_tree().answer("19/05/2011")
+        print sc.post_back_json("456789")
+        sess.get_decision_tree().finish()
+        sess.save()
+        sess = None
 
-        print ''
-        print repr(dt4.get_data_source())
-        print sess4.get_decision_tree().dump_json_data()
 
-
+        print ""
+        print sc.get_session("456789").get_decision_tree().dump_json_data()
+        print sc.get_session("456789").get_decision_tree().serialize_to_json()
 
 
         #print "\n\n"
