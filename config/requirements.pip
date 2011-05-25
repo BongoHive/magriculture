@@ -2,4 +2,5 @@
 # in Vumi's requirements.pip file and it'll be download automatically as part
 # of Vumi's package requirements.
 -e git+git://github.com/dmaclay/python-smpp.git#egg=python-smpp
--e git+git://github.com/praekelt/vumi.git@develop#egg=vumi
+# -e git+git://github.com/praekelt/vumi.git@develop#egg=vumi
+-e git+git://github.com/praekelt/vumi.git@feature/mock-xmpp-as-cellulant-ussd#egg=vumi
