@@ -6,6 +6,8 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 
 from vumi.workers.session.worker import SessionConsumer, SessionPublisher, SessionWorker
 from vumi.message import Message
+from vumi.webapp.api import utils
+import vumi.options
 
 
 class MenuConsumer(SessionConsumer):
@@ -87,17 +89,35 @@ class MenuConsumer(SessionConsumer):
         if not self.yaml_template:
             self.set_yaml_template(self.test_yaml)
         recipient = message.payload['sender']
-        if not self.gsdt("456789").is_started():
-            self.gsdt("456789").start()
-            response += self.gsdt("456789").question()
+        sess = self.get_session(recipient)
+        if not sess.get_decision_tree().is_started():
+            sess.get_decision_tree().start()
+            response += sess.get_decision_tree().question()
         else:
-            self.gsdt("456789").answer(message.payload['message'])
-            if not self.gsdt("456789").is_completed():
-                response += self.gsdt("456789").question()
-            response += self.gsdt("456789").finish() or ''
-            if self.gsdt("456789").is_completed():
-                del self.sessions["456789"]
+            sess.get_decision_tree().answer(message.payload['message'])
+            if not sess.get_decision_tree().is_completed():
+                response += sess.get_decision_tree().question()
+            response += sess.get_decision_tree().finish() or ''
+            if sess.get_decision_tree().is_completed():
+                sess.delete()
+        sess.save()
         self.publisher.publish_message(Message(recipient=recipient, message=response))
+
+
+    def call_for_json(self, MSISDN):
+        MSISDN = "456789"
+        if self.data_url['url']:
+            params = [(self.data_url['params'][0], str(MSISDN))]
+            url = self.data_url['url']
+            auth_string = ''
+            if self.data_url['username']:
+                auth_string += self.data_url['username']
+                if self.data_url['password']:
+                    auth_string += ":" + self.data_url['password']
+                auth_string += "@"
+            resp_url, resp = utils.callback("http://"+auth_string+url, params)
+            return resp
+        return None
 
 
 class MenuPublisher(SessionPublisher):
@@ -108,6 +128,7 @@ class MenuWorker(SessionWorker):
     @inlineCallbacks
     def startWorker(self):
         log.msg("Starting the MenuWorker")
+        log.msg("vumi.options: %s" % (vumi.options.get()))
         self.publisher = yield self.start_publisher(MenuPublisher)
         yield self.start_consumer(MenuConsumer, self.publisher)
 

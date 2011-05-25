@@ -130,13 +130,12 @@ class MenuTestCase(TestCase):
         sess.get_decision_tree().answer("19/05/2011")
         print sc.post_back_json("456789")
         sess.get_decision_tree().finish()
-        sess.save()
-        sess = None
+        sess.delete()
 
 
-        print ""
-        print sc.get_session("456789").get_decision_tree().dump_json_data()
-        print sc.get_session("456789").get_decision_tree().serialize_to_json()
+        #print ""
+        #print sc.get_session("456789").get_decision_tree().dump_json_data()
+        #print sc.get_session("456789").get_decision_tree().serialize_to_json()
 
 
         #print "\n\n"
