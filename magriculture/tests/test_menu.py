@@ -128,7 +128,10 @@ class MenuTestCase(TestCase):
         # after persisting to redis, retrieve afresh
         sess = sc.get_session("456789")
         sess.get_decision_tree().answer("19/05/2011")
+        t = int(sess.get_decision_tree().data['farmers'][0]['timestamp'])
+        sess.get_decision_tree().data['farmers'][0]['timestamp'] = str(t+65)
         print sc.post_back_json("456789")
+        print sess.get_decision_tree().dump_json_data()
         sess.get_decision_tree().finish()
         sess.delete()
 
