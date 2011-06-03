@@ -178,13 +178,16 @@ class CellulantMenuConsumer(MenuConsumer):
         if not sess.get_decision_tree().is_started():
             sess.get_decision_tree().start()
             response += sess.get_decision_tree().question()
+            ussd['OPERATION'] = 'INV'
         else:
             sess.get_decision_tree().answer(ussd['MESSAGE'])
             if not sess.get_decision_tree().is_completed():
                 response += sess.get_decision_tree().question()
+                ussd['OPERATION'] = 'INV'
             response += sess.get_decision_tree().finish() or ''
             if sess.get_decision_tree().is_completed():
                 sess.delete()
+                ussd['OPERATION'] = 'END'
         sess.save()
         ussd['MESSAGE'] = response
         self.publisher.publish_message(Message(
