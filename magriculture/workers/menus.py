@@ -192,18 +192,16 @@ class CellulantMenuConsumer(MenuConsumer):
         ussd['MESSAGE'] = response
         self.publisher.publish_message(Message(
             uuid=message.payload['uuid'],
-            message=self.packMessage(**ussd)))
+            message=self.packMessage(**ussd)),
+            routing_key = message.payload['return_path'].pop())
 
-
-class CellulantMenuPublisher(SessionPublisher):
-    routing_key = "ussd.outbound.cellulant.http"
 
 class CellulantMenuWorker(SessionWorker):
     @inlineCallbacks
     def startWorker(self):
         log.msg("Starting the CellulantMenuWorker")
         log.msg("vumi.options: %s" % (vumi.options.get()))
-        self.publisher = yield self.start_publisher(CellulantMenuPublisher)
+        self.publisher = yield self.start_publisher(SessionPublisher)
         yield self.start_consumer(CellulantMenuConsumer, self.publisher)
 
     def stopWorker(self):
