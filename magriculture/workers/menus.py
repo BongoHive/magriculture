@@ -1,4 +1,5 @@
 import json
+import re
 
 from twisted.python import log
 from twisted.python.log import logging
@@ -136,22 +137,72 @@ class MenuWorker(SessionWorker):
         log.msg("Stopping the MenuWorker")
 
 
-#class MenuWorker(SessionWorker):
-    #@inlineCallbacks
-    #def startWorker(self):
-        #log.msg("Starting the XMPPWorker config: %s" % self.config)
-        ## create the publisher
-        #self.publisher = yield self.publish_to('xmpp.outbound.gtalk.%s' %
-                                                #self.config['username'])
-        ## when it's done, create the consumer and pass it the publisher
-        #self.consume("xmpp.inbound.gtalk.%s" % self.config['username'],
-                        #self.consume_message)
 
-    #def consume_message(self, message):
-        #recipient = message.payload['sender']
-        #message = "You said: %s " % message.payload['message']
-        #self.publisher.publish_message(Message(recipient=recipient, message=message))
+class CellulantMenuConsumer(MenuConsumer):
+    queue_name = "ussd.inbound.cellulant.http"
+    routing_key = "ussd.inbound.cellulant.http"
 
-    #def stopWorker(self):
-        #log.msg("Stopping the XMPPWorker")
+    def unpackMessage(self, message):
+        ussd = re.search(
+              '^(?P<SESSIONID>[^|]*)'
+            +'\|(?P<NETWORKID>[^|]*)'
+            +'\|(?P<MSISDN>[^|]*)'
+            +'\|(?P<MESSAGE>[^|]*)'
+            +'\|(?P<OPERATION>[^|]*)$',
+            message.payload['message'])
+        if ussd:
+            return ussd.groupdict()
+        else:
+            return {}
+
+    def packMessage(self,
+            SESSIONID,
+            NETWORKID,
+            MSISDN,
+            MESSAGE,
+            OPERATION):
+       return "%s|%s|%s|%s|%s" % (
+            SESSIONID,
+            NETWORKID,
+            MSISDN,
+            MESSAGE,
+            OPERATION)
+
+
+    def consume_message(self, message):
+        ussd = self.unpackMessage(message)
+        response = ''
+        if not self.yaml_template:
+            self.set_yaml_template(self.test_yaml)
+        sess = self.get_session(ussd['SESSIONID'])
+        if not sess.get_decision_tree().is_started():
+            sess.get_decision_tree().start()
+            response += sess.get_decision_tree().question()
+        else:
+            sess.get_decision_tree().answer(ussd['MESSAGE'])
+            if not sess.get_decision_tree().is_completed():
+                response += sess.get_decision_tree().question()
+            response += sess.get_decision_tree().finish() or ''
+            if sess.get_decision_tree().is_completed():
+                sess.delete()
+        sess.save()
+        ussd['MESSAGE'] = response
+        self.publisher.publish_message(Message(
+            uuid=message.payload['uuid'],
+            message=self.packMessage(**ussd)))
+
+
+class CellulantMenuPublisher(SessionPublisher):
+    routing_key = "ussd.outbound.cellulant.http"
+
+class CellulantMenuWorker(SessionWorker):
+    @inlineCallbacks
+    def startWorker(self):
+        log.msg("Starting the CellulantMenuWorker")
+        log.msg("vumi.options: %s" % (vumi.options.get()))
+        self.publisher = yield self.start_publisher(CellulantMenuPublisher)
+        yield self.start_consumer(CellulantMenuConsumer, self.publisher)
+
+    def stopWorker(self):
+        log.msg("Stopping the MenuWorker")
 
