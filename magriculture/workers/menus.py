@@ -65,7 +65,7 @@ class MenuConsumer(SessionConsumer):
                 default: yesterday
                 next: __finish__
               - display:
-                    english: "An earlier day"
+                    english: "An earlier day"/etc/init.d/haproxy restart
                 next:
                     question:
                         english: "Which day was it [dd/mm/yyyy]?"
@@ -189,7 +189,7 @@ class CellulantMenuConsumer(MenuConsumer):
                 sess.delete()
                 ussd['OPERATION'] = 'END'
         sess.save()
-        ussd['MESSAGE'] = response
+        ussd['MESSAGE'] = response + "\n"
         self.publisher.publish_message(Message(
             uuid=message.payload['uuid'],
             message=self.packMessage(**ussd)),
