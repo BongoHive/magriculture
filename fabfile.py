@@ -26,7 +26,7 @@ def _setup_env(fn):
 
 def _setup_env_for(branch):
     env.branch = branch
-    env.github_repo = 'http://github.com/%(github_user)s/%(github_repo_name)s.git' % env
+    env.github_repo = 'git@github.com:%(github_user)s/%(github_repo_name)s.git' % env
     env.deploy_to = '/var/praekelt/%(github_repo_name)s/%(branch)s' % env
     env.releases_path = "%(deploy_to)s/releases" % env
     env.current = "%(deploy_to)s/current" % env

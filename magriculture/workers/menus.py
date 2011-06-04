@@ -65,7 +65,7 @@ class MenuConsumer(SessionConsumer):
                 default: yesterday
                 next: __finish__
               - display:
-                    english: "An earlier day"/etc/init.d/haproxy restart
+                    english: "An earlier day"
                 next:
                     question:
                         english: "Which day was it [dd/mm/yyyy]?"
@@ -143,17 +143,32 @@ class CellulantMenuConsumer(MenuConsumer):
     routing_key = "ussd.inbound.cellulant.http"
 
     def unpackMessage(self, message):
-        ussd = re.search(
-              '^(?P<SESSIONID>[^|]*)'
-            +'\|(?P<NETWORKID>[^|]*)'
-            +'\|(?P<MSISDN>[^|]*)'
-            +'\|(?P<MESSAGE>[^|]*)'
-            +'\|(?P<OPERATION>[^|]*)$',
-            message.payload['message'])
-        if ussd:
-            return ussd.groupdict()
-        else:
-            return {}
+        mess = message.payload['message']
+        try:
+            if len(mess.get('content', '')) > 0:
+                mess = mess
+                ussd_ = re.search(
+                      '^(?P<SESSIONID>[^|]*)'
+                    +'\|(?P<NETWORKID>[^|]*)'
+                    +'\|(?P<MSISDN>[^|]*)'
+                    +'\|(?P<MESSAGE>[^|]*)'
+                    +'\|(?P<OPERATION>[^|]*)$',
+                    mess)
+                if ussd_:
+                    return ussd_.groupdict()
+        except Exception, e:
+            log.err(e)
+        try:
+            mess = mess.get('args', {})
+        except:
+            mess = {}
+        ussd = {}
+        ussd['SESSIONID'] = mess.get('SESSIONID', ['']).pop()
+        ussd['NETWORKID'] = mess.get('NETWORKID', ['']).pop()
+        ussd['MSISDN'] = mess.get('MSISDN', ['']).pop()
+        ussd['MESSAGE'] = mess.get('MESSAGE', ['']).pop()
+        ussd['OPERATION'] = mess.get('OPERATION', ['']).pop()
+        return ussd
 
     def packMessage(self,
             SESSIONID,
@@ -170,25 +185,28 @@ class CellulantMenuConsumer(MenuConsumer):
 
 
     def consume_message(self, message):
+        log.msg("Message: %s" % (message))
         ussd = self.unpackMessage(message)
+        log.msg("USSD: %s" % (ussd))
         response = ''
-        if not self.yaml_template:
-            self.set_yaml_template(self.test_yaml)
-        sess = self.get_session(ussd['SESSIONID'])
-        if not sess.get_decision_tree().is_started():
-            sess.get_decision_tree().start()
-            response += sess.get_decision_tree().question()
-            ussd['OPERATION'] = 'INV'
-        else:
-            sess.get_decision_tree().answer(ussd['MESSAGE'])
-            if not sess.get_decision_tree().is_completed():
+        if ussd['OPERATION'] != 'BEG':
+            if not self.yaml_template:
+                self.set_yaml_template(self.test_yaml)
+            sess = self.get_session(ussd['SESSIONID'])
+            if not sess.get_decision_tree().is_started():
+                sess.get_decision_tree().start()
                 response += sess.get_decision_tree().question()
                 ussd['OPERATION'] = 'INV'
-            response += sess.get_decision_tree().finish() or ''
-            if sess.get_decision_tree().is_completed():
-                sess.delete()
-                ussd['OPERATION'] = 'END'
-        sess.save()
+            else:
+                sess.get_decision_tree().answer(ussd['MESSAGE'])
+                if not sess.get_decision_tree().is_completed():
+                    response += sess.get_decision_tree().question()
+                    ussd['OPERATION'] = 'INV'
+                response += sess.get_decision_tree().finish() or ''
+                if sess.get_decision_tree().is_completed():
+                    sess.delete()
+                    ussd['OPERATION'] = 'END'
+            sess.save()
         ussd['MESSAGE'] = response
         self.publisher.publish_message(Message(
             uuid=message.payload['uuid'],
