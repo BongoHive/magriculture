@@ -189,7 +189,7 @@ class CellulantMenuConsumer(MenuConsumer):
                 sess.delete()
                 ussd['OPERATION'] = 'END'
         sess.save()
-        ussd['MESSAGE'] = response + "\n"
+        ussd['MESSAGE'] = response
         self.publisher.publish_message(Message(
             uuid=message.payload['uuid'],
             message=self.packMessage(**ussd)),
