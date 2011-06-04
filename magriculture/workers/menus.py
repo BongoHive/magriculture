@@ -146,14 +146,13 @@ class CellulantMenuConsumer(MenuConsumer):
         mess = message.payload['message']
         try:
             if len(mess.get('content', '')) > 0:
-                mess = mess
                 ussd_ = re.search(
                       '^(?P<SESSIONID>[^|]*)'
                     +'\|(?P<NETWORKID>[^|]*)'
                     +'\|(?P<MSISDN>[^|]*)'
                     +'\|(?P<MESSAGE>[^|]*)'
                     +'\|(?P<OPERATION>[^|]*)$',
-                    mess)
+                    mess['content'])
                 if ussd_:
                     return ussd_.groupdict()
         except Exception, e:
