@@ -181,7 +181,7 @@ class CellulantMenuConsumer(MenuConsumer):
         ussd['ABORT'] = mess.get('ABORT', ['null']).pop()
         ussd['OPERATION'] = mess.get('opCode', ['null']).pop()
         ussd['TEMPLEVEL'] = mess.get('TEMPLEVEL', ['null']).pop()
-        ussd['MESSAGE'] = mess.get('INPUT', ['null']).pop()
+        ussd['MESSAGE'] = str(mess.get('INPUT', ['null']).pop())
         ussd['api'] = '1.0'
         return ussd
 
