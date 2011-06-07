@@ -237,7 +237,6 @@ class CellulantMenuConsumer(MenuConsumer):
                 response += sess.get_decision_tree().question()
                 ussd['OPERATION'] = 'INV'
             else:
-                print repr(ussd['MESSAGE']), ussd['MESSAGE']
                 sess.get_decision_tree().answer(ussd['MESSAGE'])
                 if not sess.get_decision_tree().is_completed():
                     response += sess.get_decision_tree().question()
