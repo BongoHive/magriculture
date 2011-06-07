@@ -192,7 +192,7 @@ class CellulantMenuConsumer(MenuConsumer):
             MESSAGE = None,
             OPERATION = None,
             **kwargs):
-        nextLevel = 'null'
+        nextLevel = '1'
         message = MESSAGE
         valueOfSelection = 'null'
         serviceID = 'null'
