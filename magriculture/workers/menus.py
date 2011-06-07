@@ -213,7 +213,8 @@ class CellulantMenuConsumer(MenuConsumer):
             NETWORKID,
             MSISDN,
             MESSAGE,
-            OPERATION):
+            OPERATION,
+            **kwargs):
         return "%s|%s|%s|%s|%s" % (
                 SESSIONID,
                 NETWORKID,
