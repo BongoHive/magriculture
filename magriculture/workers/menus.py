@@ -154,33 +154,72 @@ class CellulantMenuConsumer(MenuConsumer):
                     +'\|(?P<OPERATION>[^|]*)$',
                     mess['content'])
                 if ussd_:
-                    return ussd_.groupdict()
+                    ussd = ussd_.groupdict()
+                    ussd['api'] = '2.1'
+                    return ussd
         except Exception, e:
             log.err(e)
+        #'CURRENTLEVEL': ['239'],
+        #'SESSIONFILE': ['/var/www/ussdSessions/16539634_254717201184_2011_Jun_Tue_120711'],
+        #'EXTRA': ['null'],
+        #'MSISDN': ['254717201184'],
+        #'sessionID': ['110607120709000'],
+        #'ABORT': ['0'],
+        #'opCode': ['BEG'],
+        #'TEMPLEVEL': ['1'],
+        #'INPUT': ['8864']}
         try:
             mess = mess.get('args', {})
         except:
             mess = {}
         ussd = {}
-        ussd['SESSIONID'] = mess.get('SESSIONID', ['']).pop()
-        ussd['NETWORKID'] = mess.get('NETWORKID', ['']).pop()
-        ussd['MSISDN'] = mess.get('MSISDN', ['']).pop()
-        ussd['MESSAGE'] = mess.get('MESSAGE', ['']).pop()
-        ussd['OPERATION'] = mess.get('OPERATION', ['']).pop()
+        ussd['CURRENTLEVEL'] = mess.get('CURRENTLEVEL', ['null']).pop()
+        ussd['SESSIONFILE'] = mess.get('SESSIONFILE', ['null']).pop()
+        ussd['MSISDN'] = mess.get('MSISDN', ['null']).pop()
+        ussd['EXTRA'] = mess.get('EXTRA', ['null']).pop()
+        ussd['SESSIONID'] = mess.get('sessionID', ['null']).pop()
+        ussd['ABORT'] = mess.get('ABORT', ['null']).pop()
+        ussd['OPERATION'] = mess.get('opCode', ['null']).pop()
+        ussd['TEMPLEVEL'] = mess.get('TEMPLEVEL', ['null']).pop()
+        ussd['MESSAGE'] = mess.get('INPUT', ['null']).pop()
+        ussd['api'] = '1.0'
         return ussd
 
-    def packMessage(self,
+    def packMessage_1_0(self,
+            SESSIONID = None,
+            NETWORKID = None,
+            MSISDN = None,
+            MESSAGE = None,
+            OPERATION = None,
+            **kwargs):
+        nextLevel = 'null'
+        message = MESSAGE
+        valueOfSelection = 'null'
+        serviceID = 'null'
+        status = 'continue'
+        if OPERATION == "END":
+            status = 'end'
+        extra = 'null'
+        return "%s|%s|%s|%s|%s|%s" % (
+                nextLevel,
+                message,
+                valueOfSelection,
+                serviceID,
+                status,
+                extra)
+
+    def packMessage_2_1(self,
             SESSIONID,
             NETWORKID,
             MSISDN,
             MESSAGE,
             OPERATION):
-       return "%s|%s|%s|%s|%s" % (
-            SESSIONID,
-            NETWORKID,
-            MSISDN,
-            MESSAGE,
-            OPERATION)
+        return "%s|%s|%s|%s|%s" % (
+                SESSIONID,
+                NETWORKID,
+                MSISDN,
+                MESSAGE,
+                OPERATION)
 
 
     def consume_message(self, message):
@@ -207,9 +246,13 @@ class CellulantMenuConsumer(MenuConsumer):
                     ussd['OPERATION'] = 'END'
             sess.save()
         ussd['MESSAGE'] = response
+        if ussd['api'] == '2.1':
+            packed_message = self.packMessage_2_1(**ussd)
+        else:
+            packed_message = self.packMessage_1_0(**ussd)
         self.publisher.publish_message(Message(
-            uuid=message.payload['uuid'],
-            message=self.packMessage(**ussd)),
+                uuid=message.payload['uuid'],
+                message=packed_message),
             routing_key = message.payload['return_path'].pop())
 
 
