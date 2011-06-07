@@ -228,7 +228,7 @@ class CellulantMenuConsumer(MenuConsumer):
         ussd = self.unpackMessage(message)
         log.msg("USSD: %s" % (ussd))
         response = ''
-        if ussd['OPERATION'] != 'null':
+        if True:
             if not self.yaml_template:
                 self.set_yaml_template(self.test_yaml)
             sess = self.get_session(ussd['SESSIONID'])
