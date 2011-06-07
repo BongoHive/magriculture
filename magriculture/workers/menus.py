@@ -246,6 +246,7 @@ class CellulantMenuConsumer(MenuConsumer):
                     ussd['OPERATION'] = 'END'
             sess.save()
         ussd['MESSAGE'] = response
+        log.msg("ussd: %s" % ussd)
         if ussd['api'] == '2.1':
             packed_message = self.packMessage_2_1(**ussd)
         else:
