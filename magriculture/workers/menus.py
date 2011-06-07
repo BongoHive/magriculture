@@ -245,7 +245,7 @@ class CellulantMenuConsumer(MenuConsumer):
                     sess.delete()
                     ussd['OPERATION'] = 'END'
             sess.save()
-        ussd['MESSAGE'] = response
+        ussd['MESSAGE'] = re.sub(r'\n', '\\\\n', response
         log.msg("ussd: %s" % ussd)
         if ussd['api'] == '2.1':
             packed_message = self.packMessage_2_1(**ussd)
