@@ -196,7 +196,7 @@ class CellulantMenuConsumer(MenuConsumer):
         message = MESSAGE
         valueOfSelection = 'null'
         serviceID = 'null'
-        status = 'end'
+        status = 'null'
         if OPERATION == "END":
             status = 'end'
         extra = 'null'
