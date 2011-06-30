@@ -270,3 +270,26 @@ class CellulantMenuWorker(SessionWorker):
     def stopWorker(self):
         log.msg("Stopping the MenuWorker")
 
+
+class MMMobileMenuConsumer(MenuConsumer):
+    queue_name = "ussd.inbound.mmmobile.http"
+    routing_key = "ussd.inbound.mmmobile.http"
+
+    def consume_message(self, message):
+        log.msg("Message: %s" % (message))
+        self.publisher.publish_message(Message(
+                uuid=message.payload['uuid'],
+                message='END Praekelt test session'),
+            routing_key = message.payload['return_path'].pop())
+
+class MMMobileMenuWorker(SessionWorker):
+    @inlineCallbacks
+    def startWorker(self):
+        log.msg("Starting the MMMobileMenuWorker")
+        log.msg("vumi.options: %s" % (vumi.options.get()))
+        self.publisher = yield self.start_publisher(SessionPublisher)
+        yield self.start_consumer(MMMobileMenuConsumer, self.publisher)
+
+    def stopWorker(self):
+        log.msg("Stopping the MenuWorker")
+
