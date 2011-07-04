@@ -279,7 +279,7 @@ class MMMobileMenuConsumer(MenuConsumer):
         log.msg("Message: %s" % (message))
         self.publisher.publish_message(Message(
                 uuid=message.payload['uuid'],
-                message='END Praekelt test session'),
+                message='CON if you keep replying, you should get this response each time.'),
             routing_key = message.payload['return_path'].pop())
 
 class MMMobileMenuWorker(SessionWorker):
