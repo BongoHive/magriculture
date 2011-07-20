@@ -3,3 +3,4 @@
 # of Vumi's package requirements.
 -e git+git://github.com/dmaclay/python-smpp.git#egg=python-smpp
 -e git+git://github.com/praekelt/vumi.git@develop#egg=vumi
+Django>=1.3
