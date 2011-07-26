@@ -1,8 +1,19 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+
+def create_actor(sender, instance, created, **kwargs):
+    if created:
+        Actor.objects.create(user=instance, name='%s %s' % (
+            instance.first_name, instance.last_name))
+
+post_save.connect(create_actor, sender=User)
 
 class Actor(models.Model):
     """A person with access to FNCS and who is able to interact with the
     data avaible."""
+    user = models.OneToOneField('auth.User')
+    # TODO: do we need a name here, it's duplicated from the Django User model
     name = models.CharField(blank=False, max_length=255)
     
     class Meta:
