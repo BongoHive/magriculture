@@ -10,7 +10,7 @@ class Province(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (Province)" % self.name
+        return u"%s (Province)" % (self.name,)
 
 
 class RPIArea(models.Model):
@@ -25,7 +25,7 @@ class RPIArea(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (RPIArea)" % self.name
+        return u"%s (RPIArea)" % (self.name,)
 
 
 class Zone(models.Model):
@@ -40,7 +40,7 @@ class Zone(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (Zone)" % self.name
+        return u"%s (Zone)" % (self.name,)
 
 
 class District(models.Model):
@@ -54,7 +54,7 @@ class District(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (District)" % self.name
+        return u"%s (District)" % (self.name,)
 
 class Ward(models.Model):
     """A geographic area, smaller than a District"""
@@ -67,7 +67,7 @@ class Ward(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (Ward)" % self.name
+        return u"%s (Ward)" % (self.name,)
     
 
 class Village(models.Model):
@@ -81,5 +81,17 @@ class Village(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (Village)"  % self.name
+        return u"%s (Village)"  % (self.name,)
 
+class Market(models.Model):
+    """A market is a location of trade in a certain district"""
+    name = models.CharField(blank=False, max_length=255)
+    district = models.ForeignKey('fncs.District')
+
+    class Meta:
+        ordering = ['-name']
+        get_latest_by = 'pk'
+        app_label = 'fncs'
+
+    def __unicode__(self):
+        return u"%s (Market)" % (self.name,)
