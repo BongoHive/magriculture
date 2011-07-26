@@ -30,10 +30,20 @@ class Farmer(models.Model):
     actor = models.ForeignKey('fncs.Actor')
     farmergroup = models.ForeignKey('fncs.FarmerGroup')
     agents = models.ManyToManyField('fncs.Agent')
+    markets = models.ManyToManyField('fncs.Market')
     
     class Meta:
         app_label = 'fncs'
     
+    def sells_at(self, market, agent):
+        # the farmer and the agent need to sell at the given market
+        self.markets.add(market)
+        agent.markets.add(market)
+        # the farmer has the agent registered as an agent
+        self.agents.add(agent)
+        # the agent has the farmer registered as a farmer
+        agent.farmers.add(self)
+
     def __unicode__(self):
         return u"%s (Farmer)" % (self.actor,)
 
@@ -85,7 +95,7 @@ class Agent(models.Model):
     actor = models.ForeignKey('fncs.Actor')
     farmers = models.ManyToManyField('fncs.Farmer')
     markets = models.ManyToManyField('fncs.Market')
-
+    
     class Meta:
         app_label = 'fncs'
     
