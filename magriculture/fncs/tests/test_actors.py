@@ -120,3 +120,32 @@ class ActorTestCase(TestCase):
         self.assertIn(market, monitor.markets.all())
         self.assertIn(market.district.rpiarea, monitor.rpiareas.all())
         self.assertEquals(offer.price, 200.0)
+        self.assertEquals(offer.crop, crop)
+        self.assertEquals(offer.unit, unit)
+        self.assertEquals(offer.agent, agent)
+        self.assertEquals(offer.market, market)
+        self.assertTrue(offer.created_at)
+    
+    def test_agent_sale(self):
+        farmer = create_farmer()
+        market = create_market("market", farmer.farmergroup.district)
+        agent = create_agent()
+        
+        crop = create_crop("potatoes")
+        unit = CropUnit.objects.get(name="boxes")
+        price = 20
+        amount = 10
+        
+        transaction = agent.register_sale(market, farmer, crop, unit, price, amount)
+        self.assertTrue(agent.sells_for(farmer, market))
+        self.assertIn(market, agent.markets.all())
+        self.assertIn(farmer, agent.farmers.all())
+        self.assertEquals(transaction.total, 200.0)
+        self.assertEquals(transaction.price, price)
+        self.assertEquals(transaction.crop, crop)
+        self.assertEquals(transaction.unit, unit)
+        self.assertEquals(transaction.agent, agent)
+        self.assertEquals(transaction.farmer, farmer)
+        self.assertEquals(transaction.market, market)
+        self.assertEquals(transaction.amount, amount)
+        self.assertTrue(transaction.created_at)

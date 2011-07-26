@@ -84,10 +84,11 @@ class MarketMonitor(models.Model):
     rpiareas = models.ManyToManyField('fncs.RPIArea')
     
     def register_offer(self, market, agent, crop, unit, price):
+        offer = self.offer_set.create(crop=crop, unit=unit, agent=agent, 
+                                        price=price, market=market)
         self.markets.add(market)
         self.rpiareas.add(market.district.rpiarea)
-        return self.offer_set.create(crop=crop, unit=unit, agent=agent, 
-                price=price, market=market)
+        return offer
         
     
     def is_monitoring(self, market):
@@ -113,6 +114,15 @@ class Agent(models.Model):
         return (self.farmers.filter(pk=farmer.pk).exists() and
                 self.markets.filter(pk=market.pk).exists() and
                 farmer.markets.filter(pk=market.pk).exists())
-
+    
+    def register_sale(self, market, farmer, crop, unit, price, amount):
+        transaction = self.transaction_set.create(market=market, 
+                    farmer=farmer, crop=crop, unit=unit, price=price, 
+                    amount=amount)
+        self.markets.add(market)
+        self.farmers.add(farmer)
+        farmer.markets.add(market)
+        return transaction
+    
     def __unicode__(self):
         return u"%s (Agent)" % (self.actor,)
