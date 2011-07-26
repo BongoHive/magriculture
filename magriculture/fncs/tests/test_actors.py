@@ -1,8 +1,10 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from magriculture.fncs.models.actors import (Actor, FarmerGroup, Farmer, Agent)
+from magriculture.fncs.models.actors import (Actor, FarmerGroup, Farmer, 
+        Agent, MarketMonitor)
 from magriculture.fncs.models.geo import (Province, RPIArea, District, Ward,
         Village, Zone, Market)
+from magriculture.fncs.models.props import (Crop, CropUnit, Transaction, Offer)
 
 def create_province(name):
     province, _ = Province.objects.get_or_create(name=name)
@@ -36,6 +38,13 @@ def create_farmer_group(name, zone, district, village):
     fg.villages.add(village)
     return fg
 
+def create_crop(name, units=["boxes","bunches","kilos"]):
+    crop, _ = Crop.objects.get_or_create(name=name)
+    for unitname in units:
+        unit, _ = CropUnit.objects.get_or_create(name=unitname)
+        crop.units.add(unit)
+    return crop
+
 def create_farmer(name="farmer", farmergroup_name="farmer group",
         rpiarea_name="rpi area", zone_name="zone", district_name="district",
         village_name="village"):
@@ -54,6 +63,11 @@ def create_agent(name="agent"):
     user, _ = User.objects.get_or_create(username=name, first_name=name)
     agent, _ = Agent.objects.get_or_create(actor=user.get_profile())
     return agent
+
+def create_market_monitor(name="market monitor"):
+    user, _ = User.objects.get_or_create(username=name, first_name=name)
+    market_monitor, _ = MarketMonitor.objects.get_or_create(actor=user.get_profile())
+    return market_monitor
 
 class ActorTestCase(TestCase):
     
@@ -90,3 +104,19 @@ class ActorTestCase(TestCase):
         self.assertIn(farmer, agent.farmers.all())
         self.assertIn(market, farmer.markets.all())
     
+    def test_market_monitor(self):
+        monitor = create_market_monitor()
+        rpiarea = create_rpiarea("rpiarea")
+        district = create_district("district", rpiarea)
+        market = create_market("market", district)
+        agent = create_agent()
+        
+        crop = create_crop("potatoes")
+        unit = CropUnit.objects.get(name="boxes")
+        price = 200
+        
+        offer = monitor.register_offer(market, agent, crop, unit, price)
+        self.assertTrue(monitor.is_monitoring(market))
+        self.assertIn(market, monitor.markets.all())
+        self.assertIn(market.district.rpiarea, monitor.rpiareas.all())
+        self.assertEquals(offer.price, 200.0)

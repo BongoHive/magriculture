@@ -83,6 +83,16 @@ class MarketMonitor(models.Model):
     markets = models.ManyToManyField('fncs.Market')
     rpiareas = models.ManyToManyField('fncs.RPIArea')
     
+    def register_offer(self, market, agent, crop, unit, price):
+        self.markets.add(market)
+        self.rpiareas.add(market.district.rpiarea)
+        return self.offer_set.create(crop=crop, unit=unit, agent=agent, 
+                price=price, market=market)
+        
+    
+    def is_monitoring(self, market):
+        return self.markets.filter(pk=market.pk).exists()
+    
     class Meta:
         app_label = 'fncs'
     
