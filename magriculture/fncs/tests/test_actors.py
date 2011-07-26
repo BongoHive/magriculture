@@ -85,7 +85,7 @@ class ActorTestCase(TestCase):
         agent = create_agent()
 
         farmer.sells_at(market, agent)
-
+        self.assertTrue(agent.sells_for(farmer, market))
         self.assertIn(market, agent.markets.all())
         self.assertIn(farmer, agent.farmers.all())
         self.assertIn(market, farmer.markets.all())

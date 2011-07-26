@@ -99,5 +99,10 @@ class Agent(models.Model):
     class Meta:
         app_label = 'fncs'
     
+    def sells_for(self, farmer, market):
+        return (self.farmers.filter(pk=farmer.pk).exists() and
+                self.markets.filter(pk=market.pk).exists() and
+                farmer.markets.filter(pk=market.pk).exists())
+
     def __unicode__(self):
         return u"%s (Agent)" % (self.actor,)
