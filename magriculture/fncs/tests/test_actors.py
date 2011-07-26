@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import Actor
+from datetime import datetime, timedelta
 
 class ActorTestCase(TestCase):
     
@@ -58,7 +59,8 @@ class ActorTestCase(TestCase):
         self.assertEquals(offer.unit, unit)
         self.assertEquals(offer.agent, agent)
         self.assertEquals(offer.market, market)
-        self.assertTrue(offer.created_at)
+        self.assertAlmostEqual(offer.created_at, datetime.now(),
+            delta=timedelta(minutes=1))
     
     def test_agent_sale(self):
         farmer = utils.create_farmer()
@@ -82,4 +84,5 @@ class ActorTestCase(TestCase):
         self.assertEquals(transaction.farmer, farmer)
         self.assertEquals(transaction.market, market)
         self.assertEquals(transaction.amount, amount)
-        self.assertTrue(transaction.created_at)
+        self.assertAlmostEqual(transaction.created_at, datetime.now(),
+            delta=timedelta(minutes=1))
