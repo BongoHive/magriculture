@@ -60,7 +60,7 @@ class ActorTestCase(TestCase):
         self.assertEquals(offer.agent, agent)
         self.assertEquals(offer.market, market)
         self.assertAlmostEqual(offer.created_at, datetime.now(),
-            delta=timedelta(minutes=1))
+            delta=timedelta(seconds=2))
     
     def test_agent_sale(self):
         farmer = utils.create_farmer()
@@ -85,4 +85,4 @@ class ActorTestCase(TestCase):
         self.assertEquals(transaction.market, market)
         self.assertEquals(transaction.amount, amount)
         self.assertAlmostEqual(transaction.created_at, datetime.now(),
-            delta=timedelta(minutes=1))
+            delta=timedelta(seconds=2))
