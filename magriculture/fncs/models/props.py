@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 from django.template.defaultfilters import floatformat
 
 class Crop(models.Model):
@@ -7,7 +8,7 @@ class Crop(models.Model):
     units = models.ManyToManyField('fncs.CropUnit')
     
     class Meta:
-        ordering = ['-name']
+        ordering = ['name']
         get_latest_by = 'pk'
         app_label = 'fncs'
 
@@ -34,10 +35,17 @@ class Transaction(models.Model):
     farmer = models.ForeignKey('fncs.Farmer')
     agent = models.ForeignKey('fncs.Agent')
     market = models.ForeignKey('fncs.Market')
-    amount = models.FloatField()
+    quality = models.IntegerField(blank=False, default=5, choices=(
+        (10, 'Excellent'),
+        (7, 'Good'),
+        (5, 'Standard'),
+        (3, 'Mediocre'),
+        (0, 'Poor'),
+    ))
+    amount = models.FloatField('Quantity')
     price = models.FloatField()
     total = models.FloatField()
-    created_at = models.DateTimeField(blank=False, auto_now_add=True)
+    created_at = models.DateTimeField(blank=False)
     
     def save(self, *args, **kwargs):
         if not self.total:
@@ -72,3 +80,8 @@ class Offer(models.Model):
 
     def __unicode__(self):
         return u"%s of %s at %s (Offer)" % (self.unit, self.crop, self.price)
+
+admin.site.register(Crop)
+admin.site.register(CropUnit)
+admin.site.register(Transaction)
+admin.site.register(Offer)

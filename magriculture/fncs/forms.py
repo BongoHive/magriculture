@@ -1,0 +1,28 @@
+from django import forms
+from django.forms.widgets import HiddenInput
+from django.forms.extras.widgets import SelectDateWidget
+from magriculture.fncs.models.props import Crop, Transaction
+from magriculture.fncs.widgets import SplitSelectDateTimeWidget
+
+class SelectCropForm(forms.Form):
+    crop = forms.ModelChoiceField(label='Which crop?', required=True, 
+        empty_label=None, queryset=Crop.objects.all())
+
+class TransactionForm(forms.ModelForm):
+    crop = forms.ModelChoiceField(queryset=Crop.objects.all(), 
+                    widget=HiddenInput())
+    created_at = forms.DateTimeField(label='Date', required=True, 
+                    widget=SplitSelectDateTimeWidget(attrs={
+                        'class':'date-form'
+                    }))
+    
+    class Meta:
+        model = Transaction
+        fields = [
+            'amount',
+            'quality',
+            'unit',
+            'price',
+            'created_at'
+        ]
+        

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from magriculture.fncs.models.geo import District
 from magriculture.fncs.models.props import Transaction
+from datetime import datetime
 
 def create_actor(sender, instance, created, **kwargs):
     if created:
@@ -134,7 +135,7 @@ class Agent(models.Model):
     def register_sale(self, market, farmer, crop, unit, price, amount):
         transaction = self.transaction_set.create(market=market, 
                     farmer=farmer, crop=crop, unit=unit, price=price, 
-                    amount=amount)
+                    amount=amount, created_at=datetime.now())
         self.markets.add(market)
         self.farmers.add(farmer)
         farmer.markets.add(market)
