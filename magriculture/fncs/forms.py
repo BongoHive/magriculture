@@ -3,6 +3,7 @@ from django.forms.widgets import HiddenInput
 from django.forms.extras.widgets import SelectDateWidget
 from magriculture.fncs.models.props import Crop, Transaction
 from magriculture.fncs.models.geo import Market
+from magriculture.fncs.models.actors import Farmer
 from magriculture.fncs.widgets import SplitSelectDateTimeWidget
 
 class SelectCropForm(forms.Form):
@@ -28,4 +29,8 @@ class TransactionForm(forms.ModelForm):
             'price',
             'created_at'
         ]
-        
+    
+
+class FarmerForm(forms.ModelForm):
+    class Meta:
+        model = Farmer

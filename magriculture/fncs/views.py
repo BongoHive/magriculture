@@ -32,6 +32,13 @@ def farmers(request):
     }, context_instance=RequestContext(request))
 
 @login_required
+def farmer_new(request):
+    form = forms.FarmerForm()
+    return render_to_response('farmers/new.html', {
+        'form': form
+    }, context_instance=RequestContext(request))
+
+@login_required
 def farmer_add(request):
     return HttpResponse('ok')
 
@@ -116,12 +123,57 @@ def farmer_messages(request, farmer_pk):
     }, context_instance=RequestContext(request))
 
 @login_required
+def farmer_new_message(request, farmer_pk):
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    return render_to_response('farmers/new_message.html', {
+        'farmer': farmer
+    }, context_instance=RequestContext(request))
+
+@login_required
 def farmer_notes(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     return render_to_response('farmers/notes.html', {
         'farmer': farmer
     }, context_instance=RequestContext(request))
 
+@login_required
+def farmer_new_note(request, farmer_pk):
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    return render_to_response('farmers/new_note.html', {
+        'farmer': farmer
+    }, context_instance=RequestContext(request))
+
+@login_required
+def farmer_profile(request, farmer_pk):
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    return render_to_response('farmers/profile.html', {
+        'farmer': farmer
+    }, context_instance=RequestContext(request))
+
+@login_required
+def messages(request):
+    return render_to_response('messages.html', {
+    }, context_instance=RequestContext(request))
+
+@login_required
+def sales(request):
+    return render_to_response('sales.html', {
+    }, context_instance=RequestContext(request))
+
+@login_required
+def sales_crops(request):
+    return render_to_response('sales_crops.html', {
+    }, context_instance=RequestContext(request))
+
+@login_required
+def sales_agents(request):
+    return render_to_response('sales_agents.html', {
+    }, context_instance=RequestContext(request))
+
+@login_required
+def sales_agent_breakdown(request):
+    return render_to_response('sales_agent_breakdown.html', {
+    }, context_instance=RequestContext(request))
 
 
 def todo(request):
