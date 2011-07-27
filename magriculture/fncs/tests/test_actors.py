@@ -18,8 +18,8 @@ class ActorTestCase(TestCase):
         self.assertTrue(isinstance(actor, Actor))
     
     def test_farmer_creation(self):
-        farmer = utils.create_farmer() 
-        self.assertEquals(farmer.actor.user.first_name, "farmer")
+        farmer = utils.create_farmer(name="joe") 
+        self.assertEquals(farmer.actor.user.first_name, "joe")
         self.assertEquals(farmer.farmergroup.name, "farmer group")
         self.assertEquals(farmer.agents.count(), 0)
     

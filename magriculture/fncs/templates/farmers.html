@@ -7,30 +7,34 @@
     </ul>
     
     <div class="content">
-    
         <ul class="list">
-            <li>
-                <a href="{% url fncs:todo %}farmer-detail-sales.php">John Richards</a> <span class="area">Stellenbosch</span><br />
-                <span class="subtitle">Grapes</span>
-            </li>
-            <li>
-                <a href="{% url fncs:todo %}farmer-detail-sales.php">John Richards</a> <span class="area">Stellenbosch</span><br />
-                <span class="subtitle">Grapes</span>
-            </li>
-            <li>
-                <a href="{% url fncs:todo %}farmer-detail-sales.php">John Richards</a> <span class="area">Stellenbosch</span><br />
-                <span class="subtitle">Grapes</span>
-            </li>
-            <li>
-                <a href="{% url fncs:todo %}farmer-detail-sales.php">John Richards</a> <span class="area">Stellenbosch</span><br />
-                <span class="subtitle">Grapes</span>
-            </li>
-            <li class="pagination"><a href="">&laquo; Prev</a> | <a href="">Next &raquo;</a></li>
+            {% for farmer in page.object_list %}
+                <li>
+                    <a href="{% url fncs:farmer pk=farmer.pk %}">{{farmer.actor.name}}</a> 
+                    <span class="area">{{farmer.districts|join:", "}}</span><br />
+                    <span class="subtitle">{{farmer.crops|join:", "}}</span>
+                </li>
+            {% endfor %}
+            {% if page.has_other_pages %}
+                <li class="pagination">
+                    {% if page.has_previous %}
+                        <a href="?p={{page.previous_page_number}}">&laquo; Prev</a>
+                    {% endif %}
+                    
+                    {% if page.has_previous and page.has_next %}
+                        |
+                    {% endif %}
+                    
+                    {% if page.has_next %}
+                        <a href="?p={{page.next_page_number}}">Next &raquo;</a>
+                    {% endif %}
+                </li>
+            {% endif %}
         </ul>
         
-        <?php include_once('search-include.php'); ?>    
+        {% include "includes/search.html" %}
     
         <h2>Menu</h2>
-        <?php include_once('menu.php'); ?>        
+        {% include "includes/menu.html" %}
     </div> <!-- /.content -->
 {% endblock %}
