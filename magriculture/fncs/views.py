@@ -26,7 +26,8 @@ def farmer_add(request):
     return HttpResponse('ok')
 
 @login_required
-def farmer(request):
+def farmer(request, pk):
+    farmer = get_object_or_404(Farmer, pk=pk)
     return HttpResponse('ok')
 
 def todo(request):

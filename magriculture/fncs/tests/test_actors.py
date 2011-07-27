@@ -17,27 +17,40 @@ class ActorTestCase(TestCase):
         actor = user.get_profile()
         self.assertTrue(isinstance(actor, Actor))
     
-    def test_farmer_creation(self):
-        farmer = utils.create_farmer(name="joe") 
-        self.assertEquals(farmer.actor.user.first_name, "joe")
-        self.assertEquals(farmer.farmergroup.name, "farmer group")
-        self.assertEquals(farmer.agents.count(), 0)
-    
+
+class AgentTestCase(TestCase):
     def test_agent_creation(self):
         agent = utils.create_agent()
         self.assertEquals(agent.farmers.count(), 0)
         self.assertEquals(agent.markets.count(), 0)
-
-    def test_farmer_agent_link(self):
+    
+    def test_agent_sale(self):
         farmer = utils.create_farmer()
         market = utils.create_market("market", farmer.farmergroup.district)
         agent = utils.create_agent()
 
-        farmer.sells_at(market, agent)
+        crop = utils.create_crop("potatoes")
+        unit = utils.create_crop_unit("boxes")
+        price = 20
+        amount = 10
+
+        transaction = agent.register_sale(market, farmer, crop, unit, price, amount)
         self.assertTrue(agent.sells_for(farmer, market))
         self.assertIn(market, agent.markets.all())
         self.assertIn(farmer, agent.farmers.all())
-        self.assertIn(market, farmer.markets.all())
+        self.assertEquals(transaction.total, 200.0)
+        self.assertEquals(transaction.price, price)
+        self.assertEquals(transaction.crop, crop)
+        self.assertEquals(transaction.unit, unit)
+        self.assertEquals(transaction.agent, agent)
+        self.assertEquals(transaction.farmer, farmer)
+        self.assertEquals(transaction.market, market)
+        self.assertEquals(transaction.amount, amount)
+        self.assertAlmostEqual(transaction.created_at, datetime.now(),
+            delta=timedelta(seconds=2))
+
+
+class MarketMonitorTestCase(TestCase):
     
     def test_market_monitor_registration(self):
         monitor = utils.create_market_monitor()
@@ -62,27 +75,43 @@ class ActorTestCase(TestCase):
         self.assertAlmostEqual(offer.created_at, datetime.now(),
             delta=timedelta(seconds=2))
     
-    def test_agent_sale(self):
+
+
+class FarmerTestCase(TestCase):
+    
+    def test_farmer_creation(self):
+        farmer = utils.create_farmer(name="joe") 
+        self.assertEquals(farmer.actor.user.first_name, "joe")
+        self.assertEquals(farmer.farmergroup.name, "farmer group")
+        self.assertEquals(farmer.agents.count(), 0)
+    
+    def test_farmer_agent_link(self):
         farmer = utils.create_farmer()
         market = utils.create_market("market", farmer.farmergroup.district)
         agent = utils.create_agent()
         
-        crop = utils.create_crop("potatoes")
-        unit = utils.create_crop_unit("boxes")
-        price = 20
-        amount = 10
-        
-        transaction = agent.register_sale(market, farmer, crop, unit, price, amount)
+        farmer.sells_at(market, agent)
         self.assertTrue(agent.sells_for(farmer, market))
         self.assertIn(market, agent.markets.all())
         self.assertIn(farmer, agent.farmers.all())
-        self.assertEquals(transaction.total, 200.0)
-        self.assertEquals(transaction.price, price)
-        self.assertEquals(transaction.crop, crop)
-        self.assertEquals(transaction.unit, unit)
-        self.assertEquals(transaction.agent, agent)
-        self.assertEquals(transaction.farmer, farmer)
-        self.assertEquals(transaction.market, market)
-        self.assertEquals(transaction.amount, amount)
-        self.assertAlmostEqual(transaction.created_at, datetime.now(),
-            delta=timedelta(seconds=2))
+        self.assertIn(market, farmer.markets.all())
+    
+    def test_farmer_districts(self):
+        rpiarea = utils.create_rpiarea("rpiarea")
+        district1 = utils.create_district("district 1", rpiarea)
+        market1 = utils.create_market("market 1", district1)
+        
+        district2 = utils.create_district("district 2", rpiarea)
+        market2 = utils.create_market("market 2", district2)
+        
+        farmer = utils.create_farmer()
+        agent1 = utils.create_agent("agent 1")
+        agent2 = utils.create_agent("agent 2")
+        
+        farmer.sells_at(market1, agent1)
+        farmer.sells_at(market2, agent2)
+        
+        self.assertEquals(farmer.districts().count(), 2)
+        self.assertIn(district1, farmer.districts())
+        self.assertIn(district2, farmer.districts())
+        

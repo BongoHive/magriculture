@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from magriculture.fncs.models.geo import District
 
 def create_actor(sender, instance, created, **kwargs):
     if created:
@@ -34,6 +35,9 @@ class Farmer(models.Model):
     
     class Meta:
         app_label = 'fncs'
+    
+    def districts(self):
+        return District.objects.filter(market__in=self.markets.all())
     
     def sells_at(self, market, agent):
         # the farmer and the agent need to sell at the given market
