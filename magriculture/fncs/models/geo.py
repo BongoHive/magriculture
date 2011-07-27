@@ -94,4 +94,4 @@ class Market(models.Model):
         app_label = 'fncs'
 
     def __unicode__(self):
-        return u"%s (Market)" % (self.name,)
+        return self.name

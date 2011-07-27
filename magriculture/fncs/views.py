@@ -87,6 +87,12 @@ def farmer_new_sale_detail(request, farmer_pk):
             form = forms.TransactionForm(request.POST)
             if form.is_valid():
                 transaction = form.save(commit=False)
+                crop = form.cleaned_data['crop']
+                unit = form.cleaned_data['unit']
+                price = form.cleaned_data['price']
+                amount = form.cleaned_data['amount']
+                market = form.cleaned_data['market']
+                agent.register_sale(market, farmer, crop, unit, price, amount)
                 messages.add_message(request, messages.INFO, 
                     "New Sale Registered")
                 return redirect_to_farmer
@@ -102,6 +108,21 @@ def farmer_new_sale_detail(request, farmer_pk):
         'crop': crop
     }, context_instance=RequestContext(request))
     
+@login_required
+def farmer_messages(request, farmer_pk):
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    return render_to_response('farmers/messages.html', {
+        'farmer': farmer
+    }, context_instance=RequestContext(request))
+
+@login_required
+def farmer_notes(request, farmer_pk):
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    return render_to_response('farmers/notes.html', {
+        'farmer': farmer
+    }, context_instance=RequestContext(request))
+
+
 
 def todo(request):
     """Anything that resolves to here still needs to be completed"""

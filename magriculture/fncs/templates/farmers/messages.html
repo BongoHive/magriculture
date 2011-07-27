@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+
+	<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; {{farmer.actor.name}}</div>
+	
+	<div class="meta">
+        {% include "includes/farmer_header.html" %}
+	</div> <!-- /.meta -->
+	
+    {% include "includes/farmer_menu.html" %}
+
+    <div class="tabs">
+        <a href="{% url fncs:farmer_sales farmer_pk=farmer.pk %}">Sales</a> | 
+        Messages | 
+        <a href="{% url fncs:farmer_notes farmer_pk=farmer.pk %}">Notes</a>
+    </div>
+
+	<div class="list">
+		<div class="item">
+			<span class="text">Message text to Farmer goes here</span><br/>
+			<span class="subtitle">25 AUG 2011, 10:45PM</span>
+		</div>
+		<div class="item">
+			<span class="text">Message text to Farmer goes here</span><br/>
+			<span class="subtitle">25 AUG 2011, 10:45PM</span>
+		</div>
+		<div class="item">
+			<span class="text">Message text to Farmer goes here</span><br/>
+			<span class="subtitle">25 AUG 2011, 10:45PM</span>
+		</div>
+		<div class="item">
+			<span class="text">Message text to Farmer goes here</span><br/>
+			<span class="subtitle">25 AUG 2011, 10:45PM</span>
+		</div>
+		<div class="pagination"><a href="">&laquo; Prev</a> | <a href="">Next &raquo;</a></div>
+	</div>
+	
+	<?php include_once('search-include.php'); ?>	
+
+	<div class="h2">Menu</div>
+	<?php include_once('menu.php'); ?>		
+</div> <!-- /.content -->
+{% endblock %}
