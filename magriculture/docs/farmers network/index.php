@@ -1,6 +1,6 @@
 <?php include_once('header.php'); ?>
 
-	<h2>Sign In</h2>
+	<div class="h2">Sign In</div>
 	
 	<form class="signin" action="/home.php">
 		<div class="error">Sign in failed.<br />Please try again.</div>

@@ -5,23 +5,23 @@
 		<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; John Richards</div>
 		
 		<div class="meta">
-			<h2>8 Boxes of Tomatoes</h2>
+			<div class="h2">8 Boxes of Tomatoes</div>
 			<span class="subtitle">25 AUG 2011, 10:45PM</span>
 		</div> <!-- /.meta -->
 		
-		<h2>Sale Information</h2>
+		<div class="h2">Sale Information</div>
 		
-		<ul class="list">
-			<li><label>Farmer:</label> Rupert de Villiers</li>
-			<li><label>Agent:</label> Jane Stevens</li>
-			<li><label>Crop:</label> Tomato</li>
-			<li><label>Quantity:</label> 8 Boxes</li>
-			<li><label>Price:</label> ZK 30 000</li>
-			<li><label>Crop:</label> Tomato</li>
-			<li class="pagination"><a class="del" href="">[x] Cancel Sale</a> | <a href="/farmer-detail-sales.php">More Sales &raquo;</a></li>
-		</ul>
+		<div class="list">
+			<div class="item"><label>Farmer:</label> Rupert de Villiers</div>
+			<div class="item"><label>Agent:</label> Jane Stevens</div>
+			<div class="item"><label>Crop:</label> Tomato</div>
+			<div class="item"><label>Quantity:</label> 8 Boxes</div>
+			<div class="item"><label>Price:</label> ZK 30 000</div>
+			<div class="item"><label>Crop:</label> Tomato</div>
+			<div class="pagination"><a class="del" href="">[x] Cancel Sale</a> | <a href="/farmer-detail-sales.php">More Sales &raquo;</a></div>
+		</div>
 		
-		<h2>Menu</h2>
+		<div class="h2">Menu</div>
 		<?php include_once('menu.php'); ?>		
 	</div> <!-- /.content -->
 

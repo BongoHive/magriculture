@@ -4,7 +4,7 @@
 
 		<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; New Sale</div>
 		
-		<h2>Compose Message</h2>
+		<div class="h2">Compose Message</div>
 		
 		<form class="standard" action="">
 			<label for="form-message">Message <span>[160 characters left]</span></label>
@@ -16,7 +16,7 @@
 			
 		</form>		
 		
-		<h2>Menu</h2>
+		<div class="h2">Menu</div>
 		<?php include_once('menu.php'); ?>		
 	</div> <!-- /.content -->
 

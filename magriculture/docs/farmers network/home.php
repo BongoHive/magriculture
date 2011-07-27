@@ -1,6 +1,6 @@
 <?php include_once('header.php'); ?>
 
-	<h2>Home</h2>
+	<div class="h2">Home</div>
 	
 	<div class="content">
 		<?php include_once('menu.php'); ?>		

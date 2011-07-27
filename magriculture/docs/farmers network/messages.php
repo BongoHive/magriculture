@@ -4,37 +4,37 @@
 
 		<div class="breadcrumb"><a href="/home.php">Home</a> &gt; Messages</div>
 		
-		<ul class="menu">
-			<li><a href="/message-farmer.php"><img src="images/icon-message.gif" alt="icon-message" width="16" height="16" />Send a new message &raquo;</a></li>
-		</ul>
+		<div class="menu">
+			<div class="item"><a href="/message-farmer.php"><img src="images/icon-message.gif" alt="icon-message" width="16" height="16" />Send a new message &raquo;</a></div>
+		</div>
 
-		<ul class="list">
-			<li>
+		<div class="list">
+			<div class="item">
 				<span class="heading">Recipient Group</span><br/>
 				<span class="text">Message text to Farmer goes here</span><br/>
 				<span class="subtitle">25 AUG 2011, 10:45PM</span>
-			</li>
-			<li>
+			</div>
+			<div class="item">
 				<span class="heading">Recipient Group</span><br/>
 				<span class="text">Message text to Farmer goes here</span><br/>
 				<span class="subtitle">25 AUG 2011, 10:45PM</span>
-			</li>
-			<li>
+			</div>
+			<div class="item">
 				<span class="heading">Recipient Group</span><br/>
 				<span class="text">Message text to Farmer goes here</span><br/>
 				<span class="subtitle">25 AUG 2011, 10:45PM</span>
-			</li>
-			<li>
+			</div>
+			<div class="item">
 				<span class="heading">Recipient Group</span><br/>
 				<span class="text">Message text to Farmer goes here</span><br/>
 				<span class="subtitle">25 AUG 2011, 10:45PM</span>
-			</li>
-			<li class="pagination"><a href="">&laquo; Prev</a> | <a href="">Next &raquo;</a></li>
-		</ul>
+			</div>
+			<div class="pagination"><a href="">&laquo; Prev</a> | <a href="">Next &raquo;</a></div>
+		</div>
 		
 		<?php include_once('search-include.php'); ?>	
 	
-		<h2>Menu</h2>
+		<div class="h2">Menu</div>
 		<?php include_once('menu.php'); ?>		
 	</div> <!-- /.content -->
 

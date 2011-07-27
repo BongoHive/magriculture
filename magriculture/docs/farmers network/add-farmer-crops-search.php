@@ -4,7 +4,7 @@
 
 		<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a></div>
 		
-		<h2>Search Crops</h2>
+		<div class="h2">Search Crops</div>
 		
 		<form class="standard" action="">
 			<input type="text" />
@@ -23,7 +23,7 @@
 			<input type="submit" name="submit" class="submit" value="Add to Farmer &raquo;" />
 		</form>
 		
-		<h2>Menu</h2>
+		<div class="h2">Menu</div>
 		<?php include_once('menu.php'); ?>		
 	</div> <!-- /.content -->
 

@@ -4,7 +4,7 @@
 
 		<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; New Sale</div>
 		
-		<h2>New Sale</h2>
+		<div class="h2">New Sale</div>
 		
 		<form class="standard" action="/new-sale-detail.php">
 			<label for="form-crop">Crop</label>
@@ -18,7 +18,7 @@
 			
 		</form>		
 		
-		<h2>Menu</h2>
+		<div class="h2">Menu</div>
 		<?php include_once('menu.php'); ?>		
 	</div> <!-- /.content -->
 

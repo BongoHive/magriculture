@@ -1,6 +1,6 @@
 <?php include_once('header.php'); ?>
 
-	<h2>Recover Password</h2>
+	<div class="h2">Recover Password</div>
 	
 	<div class="content forgotsuccess">
 		<div class="success">Password Recovery Successful!</div>

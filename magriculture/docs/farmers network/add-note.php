@@ -4,7 +4,7 @@
 
 		<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; Add Note</div>
 		
-		<h2>Add A Note</h2>
+		<div class="h2">Add A Note</div>
 		
 		<form class="standard" action="/new-sale-success.php">
 			<label for="form-note">Note <span>[200 characters left]</span></label>
@@ -13,7 +13,7 @@
 			<input type="submit" name="cancel" class="submit" value="cancel" />
 		</form>		
 		
-		<h2>Menu</h2>
+		<div class="h2">Menu</div>
 		<?php include_once('menu.php'); ?>		
 	</div> <!-- /.content -->
 

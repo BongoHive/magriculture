@@ -5,24 +5,24 @@
 		<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; Rupert de Villiers</div>
 		
 		<div class="meta">
-			<h2>Rupert de Villiers</h2>
+			<div class="h2">Rupert de Villiers</div>
 		</div> <!-- /.meta -->
 		
-		<h2>Farmer Profile</h2>
+		<div class="h2">Farmer Profile</div>
 		
-		<ul class="list">
-			<li><label>Farmer:</label> Rupert de Villiers</li>
-			<li><label>Agent:</label> Jane Stevens</li>
-			<li><label>Crop:</label> Tomato</li>
-			<li><label>Quantity:</label> 8 Boxes</li>
-			<li><label>Price:</label> ZK 30 000</li>
-			<li><label>Crop:</label> Tomato</li>
-			<li><label>Created:</label> 14 Jan 2011, 13:45</li>
-			<li><a href="#">Edit Profile &raquo;</a></li>
-			<li class="pagination"><a class="del" href="">[x] Remove this Farmer</a> | <a href="/farmer-detail-sales.php">More Farmers &raquo;</a></li>
-		</ul>
+		<div class="list">
+			<div class="item"><label>Farmer:</label> Rupert de Villiers</div>
+			<div class="item"><label>Agent:</label> Jane Stevens</div>
+			<div class="item"><label>Crop:</label> Tomato</div>
+			<div class="item"><label>Quantity:</label> 8 Boxes</div>
+			<div class="item"><label>Price:</label> ZK 30 000</div>
+			<div class="item"><label>Crop:</label> Tomato</div>
+			<div class="item"><label>Created:</label> 14 Jan 2011, 13:45</div>
+			<div class="item"><a href="#">Edit Profile &raquo;</a></div>
+			<div class="pagination"><a class="del" href="">[x] Remove this Farmer</a> | <a href="/farmer-detail-sales.php">More Farmers &raquo;</a></div>
+		</div>
 
-		<h2>Menu</h2>
+		<div class="h2">Menu</div>
 		<?php include_once('menu.php'); ?>		
 	</div> <!-- /.content -->
 
