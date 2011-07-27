@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Farmers</div>
+    <ul class="menu">
+        <li><a href="{% url fncs:farmer_add %}"><img src="{{ STATIC_URL }}images/icon-profile.gif" alt="Farmers" width="16" height="16" />+ Add new Farmer &raquo;</a></li>
+    </ul>
+    
+    <div class="content">
+    
+        <ul class="list">
+            <li>
+                <a href="{% url fncs:todo %}farmer-detail-sales.php">John Richards</a> <span class="area">Stellenbosch</span><br />
+                <span class="subtitle">Grapes</span>
+            </li>
+            <li>
+                <a href="{% url fncs:todo %}farmer-detail-sales.php">John Richards</a> <span class="area">Stellenbosch</span><br />
+                <span class="subtitle">Grapes</span>
+            </li>
+            <li>
+                <a href="{% url fncs:todo %}farmer-detail-sales.php">John Richards</a> <span class="area">Stellenbosch</span><br />
+                <span class="subtitle">Grapes</span>
+            </li>
+            <li>
+                <a href="{% url fncs:todo %}farmer-detail-sales.php">John Richards</a> <span class="area">Stellenbosch</span><br />
+                <span class="subtitle">Grapes</span>
+            </li>
+            <li class="pagination"><a href="">&laquo; Prev</a> | <a href="">Next &raquo;</a></li>
+        </ul>
+        
+        <?php include_once('search-include.php'); ?>    
+    
+        <h2>Menu</h2>
+        <?php include_once('menu.php'); ?>        
+    </div> <!-- /.content -->
+{% endblock %}
