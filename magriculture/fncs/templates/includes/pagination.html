@@ -1,5 +1,5 @@
 {% if page.has_other_pages %}
-    <li class="pagination">
+    <div class="pagination">
         {% if page.has_previous %}
             <a href="?p={{page.previous_page_number}}">&laquo; Prev</a>
         {% endif %}
@@ -11,5 +11,5 @@
         {% if page.has_next %}
             <a href="?p={{page.next_page_number}}">Next &raquo;</a>
         {% endif %}
-    </li>
+    </div>
 {% endif %}
