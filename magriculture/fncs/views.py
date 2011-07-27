@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, get_object_or_404
 
 @login_required
-def index(request):
-    return render_to_response('index.html', 
+def home(request):
+    return render_to_response('home.html', 
         context_instance=RequestContext(request))
 
 def todo(request):

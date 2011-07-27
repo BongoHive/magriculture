@@ -3,6 +3,6 @@ from magriculture.fncs import views
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', views.index, name='index'),
+    url(r'^$', views.home, name='home'),
     url(r'^todo/.*', views.todo, name='todo'),
 )
