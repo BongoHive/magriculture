@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib import admin
 from django.template.defaultfilters import floatformat
 
 class Crop(models.Model):
@@ -81,7 +80,3 @@ class Offer(models.Model):
     def __unicode__(self):
         return u"%s of %s at %s (Offer)" % (self.unit, self.crop, self.price)
 
-admin.site.register(Crop)
-admin.site.register(CropUnit)
-admin.site.register(Transaction)
-admin.site.register(Offer)

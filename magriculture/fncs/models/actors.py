@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from magriculture.fncs.models.geo import District
@@ -155,9 +154,3 @@ class Agent(models.Model):
     def __unicode__(self):
         return self.actor.name
 
-admin.site.register(Actor)
-admin.site.register(Farmer)
-admin.site.register(FarmerGroup)
-admin.site.register(ExtensionOfficer)
-admin.site.register(MarketMonitor)
-admin.site.register(Agent)

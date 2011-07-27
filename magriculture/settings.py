@@ -128,7 +128,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'fncs',
     'south',
-    'django_nose'
+    'django_nose',
+    'gunicorn',
 )
 
 # A sample logging configuration. The only tangible logging
