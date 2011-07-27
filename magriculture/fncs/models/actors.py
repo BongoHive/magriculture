@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from magriculture.fncs.models.geo import District
+from magriculture.fncs.models.props import Transaction
 
 def create_actor(sender, instance, created, **kwargs):
     if created:
@@ -47,6 +48,9 @@ class Farmer(models.Model):
     def districts(self):
         return District.objects.filter(market__in=self.markets.all())
     
+    def transactions(self):
+        return self.transaction_set.all()
+    
     def sells_at(self, market, agent):
         # the farmer and the agent need to sell at the given market
         self.markets.add(market)
@@ -57,7 +61,7 @@ class Farmer(models.Model):
         agent.farmers.add(self)
 
     def __unicode__(self):
-        return u"%s (Farmer)" % (self.actor,)
+        return self.actor.name
 
 
 class FarmerGroup(models.Model):
@@ -137,4 +141,4 @@ class Agent(models.Model):
         return transaction
     
     def __unicode__(self):
-        return u"%s (Agent)" % (self.actor,)
+        return self.actor.name

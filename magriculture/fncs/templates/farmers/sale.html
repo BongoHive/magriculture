@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="content">
+
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; {{farmer.actor.name}}</div>
+
+        <div class="meta">
+            <h2>{{transaction}}</h2>
+            <span class="subtitle">{{transaction.created_at|date:"j b Y, g:iA"|upper}}</span>
+        </div> <!-- /.meta -->
+
+        <h2>Sale Information</h2>
+
+        <ul class="list">
+            <li><label>Farmer:</label> {{transaction.farmer}}</li>
+            <li><label>Agent:</label> {{transaction.agent}}</li>
+            <li><label>Crop:</label> {{transaction.crop}}</li>
+            <li><label>Quantity:</label> {{transaction.amount|floatformat}} {{transaction.unit}}</li>
+            <li><label>Unit Price:</label> ZK {{transaction.price|floatformat}}</li>
+            <li><label>Total Price:</label> ZK {{transaction.total|floatformat}}</li>
+            <li class="pagination">
+                <a class="del" href="{% url fncs:todo %}cancel-sale">[x] Cancel Sale</a> | 
+                <a href="{% url fncs:farmer_sales farmer_pk=transaction.farmer.pk %}">More Sales &raquo;</a>
+            </li>
+        </ul>
+
+        <h2>Menu</h2>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+    
+{% endblock %}

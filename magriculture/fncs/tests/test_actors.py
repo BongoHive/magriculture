@@ -48,6 +48,7 @@ class AgentTestCase(TestCase):
         self.assertEquals(transaction.amount, amount)
         self.assertAlmostEqual(transaction.created_at, datetime.now(),
             delta=timedelta(seconds=2))
+        self.assertIn(transaction, farmer.transactions())
 
 
 class MarketMonitorTestCase(TestCase):

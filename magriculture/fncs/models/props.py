@@ -1,4 +1,5 @@
 from django.db import models
+from django.template.defaultfilters import floatformat
 
 class Crop(models.Model):
     """A crop is an item that is being traded"""
@@ -23,7 +24,7 @@ class CropUnit(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (Unit)" % (self.name,)
+        return self.name
 
 class Transaction(models.Model):
     """A transaction is an exchange of a crop at a certain unit
@@ -49,7 +50,7 @@ class Transaction(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s %s of %s (Transaction)" % (self.amount, self.unit, self.crop)
+        return u"%s %s of %s" % (floatformat(self.amount), self.unit, self.crop)
 
 class Offer(models.Model):
     """An offer is like a transaction but differs because no goods

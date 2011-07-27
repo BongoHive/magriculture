@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; {{farmer.actor.name}}</div>
+    
+    <div class="meta">
+        <h2>{{farmer.actor.name}} <span>{{farmer.districts.all|join:", "}}</span></h2>
+        <span class="subtitle">{{farmer.crops.all|join:", "}}</span>
+    </div> <!-- /.meta -->
+    
+    <ul class="menu">
+        <li><a href="{% url fncs:todo %}/new-sale.php"><img src="{{ STATIC_URL }}images/icon-calendar.gif" alt="icon-calendar" width="16" height="16" />Register new Sale &raquo;</a></li>
+        <li><a href="{% url fncs:todo %}/message-farmer.php"><img src="{{ STATIC_URL }}images/icon-message.gif" alt="icon-message" width="16" height="16" />Message Farmer &raquo;</a></li>
+        <li><a href="{% url fncs:todo %}/add-note.php"><img src="{{ STATIC_URL }}images/icon-write.gif" alt="icon-write" width="16" height="16" />Add Note &raquo;</a></li>
+        <li><a href="{% url fncs:todo %}/farmer-profile.php"><img src="{{ STATIC_URL }}images/icon-profile.gif" alt="Farmers" width="16" height="16" />View Profile &raquo;</a></li>
+    </ul>
+
+    <div class="tabs">
+        Sales | 
+        <a href="{% url fncs:todo %}/farmer-detail-messages.php">Messages</a> | 
+        <a href="{% url fncs:todo %}/farmer-detail-notes.php">Notes</a>
+    </div>
+
+    <ul class="list">
+        {% for transaction in page.object_list %}
+        <li>
+            <span class="text"><a href="{% url fncs:farmer_sale farmer_pk=farmer.pk,sale_pk=transaction.pk %}">{{transaction}}</a></span><br/>
+            <span class="subtitle">{{transaction.created_at|date:"j b Y, g:iA"|upper}}</span>
+        </li>
+        {% endfor %}
+        {% include "includes/pagination.html" %}
+    </ul>
+    
+    {% include "includes/search.html" %}
+
+    <h2>Menu</h2>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->
+{% endblock %}
