@@ -4,7 +4,7 @@ import os.path
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 def abspath(*args): 
     """convert relative paths to absolute paths relative to PROJECT_ROOT"""
-    os.path.join(PROJECT_ROOT, *args)
+    return os.path.join(PROJECT_ROOT, *args)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -125,7 +125,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
     'fncs',
     'south',
     'django_nose'
