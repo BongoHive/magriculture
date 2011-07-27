@@ -32,9 +32,14 @@ class Farmer(models.Model):
     farmergroup = models.ForeignKey('fncs.FarmerGroup')
     agents = models.ManyToManyField('fncs.Agent')
     markets = models.ManyToManyField('fncs.Market')
+    crops = models.ManyToManyField('fncs.Crop')
     
     class Meta:
         app_label = 'fncs'
+        get_latest_by = 'actor__pk'
+    
+    def grows_crop(self, crop):
+        self.crops.add(crop)
     
     def districts(self):
         return District.objects.filter(market__in=self.markets.all())
@@ -114,7 +119,7 @@ class Agent(models.Model):
     class Meta:
         app_label = 'fncs'
     
-    def sells_for(self, farmer, market):
+    def is_selling_for(self, farmer, market):
         return (self.farmers.filter(pk=farmer.pk).exists() and
                 self.markets.filter(pk=market.pk).exists() and
                 farmer.markets.filter(pk=market.pk).exists())

@@ -54,7 +54,7 @@ class District(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (District)" % (self.name,)
+        return self.name
 
 class Ward(models.Model):
     """A geographic area, smaller than a District"""

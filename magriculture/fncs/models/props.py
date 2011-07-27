@@ -11,7 +11,7 @@ class Crop(models.Model):
         app_label = 'fncs'
 
     def __unicode__(self):
-        return u"%s (Crop)" % (self.name,)
+        return self.name
 
 class CropUnit(models.Model):
     """A unit that a crop is traded in"""

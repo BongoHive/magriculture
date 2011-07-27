@@ -11,8 +11,8 @@
             {% for farmer in page.object_list %}
                 <li>
                     <a href="{% url fncs:farmer pk=farmer.pk %}">{{farmer.actor.name}}</a> 
-                    <span class="area">{{farmer.districts|join:", "}}</span><br />
-                    <span class="subtitle">{{farmer.crops|join:", "}}</span>
+                    <span class="area">{{farmer.districts.all|join:", "}}</span><br />
+                    <span class="subtitle">{{farmer.crops.all|join:", "}}</span>
                 </li>
             {% endfor %}
             {% if page.has_other_pages %}

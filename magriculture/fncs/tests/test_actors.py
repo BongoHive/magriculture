@@ -35,7 +35,7 @@ class AgentTestCase(TestCase):
         amount = 10
 
         transaction = agent.register_sale(market, farmer, crop, unit, price, amount)
-        self.assertTrue(agent.sells_for(farmer, market))
+        self.assertTrue(agent.is_selling_for(farmer, market))
         self.assertIn(market, agent.markets.all())
         self.assertIn(farmer, agent.farmers.all())
         self.assertEquals(transaction.total, 200.0)
@@ -91,7 +91,7 @@ class FarmerTestCase(TestCase):
         agent = utils.create_agent()
         
         farmer.sells_at(market, agent)
-        self.assertTrue(agent.sells_for(farmer, market))
+        self.assertTrue(agent.is_selling_for(farmer, market))
         self.assertIn(market, agent.markets.all())
         self.assertIn(farmer, agent.farmers.all())
         self.assertIn(market, farmer.markets.all())
@@ -114,4 +114,9 @@ class FarmerTestCase(TestCase):
         self.assertEquals(farmer.districts().count(), 2)
         self.assertIn(district1, farmer.districts())
         self.assertIn(district2, farmer.districts())
-        
+    
+    def test_farmer_grows_crops(self):
+        farmer = utils.create_farmer()
+        crop = utils.random_crop()
+        farmer.grows_crop(crop)
+        self.assertIn(crop, farmer.crops.all())

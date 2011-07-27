@@ -29,6 +29,28 @@ SURNAMES = ['Azikiwe','Awolowo','Bello','Balewa','Akintola','Okotie-Eboh',
             'Ademola','Onobanjo','Aguda','Okpara','Mbanefo','Mbadinuju','Boro',
             'Ekwensi','Gowon', 'Saro-Wiwa']
 
+DISTRICT_NAMES = ['Chibombo', 'Kabwe', 'Kapiri Mposhi', 'Mkushi', 'Mumbwa', 
+    'Serenje', 'Chililabombwe', 'Chingola', 'Kalulushi', 'Kitwe', 'Luanshya', 
+    'Lufwanyama', 'Masaiti', 'Mpongwe', 'Mufulira', 'Ndola', 'Chadiza', 
+    'Chama', 'Chipata', 'Katete', 'Lundazi', 'Mambwe', 'Nyimba', 'Petauke', 
+    'Chiengi', 'Kawambwa', 'Mansa', 'Milenge', 'Mwense', 'Nchelenge', 'Samfya', 
+    'Chongwe', 'Kafue', 'Luangwa', 'Lusaka', 'Chavuma', 'Kabompo', 'Kasempa', 
+    'Mufumbwe', 'Mwinilunga', 'Solwezi', 'Zambezi', 'Chilubi', 'Chinsali', 
+    'Isoka', 'Kaputa', 'Kasama', 'Luwingu', 'Mbala', 'Mpika', 'Mporokoso', 
+    'Mpulungu', 'Mungwi', 'Nakonde', 'Choma', 'Gwembe', 'Itezhi Tezhi\'Kalomo', 
+    'Kazungula', 'Livingstone', 'Mazabuka', 'Monze', 'Namwala\'Siavonga', 
+    'Sinazongwe', 'Kalabo', 'Kaoma', 'Lukulu', 'Mongu', 'Senanga', 'Sesheke', 
+    'Shangombo']
+
+CROP_NAMES = [
+    'Maize', 'Sorghum', 'Rice', 'Millet', 'Wheat', 'Cassava', 'Soybean',
+    'Sunflowers', 'Sugarcane', 'Tobacco', 'Coffee'
+]
+
+CROP_UNIT_NAMES = [
+    'Boxes', 'Kilos', 'Bunches'
+]
+
 def random_name():
     return random.choice(NAMES)
 
@@ -37,6 +59,18 @@ def random_surname():
 
 def random_full_name():
     return '%s %s' % (random_name(), random_surname())
+
+def random_district_name():
+    return random.choice(DISTRICT_NAMES)
+
+def random_crop_name():
+    return random.choice(CROP_NAMES)
+
+def random_district():
+    return create_district(random_district_name(), create_rpiarea("rpiarea"))
+
+def random_crop():
+    return create_crop(random_crop_name())
 
 def create_province(name):
     province, _ = Province.objects.get_or_create(name=name)
@@ -89,14 +123,19 @@ def create_farmer(msisdn='27761234567', name="name", surname="surname",
     village = create_village(village_name, district)
     farmergroup = create_farmer_group(farmergroup_name, zone, district,
             village)
-    user, _ = User.objects.get_or_create(username=msisdn, first_name=name,
-            last_name=surname)
+    user, _ = User.objects.get_or_create(username=msisdn)
+    user.first_name = name
+    user.last_name = surname
+    user.save()
     farmer, _ = Farmer.objects.get_or_create(farmergroup=farmergroup,
             actor=user.get_profile())
     return farmer
 
-def create_agent(name="agent"):
-    user, _ = User.objects.get_or_create(username=name, first_name=name)
+def create_agent(msisdn="27761234568", name="name", surname="surname"):
+    user, _ = User.objects.get_or_create(username=msisdn)
+    user.first_name = name
+    user.last_name = surname
+    user.save()
     agent, _ = Agent.objects.get_or_create(actor=user.get_profile())
     return agent
 
