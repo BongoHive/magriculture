@@ -49,6 +49,12 @@ class AgentTestCase(TestCase):
         self.assertAlmostEqual(transaction.created_at, datetime.now(),
             delta=timedelta(seconds=2))
         self.assertIn(transaction, farmer.transactions())
+        self.assertTrue(farmer.is_growing_crop(crop))
+    
+    def test_actor_as_agent(self):
+        agent = utils.create_agent()
+        actor = agent.actor
+        self.assertEquals(agent, actor.as_agent())
 
 
 class MarketMonitorTestCase(TestCase):

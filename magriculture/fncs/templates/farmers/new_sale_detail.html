@@ -3,9 +3,9 @@
 {% block content %}
     
     <div class="content">
-        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; New Sale</div>
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; New {{crop.name|title}} Sale</div>
         
-        <div class="h2">New {{crop.name}} sale</div>
+        <div class="h2">New {{crop.name|title}} sale</div>
         
         <form class="standard" action="" method="post">
             {{ form.non_field_errors }}

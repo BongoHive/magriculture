@@ -73,6 +73,10 @@ def farmer_new_sale(request, farmer_pk):
 @login_required
 def farmer_new_sale_detail(request, farmer_pk):
     crop = get_object_or_404(Crop, pk=request.GET.get('crop'))
+    farmer = get_object_or_404(Farmer, pk = farmer_pk)
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    
     redirect_to_farmer = HttpResponseRedirect(reverse('fncs:farmer', kwargs={
         'farmer_pk': farmer_pk
     }))
@@ -83,7 +87,6 @@ def farmer_new_sale_detail(request, farmer_pk):
             form = forms.TransactionForm(request.POST)
             if form.is_valid():
                 transaction = form.save(commit=False)
-                transaction.crop = crop
                 messages.add_message(request, messages.INFO, 
                     "New Sale Registered")
                 return redirect_to_farmer

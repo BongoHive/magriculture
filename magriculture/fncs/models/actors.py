@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from magriculture.fncs.models.geo import District
@@ -21,6 +22,12 @@ class Actor(models.Model):
     user = models.OneToOneField('auth.User')
     # TODO: do we need a name here, it's duplicated from the Django User model
     name = models.CharField(blank=False, max_length=255)
+    
+    def as_agent(self):
+        agents = self.agent_set.all()
+        if agents.count() > 1:
+            raise Exception, 'More than one agent for an actor'
+        return agents[0]
     
     class Meta:
         ordering = ['-name']
@@ -45,6 +52,9 @@ class Farmer(models.Model):
     
     def grows_crop(self, crop):
         self.crops.add(crop)
+    
+    def is_growing_crop(self, crop):
+        return self.crops.filter(pk=crop.pk).exists()
     
     def districts(self):
         return District.objects.filter(market__in=self.markets.all())
@@ -139,7 +149,15 @@ class Agent(models.Model):
         self.markets.add(market)
         self.farmers.add(farmer)
         farmer.markets.add(market)
+        farmer.crops.add(crop)
         return transaction
     
     def __unicode__(self):
         return self.actor.name
+
+admin.site.register(Actor)
+admin.site.register(Farmer)
+admin.site.register(FarmerGroup)
+admin.site.register(ExtensionOfficer)
+admin.site.register(MarketMonitor)
+admin.site.register(Agent)
