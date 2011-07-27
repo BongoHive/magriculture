@@ -5,8 +5,11 @@ from magriculture.fncs.models.geo import District
 
 def create_actor(sender, instance, created, **kwargs):
     if created:
-        Actor.objects.create(user=instance, name='%s %s' % (
-            instance.first_name, instance.last_name))
+        Actor.objects.create(user=instance)
+    else:
+        actor = instance.get_profile()
+        actor.name = '%s %s' % (instance.first_name, instance.last_name)
+        actor.save()
 
 post_save.connect(create_actor, sender=User)
 

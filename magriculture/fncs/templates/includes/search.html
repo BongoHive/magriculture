@@ -1,4 +1,5 @@
 <h2>Search for Farmers</h2>
-<form class="search" method="post" action="{% url fncs:todo %}search/">
-	<input type="text" /> <input type="submit" class="submit" value="Go &raquo;" name="submit" />
+<form class="search" method="get" action="{% url fncs:farmers %}">
+    <input type="text" name="q" value="{{q}}"/> 
+    <input type="submit" class="submit" value="Go &raquo;" name="submit" />
 </form>

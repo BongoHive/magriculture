@@ -14,11 +14,17 @@ def home(request):
 
 @login_required
 def farmers(request):
-    paginator = Paginator(Farmer.objects.all(), 5)
+    farmers = Farmer.objects.all()
+    q = request.GET.get('q','')
+    if q:
+        farmers = farmers.filter(actor__name__icontains=q)
+        print farmers.query
+    paginator = Paginator(farmers, 5)
     page = paginator.page(request.GET.get('p', 1))
     return render_to_response('farmers.html', {
         'paginator': paginator,
-        'page': page
+        'page': page,
+        'q': q
     }, context_instance=RequestContext(request))
 
 @login_required
