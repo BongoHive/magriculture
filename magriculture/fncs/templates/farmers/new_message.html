@@ -7,7 +7,7 @@
     
     <div class="h2">Message Farmer</div>
     
-    <form class="standard" action="/new-sale-success.php">
+    <form class="standard" action="{% url fncs:todo %}/new-sale-success.php">
         <label for="form-message">Message <span>[120 characters left]</span></label>
         <textarea rows="4" cols="30" id="form-message" name="message"></textarea>
         <input type="submit" name="submit" class="submit" value="Send Message &raquo;" />

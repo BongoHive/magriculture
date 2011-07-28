@@ -6,7 +6,7 @@
     <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Messages</div>
     
     <div class="menu">
-        <div class="item"><a href="/message-farmer.php"><img src="images/icon-message.gif" alt="icon-message" width="16" height="16" />Send a new message &raquo;</a></div>
+        <div class="item"><a href="{% url fncs:todo %}/message-farmer.php"><img src="{{ STATIC_URL }}images/icon-message.gif" alt="icon-message" width="16" height="16" />Send a new message &raquo;</a></div>
     </div>
 
     <div class="list">

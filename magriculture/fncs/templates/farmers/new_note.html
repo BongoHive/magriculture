@@ -8,7 +8,7 @@
 
         <div class="h2">Add A Note</div>
 
-        <form class="standard" action="/new-sale-success.php">
+        <form class="standard" action="{% url fncs:todo %}/new-sale-success.php">
             <label for="form-note">Note <span>[200 characters left]</span></label>
             <textarea rows="4" cols="30" id="form-note"></textarea>
             <input type="submit" name="submit" class="submit" value="Add Note &raquo;" />
