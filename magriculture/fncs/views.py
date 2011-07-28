@@ -118,7 +118,8 @@ def farmer_new_sale_detail(request, farmer_pk):
                 market = form.cleaned_data['market']
                 agent.register_sale(market, farmer, crop, unit, price, amount)
                 messages.add_message(request, messages.INFO, 
-                    "New Sale Registered")
+                    "New Sale Registered and %s will be notified via SMS" % (
+                        farmer.actor.name,))
                 return redirect_to_farmer
             
     else:
@@ -252,4 +253,6 @@ def farmer_edit(request, farmer_pk):
 
 def todo(request):
     """Anything that resolves to here still needs to be completed"""
-    return HttpResponse("This still needs to be implemented.")
+    return render_to_response('todo.html', {
+    
+    }, context_instance=RequestContext(request))
