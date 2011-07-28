@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from magriculture.fncs.tests import utils
-from magriculture.fncs.models.actors import Actor, Farmer
-from magriculture.fncs.models.props import Message
+from magriculture.fncs.models.actors import Actor, Farmer, FarmerGroup
+from magriculture.fncs.models.props import Message, GroupMessage
 from datetime import datetime, timedelta
 
 class ActorTestCase(TestCase):
@@ -63,6 +63,17 @@ class AgentTestCase(TestCase):
         message = agent.send_message_to_farmer(farmer, 'hello world')
         self.assertIn(message, Message.objects.filter(sender=agent.actor,
             recipient=farmer.actor))
+    
+    def test_send_farmergroup_message(self):
+        farmer1 = utils.create_farmer(farmergroup_name="group 1")
+        farmer2 = utils.create_farmer(farmergroup_name="group 2")
+        farmergroups = FarmerGroup.objects.all()
+        agent = utils.create_agent()
+        agent.send_message_to_farmergroups(farmergroups, 'hello world')
+        self.assertTrue(agent.actor.sentmessages_set.count(), 2)
+        self.assertTrue(GroupMessage.objects.count(), 2)
+        self.assertTrue(farmer1.actor.receivedmessages_set.count(), 1)
+        self.assertTrue(farmer2.actor.receivedmessages_set.count(), 1)
 
 
 class MarketMonitorTestCase(TestCase):
@@ -141,7 +152,7 @@ class FarmerTestCase(TestCase):
         rpiarea = utils.create_rpiarea("rpiarea")
         zone = utils.create_zone("zone", rpiarea)
         village = utils.create_village("village", district)
-        farmergroup = utils.create_farmer_group("farmer group", zone, district, village)
+        farmergroup = utils.create_farmergroup("farmer group", zone, district, village)
         farmer = Farmer.create('27761234567', 'first', 'last', farmergroup)
         self.assertEquals(farmer.actor.name, 'first last')
         self.assertEquals(farmer.actor.user.username, '27761234567')

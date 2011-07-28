@@ -4,14 +4,17 @@
 
     <div class="content">
 
-        <div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/messages.php">Messages</a> &gt; New Message</div>
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Messages</a> &gt; New Message</div>
         
         <div class="h2">Choose Recipients</div>
         
         <form class="standard" action="" method="post">
             <div class="list overflow">
                 {% for group in farmergroups %}
-                    <div class="item"><label for="form-group-{{group.pk}}">{{group.name|title}}</label> <input type="checkbox" name="fg" value="{{group.pk}}" id="form-group-{{group.pk}}" /></div>
+                    <div class="item">
+                        <input type="checkbox" name="fg" value="{{group.pk}}" id="form-group-{{group.pk}}" />
+                        <label for="form-group-{{group.pk}}">{{group|title}}</label> 
+                    </div>
                 {% endfor %}
             </div>
             
@@ -21,7 +24,7 @@
         </form>        
         
         <div class="h2">Menu</div>
-        <?php include_once('menu.php'); ?>        
+        {% include "includes/menu.html" %}
     </div> <!-- /.content -->
 
 {% endblock %}

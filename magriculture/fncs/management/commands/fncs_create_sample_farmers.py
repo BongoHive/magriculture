@@ -13,9 +13,13 @@ class Command(BaseCommand):
         for i in range(total):
             msisdn = 2776123456 + i
             
+            # create a district
+            district = utils.random_district()
+            farmergroup_name = "%s Farmer Group" % (district.name,)
+            
             # create the farmer
             farmer = utils.create_farmer(msisdn=str(msisdn), name=utils.random_name(),
-                        surname=utils.random_surname())
+                        surname=utils.random_surname(), farmergroup_name=farmergroup_name)
             
             # cultivates two types of crops
             farmer.grows_crop(utils.random_crop())
@@ -26,9 +30,6 @@ class Command(BaseCommand):
             msisdn = msisdn + total + 1
             agent = utils.create_agent(msisdn=str(msisdn), name=utils.random_name(),
                         surname=utils.random_surname())
-            
-            # create a district
-            district = utils.random_district()
             
             # create a market in the district
             market_name = '%s Market' % district.name

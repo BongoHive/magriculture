@@ -99,7 +99,7 @@ def create_market(name, district):
     market, _ = Market.objects.get_or_create(name=name, district=district)
     return market
 
-def create_farmer_group(name, zone, district, village):
+def create_farmergroup(name, zone, district, village):
     fg, _ = FarmerGroup.objects.get_or_create(name=name, district=district, zone=zone)
     fg.villages.add(village)
     return fg
@@ -121,7 +121,7 @@ def create_farmer(msisdn='27761234567', name="name", surname="surname",
     zone = create_zone(zone_name, rpiarea)
     district = create_district(district_name, rpiarea)
     village = create_village(village_name, district)
-    farmergroup = create_farmer_group(farmergroup_name, zone, district,
+    farmergroup = create_farmergroup(farmergroup_name, zone, district,
             village)
     user, _ = User.objects.get_or_create(username=msisdn)
     user.first_name = name

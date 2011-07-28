@@ -1,7 +1,22 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+
 from magriculture.fncs.models.geo import District
-from magriculture.fncs.models.props import Message
+from magriculture.fncs.models.props import Message, GroupMessage
 from datetime import datetime
+
+def create_actor(sender, instance, created, **kwargs):
+    if created:
+        Actor.objects.create(user=instance)
+    else:
+        actor = instance.get_profile()
+        actor.name = '%s %s' % (instance.first_name.strip(), 
+                                    instance.last_name.strip())
+        actor.save()
+
+post_save.connect(create_actor, sender=User)
+
 
 class Actor(models.Model):
     """A person with access to FNCS and who is able to interact with the
@@ -16,9 +31,9 @@ class Actor(models.Model):
             raise Exception, 'More than one agent for an actor'
         return agents[0]
     
-    def send_message(self, recipient, message):
+    def send_message(self, recipient, message, group):
         return Message.objects.create(sender=self, recipient=recipient, 
-            content=message)
+            content=message, group=group)
     
     class Meta:
         ordering = ['-name']
@@ -100,13 +115,16 @@ class FarmerGroup(models.Model):
     villages = models.ManyToManyField('fncs.Village')
     extensionofficer = models.ForeignKey('fncs.ExtensionOfficer', null=True)
     
+    def members(self):
+        return self.farmer_set.all()
+    
     class Meta:
         ordering = ['-name']
         get_latest_by = 'pk'
         app_label = 'fncs'
     
     def __unicode__(self):
-        return u"%s (FarmerGroup)" % (self.name,)
+        return self.name
 
 
 class ExtensionOfficer(models.Model):
@@ -169,23 +187,18 @@ class Agent(models.Model):
         farmer.crops.add(crop)
         return transaction
     
-    def send_message_to_farmer(self, farmer, message):
-        return self.actor.send_message(farmer.actor, message)
+    def send_message_to_farmer(self, farmer, message, group=None):
+        return self.actor.send_message(farmer.actor, message, group)
+    
+    def send_message_to_farmergroups(self, farmergroups, message):
+        groupmessage = GroupMessage.objects.create(sender=self.actor, 
+                        content=message)
+        for farmergroup in farmergroups:
+            groupmessage.farmergroups.add(farmergroup)
+            for farmer in farmergroup.members():
+                self.send_message_to_farmer(farmer, message, groupmessage)
+        return groupmessage
     
     def __unicode__(self):
         return self.actor.name
-
-
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-
-def create_actor(sender, instance, created, **kwargs):
-    if created:
-        Actor.objects.create(user=instance)
-    else:
-        actor = instance.get_profile()
-        actor.name = '%s %s' % (instance.first_name, instance.last_name)
-        actor.save()
-
-post_save.connect(create_actor, sender=User)
 

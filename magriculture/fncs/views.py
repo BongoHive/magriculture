@@ -9,7 +9,7 @@ from datetime import datetime
 import urllib
 
 from magriculture.fncs.models.actors import Farmer, FarmerGroup
-from magriculture.fncs.models.props import Transaction, Crop
+from magriculture.fncs.models.props import Transaction, Crop, GroupMessage
 from magriculture.fncs import forms
 
 @login_required
@@ -162,20 +162,14 @@ def farmer_new_message(request, farmer_pk):
                 'Message cancelled')
             return redirect_to_farmer
         
-        form = forms.MessageForm(request.POST, initial={
-            'sender': agent.actor,
-            'recipient': agent.actor
-        })
+        form = forms.MessageForm(request.POST)
         if form.is_valid():
             agent.send_message_to_farmer(farmer, form.cleaned_data['content'])
             messages.add_message(request, messages.INFO, 
                 'The message has been sent to %s via SMS' % farmer.actor.name)
             return redirect_to_farmer
     else:
-        form = forms.MessageForm(initial={
-            'sender': agent.actor,
-            'recipient': farmer.actor
-        })
+        form = forms.MessageForm()
     return render_to_response('farmers/new_message.html', {
         'farmer': farmer,
         'form': form
@@ -204,7 +198,12 @@ def farmer_profile(request, farmer_pk):
 
 @login_required
 def group_messages(request):
+    actor = request.user.get_profile()
+    paginator = Paginator(GroupMessage.objects.filter(sender=actor), 5)
+    page = paginator.page(request.GET.get('p',1))
     return render_to_response('messages.html', {
+        'paginator': paginator,
+        'page': page
     }, context_instance=RequestContext(request))
 
 @login_required
@@ -214,7 +213,7 @@ def group_message_new(request):
         if 'cancel' in request.POST:
             messages.add_message(request, messages.INFO,
                 'Message Cancelled')
-            return HttpResponseRedirect(reverse('fncs:home'))
+            return HttpResponseRedirect(reverse('fncs:messages'))
         else:
             return HttpResponseRedirect('%s?%s' % (
                 reverse('fncs:group_message_write'),
@@ -227,7 +226,34 @@ def group_message_new(request):
 
 @login_required
 def group_message_write(request):
-    return HttpResponse('ok')
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    
+    farmergroups = FarmerGroup.objects.filter(pk__in=request.GET.getlist('fg'))
+    if not farmergroups.exists():
+        raise Http404
+    
+    if request.POST:
+        
+        if 'cancel' in request.POST:
+            messages.add_message(request, messages.INFO,
+                'The message has been cancelled')
+            return HttpResponseRedirect(reverse('fncs:messages'))
+        
+        form = forms.GroupMessageForm(request.POST)
+        if form.is_valid():
+            content = form.cleaned_data['content']
+            agent.send_message_to_farmergroups(farmergroups, content)
+            messages.add_message(request, messages.INFO,
+                'The message has been sent to all group members via SMS')
+            return HttpResponseRedirect(reverse('fncs:messages'))
+    else:
+        form = forms.GroupMessageForm()
+    
+    return render_to_response('group_messages_write.html', {
+        'form': form,
+        'farmergroups': farmergroups
+    }, context_instance=RequestContext(request))
 
 @login_required
 def sales(request):

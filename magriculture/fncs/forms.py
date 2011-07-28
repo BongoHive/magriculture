@@ -58,8 +58,6 @@ class MessageForm(forms.ModelForm):
 class GroupMessageForm(forms.ModelForm):
     content = forms.CharField(label='Message', help_text='Max 120 characters',
         widget=Textarea())
-    farmergroups = forms.ModelMultipleChoiceField(required=True,
-        widget=CheckboxSelectMultiple, queryset=FarmerGroup.objects.all())
     class Meta:
         model = GroupMessage
         exclude = [

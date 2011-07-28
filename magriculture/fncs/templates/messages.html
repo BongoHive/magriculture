@@ -10,27 +10,19 @@
     </div>
 
     <div class="list">
-        <div class="item">
-            <span class="heading">Recipient Group</span><br/>
-            <span class="text">Message text to Farmer goes here</span><br/>
-            <span class="subtitle">25 AUG 2011, 10:45PM</span>
-        </div>
-        <div class="item">
-            <span class="heading">Recipient Group</span><br/>
-            <span class="text">Message text to Farmer goes here</span><br/>
-            <span class="subtitle">25 AUG 2011, 10:45PM</span>
-        </div>
-        <div class="item">
-            <span class="heading">Recipient Group</span><br/>
-            <span class="text">Message text to Farmer goes here</span><br/>
-            <span class="subtitle">25 AUG 2011, 10:45PM</span>
-        </div>
-        <div class="item">
-            <span class="heading">Recipient Group</span><br/>
-            <span class="text">Message text to Farmer goes here</span><br/>
-            <span class="subtitle">25 AUG 2011, 10:45PM</span>
-        </div>
-        <div class="pagination"><a href="{% url fncs:todo %}">&laquo; Prev</a> | <a href="{% url fncs:todo %}">Next &raquo;</a></div>
+        {% include "includes/messages.html" %}
+        {% for groupmessage in page.object_list %}
+            <div class="item">
+                <span class="heading">{{groupmessage.farmergroups.all|join:", "}}</span><br/>
+                <span class="text">{{groupmessage.content}}</span><br/>
+                <span class="subtitle">{{groupmessage.created_at|date:"j b Y, g:iA"|upper}}</span>
+            </div>
+        {% empty %}
+            <div class="item">
+                <span class="text">You haven't sent any messages yet</span><br/>
+            </div>
+        {% endfor %}
+        {% include "includes/pagination.html" %}
     </div>
     
     {% include "includes/search.html" %}
