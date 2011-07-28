@@ -3,12 +3,12 @@
 {% block content %}
     <div class="content">
 
-		<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; {{farmer.actor.name}}</div>
-		
-		<div class="meta">
+        <div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; {{farmer.actor.name}}</div>
+        
+        <div class="meta">
             {% include "includes/farmer_header.html" %}
-		</div> <!-- /.meta -->
-		
+        </div> <!-- /.meta -->
+        
         {% include "includes/farmer_menu.html" %}
 
         <div class="tabs">
@@ -17,30 +17,30 @@
             Notes 
         </div>
 
-		<div class="list">
-			<div class="item">
-				<span class="text">New Stock Available</span> <a href="#" class="del">[x]</a><br/>
-				<span class="subtitle">25 AUG 2011, 10:45PM</span>
-			</div>
-			<div class="item">
-				<span class="text">This is a note that I wrote</span> <a href="#" class="del">[x]</a><br/>
-				<span class="subtitle">25 AUG 2011, 10:45PM</span>
-			</div>
-			<div class="item">
-				<span class="text">Another note about this farmer</span> <a href="#" class="del">[x]</a><br/>
-				<span class="subtitle">25 AUG 2011, 10:45PM</span>
-			</div>
-			<div class="item">
-				<span class="text">Very interesting note!</span> <a href="#" class="del">[x]</a><br/>
-				<span class="subtitle">25 AUG 2011, 10:45PM</span>
-			</div>
-			<div class="pagination"><a href="">&laquo; Prev</a> | <a href="">Next &raquo;</a></div>
-		</div>
-		
-		<?php include_once('search-include.php'); ?>	
-	
-		<div class="h2">Menu</div>
-		<?php include_once('menu.php'); ?>		
-	</div> <!-- /.content -->
-	
+        <div class="list">
+            <div class="item">
+                <span class="text">New Stock Available</span> <a href="#" class="del">[x]</a><br/>
+                <span class="subtitle">25 AUG 2011, 10:45PM</span>
+            </div>
+            <div class="item">
+                <span class="text">This is a note that I wrote</span> <a href="#" class="del">[x]</a><br/>
+                <span class="subtitle">25 AUG 2011, 10:45PM</span>
+            </div>
+            <div class="item">
+                <span class="text">Another note about this farmer</span> <a href="#" class="del">[x]</a><br/>
+                <span class="subtitle">25 AUG 2011, 10:45PM</span>
+            </div>
+            <div class="item">
+                <span class="text">Very interesting note!</span> <a href="#" class="del">[x]</a><br/>
+                <span class="subtitle">25 AUG 2011, 10:45PM</span>
+            </div>
+            <div class="pagination"><a href="">&laquo; Prev</a> | <a href="">Next &raquo;</a></div>
+        </div>
+        
+        {% include "includes/search.html" %}
+    
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+    
 {% endblock %}

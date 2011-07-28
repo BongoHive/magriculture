@@ -4,28 +4,28 @@
 
 <div class="content">
 
-	<div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; {{farmer.actor.name}}</div>
-	
-	<div class="meta">
+    <div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; {{farmer.actor.name}}</div>
+    
+    <div class="meta">
         {% include "includes/farmer_header.html" %}
-	</div> <!-- /.meta -->
-	
-	<div class="h2">Farmer Profile</div>
-	
-	<div class="list">
-		<div class="item"><label>Farmer:</label> {{farmer.actor.name}}</div>
-		<div class="item"><label>Agents:</label> {{farmer.agents.all|join:", "}}</div>
-		<div class="item"><label>Markets:</label> {{farmer.markets.all|join:", "}}</div>
-		<div class="item"><label>Districts:</label> {{farmer.districts.all|join:", "}}</div>
-		<div class="item"><label>Crop:</label> {{farmer.crops.all|join:", "}}</div>
+    </div> <!-- /.meta -->
+    
+    <div class="h2">Farmer Profile</div>
+    
+    <div class="list">
+        <div class="item"><label>Farmer:</label> {{farmer.actor.name}}</div>
+        <div class="item"><label>Agents:</label> {{farmer.agents.all|join:", "}}</div>
+        <div class="item"><label>Markets:</label> {{farmer.markets.all|join:", "}}</div>
+        <div class="item"><label>Districts:</label> {{farmer.districts.all|join:", "}}</div>
+        <div class="item"><label>Crop:</label> {{farmer.crops.all|join:", "}}</div>
         {# <div class="item"><label>Price:</label> ZK 30 000</div> #}
         {# <div class="item"><label>Crop:</label> Tomato</div> #}
         {# <div class="item"><label>Created:</label> 14 Jan 2011, 13:45</div> #}
-		<div class="item"><a href="#">Edit Profile &raquo;</a></div>
-		<div class="pagination"><a class="del" href="">[x] Remove this Farmer</a> | <a href="{% url fncs:farmers %}">More Farmers &raquo;</a></div>
-	</div>
+        <div class="item"><a href="#">Edit Profile &raquo;</a></div>
+        <div class="pagination"><a class="del" href="">[x] Remove this Farmer</a> | <a href="{% url fncs:farmers %}">More Farmers &raquo;</a></div>
+    </div>
 
-	<div class="h2">Menu</div>
-	<?php include_once('menu.php'); ?>		
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
 </div> <!-- /.content -->
 {% endblock %}
