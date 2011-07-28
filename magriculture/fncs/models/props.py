@@ -86,6 +86,7 @@ class Message(models.Model):
     recipient = models.ForeignKey('fncs.Actor', related_name='receivedmessages_set')
     content = models.CharField(max_length=120)
     created_at = models.DateTimeField(auto_now_add=True)
+    group = models.ForeignKey('fncs.GroupMessage', null=True)
     
     class Meta:
         ordering = ['-created_at']
@@ -95,3 +96,18 @@ class Message(models.Model):
     def __unicode__(self):
         return u"Message from %s to %s at %s" % (self.sender, self.recipient,
             self.created_at)
+
+class GroupMessage(models.Model):
+    sender = models.ForeignKey('fncs.Actor')
+    farmergroups = models.ManyToManyField('fncs.FarmerGroup')
+    content = models.CharField(max_length=120)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        get_latest_by = 'created_at'
+        app_label = 'fncs'
+    
+    def __unicode__(self):
+        return 'GroupMessage from %s to %s groups at %s' % (self.sender, 
+            self.farmergroups.count(), self.created_at)

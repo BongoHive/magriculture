@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.forms.widgets import HiddenInput, Textarea
-from magriculture.fncs.models.props import Crop, Transaction, Message
+from django.forms.widgets import HiddenInput, Textarea, CheckboxSelectMultiple
+from magriculture.fncs.models.props import Crop, Transaction, Message, GroupMessage
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs.models.actors import Actor, FarmerGroup
 from magriculture.fncs.widgets import SplitSelectDateTimeWidget
@@ -52,4 +52,16 @@ class MessageForm(forms.ModelForm):
         model = Message
         exclude = [
             'sender', 'recipient'
+        ]
+    
+
+class GroupMessageForm(forms.ModelForm):
+    content = forms.CharField(label='Message', help_text='Max 120 characters',
+        widget=Textarea())
+    farmergroups = forms.ModelMultipleChoiceField(required=True,
+        widget=CheckboxSelectMultiple, queryset=FarmerGroup.objects.all())
+    class Meta:
+        model = GroupMessage
+        exclude = [
+            'sender', 'farmergroups'
         ]

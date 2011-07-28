@@ -6,8 +6,9 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from datetime import datetime
+import urllib
 
-from magriculture.fncs.models.actors import Farmer
+from magriculture.fncs.models.actors import Farmer, FarmerGroup
 from magriculture.fncs.models.props import Transaction, Crop
 from magriculture.fncs import forms
 
@@ -202,9 +203,31 @@ def farmer_profile(request, farmer_pk):
     }, context_instance=RequestContext(request))
 
 @login_required
-def list_messages(request):
+def group_messages(request):
     return render_to_response('messages.html', {
     }, context_instance=RequestContext(request))
+
+@login_required
+def group_message_new(request):
+    farmergroups = FarmerGroup.objects.all()
+    if request.POST:
+        if 'cancel' in request.POST:
+            messages.add_message(request, messages.INFO,
+                'Message Cancelled')
+            return HttpResponseRedirect(reverse('fncs:home'))
+        else:
+            return HttpResponseRedirect('%s?%s' % (
+                reverse('fncs:group_message_write'),
+                urllib.urlencode([('fg', fg_id) for fg_id 
+                    in request.POST.getlist('fg')])
+            ))
+    return render_to_response('group_messages_new.html', {
+        'farmergroups': farmergroups
+    }, context_instance=RequestContext(request))
+
+@login_required
+def group_message_write(request):
+    return HttpResponse('ok')
 
 @login_required
 def sales(request):
