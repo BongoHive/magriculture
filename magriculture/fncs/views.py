@@ -32,7 +32,26 @@ def farmers(request):
 
 @login_required
 def farmer_new(request):
-    form = forms.FarmerForm()
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    if request.POST:
+        form = forms.FarmerForm(request.POST)
+        if form.is_valid():
+            msisdn = form.cleaned_data['msisdn']
+            name = form.cleaned_data['name']
+            surname = form.cleaned_data['surname']
+            farmergroup = form.cleaned_data['farmergroup']
+            markets = form.cleaned_data['markets']
+            farmer = Farmer.create(msisdn, name, surname, farmergroup)
+            for market in markets:
+                farmer.sells_at(market, agent)
+            messages.add_message(request, messages.INFO, 
+                "Farmer Created")
+            return HttpResponseRedirect(reverse("fncs:farmer_crops", kwargs={
+                'farmer_pk': farmer.pk
+            }))
+    else:
+        form = forms.FarmerForm()
     return render_to_response('farmers/new.html', {
         'form': form
     }, context_instance=RequestContext(request))
@@ -173,6 +192,63 @@ def sales_agent_breakdown(request):
     return render_to_response('sales_agent_breakdown.html', {
     }, context_instance=RequestContext(request))
 
+
+@login_required
+def farmer_crops(request, farmer_pk):
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    if request.POST:
+        form = forms.CropsForm(request.POST)
+        if form.is_valid():
+            selected_crops = form.cleaned_data['crops']
+            farmer.grows_crops_exclusively(selected_crops)
+            messages.add_message(request, messages.INFO, 
+                'Crops have been updated'
+            )
+            return HttpResponseRedirect(reverse('fncs:farmer', kwargs={
+                'farmer_pk': farmer_pk
+            }))
+    else:
+        form = forms.CropsForm(initial={
+            'crops': farmer.crops.all()
+        })
+    return render_to_response('farmers/crops.html', {
+        'form': form,
+        'farmer': farmer
+    }, context_instance=RequestContext(request))
+
+@login_required
+def farmer_edit(request, farmer_pk):
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    actor = farmer.actor
+    user = actor.user
+    if request.POST:
+        form = forms.FarmerForm(request.POST)
+        if form.is_valid():
+            user.first_name = form.cleaned_data['name']
+            user.last_name = form.cleaned_data['surname']
+            user.username = form.cleaned_data['msisdn']
+            user.save()
+            
+            farmer.sells_at_markets_exclusively(form.cleaned_data['markets'])
+            farmer.farmergroup = form.cleaned_data['farmergroup']
+            farmer.save()
+            messages.add_message(request, messages.INFO,
+                "Farmer Profile has been updated")
+            return HttpResponseRedirect(reverse('fncs:farmer_crops', kwargs={
+                'farmer_pk': farmer.pk
+            }))
+    else:
+        form = forms.FarmerForm(initial={
+            'name': user.first_name,
+            'surname': user.last_name,
+            'msisdn': user.username,
+            'farmergroup': farmer.farmergroup,
+            'markets': farmer.markets.all(),
+        })
+    return render_to_response('farmers/edit.html', {
+        'form': form,
+        'farmer': farmer
+    }, context_instance=RequestContext(request))
 
 def todo(request):
     """Anything that resolves to here still needs to be completed"""

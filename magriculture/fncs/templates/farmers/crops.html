@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="content">
+
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a></div>
+        <div class="meta">
+            {% include "includes/farmer_header.html" %}
+        </div> <!-- /.meta -->
+        
+        <div class="h2">Select Crops</div>
+        
+        <form class="standard" method="post" action="">
+            {{form}}
+            <input type="submit" name="submit" class="submit" value="Add to Farmer &raquo;" />
+            {# <a href="/add-farmer-crops-search.php">Search for other crops not in list</a> #}
+            {% csrf_token %}
+        </form>
+        
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+
+{% endblock %}

@@ -21,7 +21,7 @@
         {# <div class="item"><label>Price:</label> ZK 30 000</div> #}
         {# <div class="item"><label>Crop:</label> Tomato</div> #}
         {# <div class="item"><label>Created:</label> 14 Jan 2011, 13:45</div> #}
-        <div class="item"><a href="#">Edit Profile &raquo;</a></div>
+        <div class="item"><a href="{% url fncs:farmer_edit farmer_pk=farmer.pk %}">Edit Profile &raquo;</a></div>
         <div class="pagination"><a class="del" href="">[x] Remove this Farmer</a> | <a href="{% url fncs:farmers %}">More Farmers &raquo;</a></div>
     </div>
 

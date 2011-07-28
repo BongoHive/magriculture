@@ -89,7 +89,7 @@ class Market(models.Model):
     district = models.ForeignKey('fncs.District')
 
     class Meta:
-        ordering = ['-name']
+        ordering = ['name']
         get_latest_by = 'pk'
         app_label = 'fncs'
 

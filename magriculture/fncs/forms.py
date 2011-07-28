@@ -1,8 +1,9 @@
 from django import forms
+from django.contrib.auth.models import User
 from django.forms.widgets import HiddenInput
 from magriculture.fncs.models.props import Crop, Transaction
 from magriculture.fncs.models.geo import Market
-from magriculture.fncs.models.actors import Farmer
+from magriculture.fncs.models.actors import Actor, FarmerGroup
 from magriculture.fncs.widgets import SplitSelectDateTimeWidget
 
 class SelectCropForm(forms.Form):
@@ -30,6 +31,15 @@ class TransactionForm(forms.ModelForm):
         ]
     
 
-class FarmerForm(forms.ModelForm):
-    class Meta:
-        model = Farmer
+class FarmerForm(forms.Form):
+    name = forms.CharField(label='Name', required=True)
+    surname = forms.CharField(label='Surname', required=True)
+    msisdn = forms.CharField(label='Mobile Number', required=True)
+    farmergroup = forms.ModelChoiceField(label='Farmer Group', required=True,
+        empty_label=None, queryset=FarmerGroup.objects.all())
+    markets = forms.ModelMultipleChoiceField(label='Markets', required=True, 
+        queryset=Market.objects.all())
+
+class CropsForm(forms.Form):
+    crops = forms.ModelMultipleChoiceField(label='Crops', required=True,
+        queryset=Crop.objects.all())

@@ -5,9 +5,9 @@
 
     <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a></div>
     
-    <div class="h2">New Farmer</div>
+    <div class="h2">Edit Farmer</div>
     
-    <form class="standard" method="post" action="{% url fncs:farmer_new %}">
+    <form class="standard" method="post" action="{% url fncs:farmer_edit farmer_pk=farmer.pk %}">
         {% if form.errors %}
             <div class="error">Please see error below.</div>
         {% endif %}

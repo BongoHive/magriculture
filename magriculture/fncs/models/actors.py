@@ -42,6 +42,12 @@ class Farmer(models.Model):
     def is_growing_crop(self, crop):
         return self.crops.filter(pk=crop.pk).exists()
     
+    def grows_crops_exclusively(self, crops):
+        """Warning this is a destructive method!"""
+        self.crops.clear()
+        for crop in crops:
+            self.grows_crop(crop)
+    
     def districts(self):
         return District.objects.filter(market__in=self.markets.all())
     
@@ -56,6 +62,26 @@ class Farmer(models.Model):
         self.agents.add(agent)
         # the agent has the farmer registered as a farmer
         agent.farmers.add(self)
+    
+    def sells_at_markets_exclusively(self, markets):
+        """Warning this is a destructive method!"""
+        self.markets.clear()
+        for market in markets:
+            self.markets.add(market)
+    
+    @classmethod
+    def create(cls, msisdn, name, surname, farmergroup):
+        user = User.objects.create(username=msisdn)
+        user.first_name = name
+        user.last_name = surname
+        user.save()
+        
+        actor = user.get_profile()
+        
+        farmer = cls(actor=actor, farmergroup=farmergroup)
+        farmer.save()
+        
+        return farmer
 
     def __unicode__(self):
         return self.actor.name

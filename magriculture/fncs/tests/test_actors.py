@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from magriculture.fncs.tests import utils
-from magriculture.fncs.models.actors import Actor
+from magriculture.fncs.models.actors import Actor, Farmer
 from datetime import datetime, timedelta
 
 class ActorTestCase(TestCase):
@@ -127,3 +127,13 @@ class FarmerTestCase(TestCase):
         crop = utils.random_crop()
         farmer.grows_crop(crop)
         self.assertIn(crop, farmer.crops.all())
+    
+    def test_farmer_creation(self):
+        district = utils.random_district()
+        rpiarea = utils.create_rpiarea("rpiarea")
+        zone = utils.create_zone("zone", rpiarea)
+        village = utils.create_village("village", district)
+        farmergroup = utils.create_farmer_group("farmer group", zone, district, village)
+        farmer = Farmer.create('27761234567', 'first', 'last', farmergroup)
+        self.assertEquals(farmer.actor.name, 'first last')
+        self.assertEquals(farmer.actor.user.username, '27761234567')
