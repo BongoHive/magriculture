@@ -3,7 +3,7 @@
 {% block content %}
     <div class="content">
 
-        <div class="breadcrumb"><a href="/home.php">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; {{farmer.actor.name}}</div>
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="/farmers.php">Farmers</a> &gt; {{farmer.actor.name}}</div>
         
         <div class="meta">
             {% include "includes/farmer_header.html" %}
