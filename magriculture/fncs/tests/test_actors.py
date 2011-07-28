@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import Actor, Farmer
+from magriculture.fncs.models.props import Message
 from datetime import datetime, timedelta
 
 class ActorTestCase(TestCase):
@@ -55,6 +56,13 @@ class AgentTestCase(TestCase):
         agent = utils.create_agent()
         actor = agent.actor
         self.assertEquals(agent, actor.as_agent())
+    
+    def test_send_farmer_message(self):
+        farmer = utils.create_farmer()
+        agent = utils.create_agent()
+        message = agent.send_message_to_farmer(farmer, 'hello world')
+        self.assertIn(message, Message.objects.filter(sender=agent.actor,
+            recipient=farmer.actor))
 
 
 class MarketMonitorTestCase(TestCase):

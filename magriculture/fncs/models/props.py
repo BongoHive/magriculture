@@ -80,3 +80,18 @@ class Offer(models.Model):
     def __unicode__(self):
         return u"%s of %s at %s (Offer)" % (self.unit, self.crop, self.price)
 
+class Message(models.Model):
+    """A message sent or received via FNCS"""
+    sender = models.ForeignKey('fncs.Actor', related_name='sentmessages_set')
+    recipient = models.ForeignKey('fncs.Actor', related_name='receivedmessages_set')
+    content = models.CharField(max_length=120)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        get_latest_by = 'created_at'
+        app_label = 'fncs'
+    
+    def __unicode__(self):
+        return u"Message from %s to %s at %s" % (self.sender, self.recipient,
+            self.created_at)

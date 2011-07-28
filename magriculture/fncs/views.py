@@ -135,16 +135,49 @@ def farmer_new_sale_detail(request, farmer_pk):
     
 @login_required
 def farmer_messages(request, farmer_pk):
+    actor = request.user.get_profile()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    paginator = Paginator(farmer.actor.receivedmessages_set \
+                                .filter(sender=actor), 5)
+    page = paginator.page(request.GET.get('p',1))
     return render_to_response('farmers/messages.html', {
-        'farmer': farmer
+        'farmer': farmer,
+        'paginator': paginator,
+        'page': page
     }, context_instance=RequestContext(request))
 
 @login_required
 def farmer_new_message(request, farmer_pk):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    redirect_to_farmer = HttpResponseRedirect(reverse('fncs:farmer', kwargs={
+        'farmer_pk': farmer.pk
+    }))
+    if request.POST:
+        
+        if 'cancel' in request.POST:
+            messages.add_message(request, messages.INFO, 
+                'Message cancelled')
+            return redirect_to_farmer
+        
+        form = forms.MessageForm(request.POST, initial={
+            'sender': agent.actor,
+            'recipient': agent.actor
+        })
+        if form.is_valid():
+            agent.send_message_to_farmer(farmer, form.cleaned_data['content'])
+            messages.add_message(request, messages.INFO, 
+                'The message has been sent to %s via SMS' % farmer.actor.name)
+            return redirect_to_farmer
+    else:
+        form = forms.MessageForm(initial={
+            'sender': agent.actor,
+            'recipient': farmer.actor
+        })
     return render_to_response('farmers/new_message.html', {
-        'farmer': farmer
+        'farmer': farmer,
+        'form': form
     }, context_instance=RequestContext(request))
 
 @login_required

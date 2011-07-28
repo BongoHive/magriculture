@@ -1,5 +1,6 @@
 from django.db import models
 from magriculture.fncs.models.geo import District
+from magriculture.fncs.models.props import Message
 from datetime import datetime
 
 class Actor(models.Model):
@@ -14,6 +15,10 @@ class Actor(models.Model):
         if agents.count() > 1:
             raise Exception, 'More than one agent for an actor'
         return agents[0]
+    
+    def send_message(self, recipient, message):
+        return Message.objects.create(sender=self, recipient=recipient, 
+            content=message)
     
     class Meta:
         ordering = ['-name']
@@ -163,6 +168,9 @@ class Agent(models.Model):
         farmer.markets.add(market)
         farmer.crops.add(crop)
         return transaction
+    
+    def send_message_to_farmer(self, farmer, message):
+        return self.actor.send_message(farmer.actor, message)
     
     def __unicode__(self):
         return self.actor.name

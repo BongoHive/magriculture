@@ -56,7 +56,7 @@ form input, form select{ display: block; margin-bottom: 10px;}
 textarea{ margin-bottom: 5px; font: 12px Arial, sans-serif;}
 form label{color: #000;	font-size: 12px; margin-bottom: 3px; display: block;}
 form.signin label, form.recover label{color: #fff;}
-label span{font-size: 11px; color: #545454;}
+label span, span.helptext {font-size: 11px; color: #545454;}
 
 form input.submit{ background-color: #efe579; color: #2e5333; font-weight: bold; font-size: 11px; border-bottom: 1px solid #36623d; border-right: 1px solid #36623d; border-left: 0px none; border-top: 0px none; padding: 3px;}
 

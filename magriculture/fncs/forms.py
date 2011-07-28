@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.forms.widgets import HiddenInput
-from magriculture.fncs.models.props import Crop, Transaction
+from django.forms.widgets import HiddenInput, Textarea
+from magriculture.fncs.models.props import Crop, Transaction, Message
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs.models.actors import Actor, FarmerGroup
 from magriculture.fncs.widgets import SplitSelectDateTimeWidget
@@ -43,3 +43,13 @@ class FarmerForm(forms.Form):
 class CropsForm(forms.Form):
     crops = forms.ModelMultipleChoiceField(label='Crops', required=True,
         queryset=Crop.objects.all())
+    
+    
+class MessageForm(forms.ModelForm):
+    content = forms.CharField(label='Message', help_text='Max 120 characters',
+        widget=Textarea())
+    class Meta:
+        model = Message
+        exclude = [
+            'sender', 'recipient'
+        ]
