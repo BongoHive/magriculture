@@ -1,5 +1,4 @@
-from django.conf.urls.defaults import patterns, include, url
-from django.views.generic.base import TemplateView
+from django.conf.urls.defaults import patterns, url
 from magriculture.fncs import views
 
 urlpatterns = patterns('',
@@ -18,7 +17,7 @@ urlpatterns = patterns('',
     url(r'^farmers/(?P<farmer_pk>\d+)/notes/new/$', views.farmer_new_note, name='farmer_new_note'),
     url(r'^farmers/add/$', views.farmer_add, name='farmer_add'),
     url(r'^farmers/add/$', views.farmer_add, name='farmer_add'),
-    url(r'^messages/$', views.messages, name='messages'),
+    url(r'^messages/$', views.list_messages, name='messages'),
     url(r'^sales/$', views.sales, name='sales'),
     url(r'^sales/crops/$', views.sales_crops, name='sales_crops'),
     url(r'^sales/agents/$', views.sales_agents, name='sales_agents'),

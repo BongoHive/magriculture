@@ -1,4 +1,4 @@
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -10,7 +10,6 @@ from datetime import datetime
 from magriculture.fncs.models.actors import Farmer
 from magriculture.fncs.models.props import Transaction, Crop
 from magriculture.fncs import forms
-from magriculture.fncs.utils import effective_page_range_for
 
 @login_required
 def home(request):
@@ -93,7 +92,6 @@ def farmer_new_sale_detail(request, farmer_pk):
         else:
             form = forms.TransactionForm(request.POST)
             if form.is_valid():
-                transaction = form.save(commit=False)
                 crop = form.cleaned_data['crop']
                 unit = form.cleaned_data['unit']
                 price = form.cleaned_data['price']
@@ -151,7 +149,7 @@ def farmer_profile(request, farmer_pk):
     }, context_instance=RequestContext(request))
 
 @login_required
-def messages(request):
+def list_messages(request):
     return render_to_response('messages.html', {
     }, context_instance=RequestContext(request))
 

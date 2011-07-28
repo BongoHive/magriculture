@@ -1,6 +1,5 @@
 from django import forms
 from django.forms.widgets import HiddenInput
-from django.forms.extras.widgets import SelectDateWidget
 from magriculture.fncs.models.props import Crop, Transaction
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs.models.actors import Farmer

@@ -1,6 +1,5 @@
 from django.db import models
 from magriculture.fncs.models.geo import District
-from magriculture.fncs.models.props import Transaction
 from datetime import datetime
 
 class Actor(models.Model):

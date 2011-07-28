@@ -1,6 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
-from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import Farmer
 from optparse import make_option
 import random

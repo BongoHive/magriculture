@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User
-from magriculture.fncs.models.actors import (Actor, FarmerGroup, Farmer, 
+from magriculture.fncs.models.actors import (FarmerGroup, Farmer, 
         Agent, MarketMonitor)
 from magriculture.fncs.models.geo import (Province, RPIArea, District, Ward,
         Village, Zone, Market)
-from magriculture.fncs.models.props import (Crop, CropUnit, Transaction, Offer)
+from magriculture.fncs.models.props import (Crop, CropUnit)
 import random
 
 NAMES = ['Aaliyah', 'Abayomi', 'Abebe', 'Abebi', 'Abena', 'Abeo', 'Ada', 
