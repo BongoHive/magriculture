@@ -1,4 +1,3 @@
-print 'registering admins'
 from django.contrib import admin
 from magriculture.fncs.models import actors, props, geo
 

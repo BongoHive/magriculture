@@ -1,19 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
 from magriculture.fncs.models.geo import District
 from magriculture.fncs.models.props import Transaction
 from datetime import datetime
-
-def create_actor(sender, instance, created, **kwargs):
-    if created:
-        Actor.objects.create(user=instance)
-    else:
-        actor = instance.get_profile()
-        actor.name = '%s %s' % (instance.first_name, instance.last_name)
-        actor.save()
-
-post_save.connect(create_actor, sender=User)
 
 class Actor(models.Model):
     """A person with access to FNCS and who is able to interact with the
@@ -153,4 +141,18 @@ class Agent(models.Model):
     
     def __unicode__(self):
         return self.actor.name
+
+
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+
+def create_actor(sender, instance, created, **kwargs):
+    if created:
+        Actor.objects.create(user=instance)
+    else:
+        actor = instance.get_profile()
+        actor.name = '%s %s' % (instance.first_name, instance.last_name)
+        actor.save()
+
+post_save.connect(create_actor, sender=User)
 
