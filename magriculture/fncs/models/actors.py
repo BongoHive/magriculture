@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
 from magriculture.fncs.models.geo import District
-from magriculture.fncs.models.props import Message, GroupMessage
+from magriculture.fncs.models.props import Message, GroupMessage, Note
 from datetime import datetime
 
 def create_actor(sender, instance, created, **kwargs):
@@ -198,6 +198,13 @@ class Agent(models.Model):
             for farmer in farmergroup.members():
                 self.send_message_to_farmer(farmer, message, groupmessage)
         return groupmessage
+    
+    def write_note(self, farmer, note):
+        return Note.objects.create(owner=self.actor, about_actor=farmer.actor,
+            content=note)
+    
+    def notes_for(self, farmer):
+        return self.actor.note_set.filter(about_actor=farmer.actor)
     
     def __unicode__(self):
         return self.actor.name

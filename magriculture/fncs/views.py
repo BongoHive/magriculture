@@ -19,7 +19,9 @@ def home(request):
 
 @login_required
 def farmers(request):
-    farmers = Farmer.objects.all()
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    farmers = agent.farmers.all()
     q = request.GET.get('q','')
     if q:
         farmers = farmers.filter(actor__name__icontains=q)
@@ -177,16 +179,40 @@ def farmer_new_message(request, farmer_pk):
 
 @login_required
 def farmer_notes(request, farmer_pk):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    paginator = Paginator(agent.notes_for(farmer), 5)
+    page = paginator.page(request.GET.get('p',1))
     return render_to_response('farmers/notes.html', {
-        'farmer': farmer
+        'farmer': farmer,
+        'paginator': paginator,
+        'page': page,
     }, context_instance=RequestContext(request))
 
 @login_required
 def farmer_new_note(request, farmer_pk):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    redirect_to_farmer_notes = HttpResponseRedirect(reverse('fncs:farmer_notes', 
+        kwargs={ 'farmer_pk': farmer_pk}))
+    
+    if request.POST:
+        if 'cancel' in request.POST:
+            return redirect_to_farmer_notes
+        
+        form = forms.NoteForm(request.POST)
+        if form.is_valid():
+            agent.write_note(farmer, form.cleaned_data['content'])
+            messages.add_message(request, messages.INFO,
+                'Note has been saved')
+            return redirect_to_farmer_notes
+    else:
+        form = forms.NoteForm()
     return render_to_response('farmers/new_note.html', {
-        'farmer': farmer
+        'farmer': farmer,
+        'form': form,
     }, context_instance=RequestContext(request))
 
 @login_required

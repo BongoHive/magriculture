@@ -51,6 +51,30 @@ CROP_UNIT_NAMES = [
     'Boxes', 'Kilos', 'Bunches'
 ]
 
+AGRICULTURE_QUOTES = [
+    """Advances in technology will continue to reach far into every sector of our economy. Future job and economic growth in industry, defense, transportation, agriculture, health care, and life sciences is directly related to scientific advancement. - Christopher Bond """,
+    """After the First World War the economic problem was no longer one of production. It was the problem of finding markets to get the output of industry and agriculture dispersed and consumed. - John Boyd Orr """,
+    """Agriculture not only gives riches to a nation, but the only riches she can call her own. - Samuel Johnson """,
+    """Agriculture was the first manufacturing industry in America and represents the best of all of us. - Zack Wamp """,
+    """America was indebted to immigration for her settlement and prosperity. That part of America which had encouraged them most had advanced most rapidly in population, agriculture and the arts. - James Madison """,
+    """As an integral part of the Department of Agriculture, the Animal and Plant Health Inspection Service monitors our Nation's agriculture to protect against agricultural pests and diseases. - Mike Rogers """,
+    """As the first Member of Congress from western Washington to serve on the House Agriculture Committee in over 50 years, I am proud to represent the needs of our agriculture community. - Rick Larsen """,
+    """As the tension eases, we must look in the direction of agriculture, industry and education as our final goals, and toward democracy under Mr Mubarak. - Naguib Mahfouz """,
+    """Because of technological limits, there is a certain amount of food that we can produce per acre. If we were to have intensive greenhouse agriculture, we could have much higher production. - Ralph Merkle """,
+    """Before the discovery of agriculture mankind was everywhere so divided, the size of each group being determined by the natural fertility of its locality. - Arthur Keith """,
+    """Bring diversity back to agriculture. That's what made it work in the first place. - David R. Brower """,
+    """By increasing the use of renewable fuels such as ethanol and bio-diesel, and providing the Department of Energy with a budget to create more energy efficiency options, agriculture can be the backbone of our energy supply as well. - John Salazar """,
+    """Consequently the student who is devoid of talent will derive no more profit from this work than barren soil from a treatise on agriculture.- Quintilian """,
+    """Contrasting sharply, in the developing countries represented by India, Pakistan, and most of the countries in Asia and Africa, seventy to eighty percent of the population is engaged in agriculture, mostly at the subsistence level. - Norman Borlaug """,
+    """Every major food company now has an organic division. There's more capital going into organic agriculture than ever before. - Michael Pollan """,
+    """High tech companies that focus on research, development and production will learn that they can be the perfect complement to our world-renowned agriculture heritage. - Alan Autry """,
+    """I have always said there is only one thing that can bring our nation down - our dependence on foreign countries for food and energy. Agriculture is the backbone of our economy. - John Salazar """,
+    """If we win, we'll make history, and I'll serve you on the Agriculture Committee. - George Nethercutt""",
+]
+
+def random_quote():
+    return random.choice(AGRICULTURE_QUOTES)
+
 def random_name():
     return random.choice(NAMES)
 
@@ -71,6 +95,16 @@ def random_district():
 
 def random_crop():
     return create_crop(random_crop_name())
+
+def random_message_text():
+    messages = [
+        'I need more %s, please bring if you have',
+        'There are too many %s being sold. Don\'t bring any more',
+        'Increasing demand for %s this year, please prepare for demand 3 months from now.',
+        'Hi, haven\'t been able to get a hold of you lately. Where are is %s?',
+    ]
+    crop_name = random_crop_name().lower()
+    return random.choice(messages) % crop_name
 
 def create_province(name):
     province, _ = Province.objects.get_or_create(name=name)

@@ -111,3 +111,20 @@ class GroupMessage(models.Model):
     def __unicode__(self):
         return 'GroupMessage from %s to %s groups at %s' % (self.sender, 
             self.farmergroups.count(), self.created_at)
+
+class Note(models.Model):
+    """A note written by an actor and having another actor as the subject
+    of the note"""
+    owner = models.ForeignKey('fncs.Actor')
+    about_actor = models.ForeignKey('fncs.Actor', related_name='attachednote_set')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        get_latest_by = 'created_at'
+        app_label = 'fncs'
+    
+    def __unicode__(self):
+        return u"Note from %s to %s at %s" % (self.owner, self.about_actor,
+            self.created_at)

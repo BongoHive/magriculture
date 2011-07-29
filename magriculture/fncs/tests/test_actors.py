@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import Actor, Farmer, FarmerGroup
-from magriculture.fncs.models.props import Message, GroupMessage
+from magriculture.fncs.models.props import Message, GroupMessage, Note
 from datetime import datetime, timedelta
 
 class ActorTestCase(TestCase):
@@ -74,6 +74,14 @@ class AgentTestCase(TestCase):
         self.assertTrue(GroupMessage.objects.count(), 2)
         self.assertTrue(farmer1.actor.receivedmessages_set.count(), 1)
         self.assertTrue(farmer2.actor.receivedmessages_set.count(), 1)
+    
+    def test_write_note(self):
+        farmer = utils.create_farmer()
+        agent = utils.create_agent()
+        note = agent.write_note(farmer, 'this is a note about the farmer')
+        self.assertIn(note, Note.objects.all())
+        self.assertIn(note, farmer.actor.attachednote_set.all())
+        self.assertIn(note, agent.notes_for(farmer))
 
 
 class MarketMonitorTestCase(TestCase):
