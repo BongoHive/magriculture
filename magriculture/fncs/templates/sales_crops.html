@@ -6,27 +6,18 @@
         <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Crop Sales</div>
 
         <div class="list">
+            {% for transaction in page.object_list %}
             <div class="item">
-                <span class="heading">Recipient Group</span><br/>
-                <span class="text">55 boxes of Tomatoes</span><br/>
-                <span class="subtitle">25 AUG 2011, 10:45PM</span>
+                <span class="heading">{{transaction.farmer.actor.name}}</span><br/>
+                <span class="text">{{transaction}} at ZMK {{transaction.price|floatformat:2}} each, ZMK {{transaction.total|floatformat:2}} total</span><br/>
+                <span class="subtitle">{{transaction.created_at|date:"j b Y, g:iA"|upper}}</span>
             </div>
+            {% empty %}
             <div class="item">
-                <span class="heading">Recipient Group</span><br/>
-                <span class="text">55 boxes of Tomatoes</span><br/>
-                <span class="subtitle">25 AUG 2011, 10:45PM</span>
+                <span class="text">No sales recorded yet</span><br/>
             </div>
-            <div class="item">
-                <span class="heading">Recipient Group</span><br/>
-                <span class="text">55 boxes of Tomatoes</span><br/>
-                <span class="subtitle">25 AUG 2011, 10:45PM</span>
-            </div>
-            <div class="item">
-                <span class="heading">Recipient Group</span><br/>
-                <span class="text">55 boxes of Tomatoes</span><br/>
-                <span class="subtitle">25 AUG 2011, 10:45PM</span>
-            </div>
-            <div class="pagination"><a href="{% url fncs:todo %}">&laquo; Prev</a> | <a href="{% url fncs:todo %}">Next &raquo;</a></div>
+            {% endfor %}
+            {% include "includes/pagination.html" %}
         </div>
 
         {% include "includes/search.html" %}
