@@ -11,7 +11,7 @@ class Crop(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return self.name
 
 class CropUnit(models.Model):
@@ -23,7 +23,7 @@ class CropUnit(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return self.name
 
 class Transaction(models.Model):
@@ -56,7 +56,7 @@ class Transaction(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s %s of %s" % (floatformat(self.amount), self.unit, self.crop)
 
 class Offer(models.Model):
@@ -77,7 +77,7 @@ class Offer(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
 
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s of %s at %s (Offer)" % (self.unit, self.crop, self.price)
 
 class Message(models.Model):
@@ -93,7 +93,7 @@ class Message(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"Message from %s to %s at %s" % (self.sender, self.recipient,
             self.created_at)
 
@@ -108,7 +108,7 @@ class GroupMessage(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return 'GroupMessage from %s to %s groups at %s' % (self.sender, 
             self.farmergroups.count(), self.created_at)
 
@@ -125,6 +125,6 @@ class Note(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"Note from %s to %s at %s" % (self.owner, self.about_actor,
             self.created_at)

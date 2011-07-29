@@ -166,3 +166,29 @@ class FarmerTestCase(TestCase):
         farmer = Farmer.create('27761234567', 'first', 'last', farmergroup)
         self.assertEquals(farmer.actor.name, 'first last')
         self.assertEquals(farmer.actor.user.username, '27761234567')
+    
+    def test_farmer_market_setting(self):
+        farmer = utils.create_farmer()
+        market1 = utils.create_market("market 1", farmer.farmergroup.district)
+        market2 = utils.create_market("market 2", farmer.farmergroup.district)
+        market3 = utils.create_market("market 3", farmer.farmergroup.district)
+        # prime the farmer with 1 market
+        farmer.markets.add(market1)
+        # test the destructive set
+        farmer.sells_at_markets_exclusively([market2,market3])
+        self.assertNotIn(market1, farmer.markets.all())
+        self.assertIn(market2, farmer.markets.all())
+        self.assertIn(market3, farmer.markets.all())
+    
+    def test_farmer_crop_setting(self):
+        farmer = utils.create_farmer()
+        crop1 = utils.random_crop()
+        crop2 = utils.random_crop()
+        crop3 = utils.random_crop()
+        farmer.grows_crop(crop1)
+        self.assertIn(crop1, farmer.crops.all())
+        farmer.grows_crops_exclusively([crop2, crop3])
+        self.assertNotIn(crop1, farmer.crops.all())
+        self.assertIn(crop2, farmer.crops.all())
+        self.assertIn(crop3, farmer.crops.all())
+        

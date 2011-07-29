@@ -40,7 +40,7 @@ class Actor(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s (Actor)" % self.name
     
 
@@ -103,7 +103,7 @@ class Farmer(models.Model):
         
         return farmer
 
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return self.actor.name
 
 
@@ -123,7 +123,7 @@ class FarmerGroup(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return self.name
 
 
@@ -135,7 +135,7 @@ class ExtensionOfficer(models.Model):
     class Meta:
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s (ExtensionOfficer)" % (self.actor,)
 
 class MarketMonitor(models.Model):
@@ -159,7 +159,7 @@ class MarketMonitor(models.Model):
     class Meta:
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s at %s (MarketMonitor)" % (self.actor, self.market)
 
 class Agent(models.Model):
@@ -209,6 +209,6 @@ class Agent(models.Model):
     def notes_for(self, farmer):
         return self.actor.note_set.filter(about_actor=farmer.actor)
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return self.actor.name
 

@@ -9,7 +9,7 @@ class Province(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s (Province)" % (self.name,)
 
 
@@ -24,7 +24,7 @@ class RPIArea(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s (RPIArea)" % (self.name,)
 
 
@@ -39,7 +39,7 @@ class Zone(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s (Zone)" % (self.name,)
 
 
@@ -53,7 +53,7 @@ class District(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return self.name
 
 class Ward(models.Model):
@@ -66,7 +66,7 @@ class Ward(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s (Ward)" % (self.name,)
     
 
@@ -80,7 +80,7 @@ class Village(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
     
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return u"%s (Village)"  % (self.name,)
 
 class Market(models.Model):
@@ -93,5 +93,5 @@ class Market(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self):
+    def __unicode__(self): # pragma: no cover
         return self.name
