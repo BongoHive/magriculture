@@ -12,6 +12,8 @@ admin.site.register(props.Crop)
 admin.site.register(props.CropUnit)
 admin.site.register(props.Transaction)
 admin.site.register(props.Offer)
+admin.site.register(props.Message)
+admin.site.register(props.GroupMessage)
 
 admin.site.register(geo.Province)
 admin.site.register(geo.RPIArea)
