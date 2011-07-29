@@ -187,6 +187,9 @@ class Agent(models.Model):
         farmer.crops.add(crop)
         return transaction
     
+    def sales_for(self, farmer):
+        return self.transaction_set.filter(farmer=farmer)
+    
     def send_message_to_farmer(self, farmer, message, group=None):
         return self.actor.send_message(farmer.actor, message, group)
     

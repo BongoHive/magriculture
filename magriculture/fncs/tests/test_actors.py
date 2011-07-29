@@ -51,6 +51,7 @@ class AgentTestCase(TestCase):
             delta=timedelta(seconds=2))
         self.assertIn(transaction, farmer.transactions())
         self.assertTrue(farmer.is_growing_crop(crop))
+        self.assertIn(transaction, agent.sales_for(farmer))
     
     def test_actor_as_agent(self):
         agent = utils.create_agent()
@@ -82,6 +83,7 @@ class AgentTestCase(TestCase):
         self.assertIn(note, Note.objects.all())
         self.assertIn(note, farmer.actor.attachednote_set.all())
         self.assertIn(note, agent.notes_for(farmer))
+    
 
 
 class MarketMonitorTestCase(TestCase):

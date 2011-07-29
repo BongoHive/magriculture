@@ -72,7 +72,8 @@ def farmer(request, farmer_pk):
 @login_required
 def farmer_sales(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
-    paginator = Paginator(farmer.transactions(), 5)
+    agent = request.user.get_profile().as_agent()
+    paginator = Paginator(agent.sales_for(farmer), 5)
     page = paginator.page(request.GET.get('p', 1))
     return render_to_response('farmers/sales.html', {
         'farmer': farmer,
