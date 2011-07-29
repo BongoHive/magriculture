@@ -1,0 +1,5 @@
+{% if messages %}
+    <div class="success">
+        {{messages|safeseq|join:"<br/>"}}
+    </div>
+{% endif %}

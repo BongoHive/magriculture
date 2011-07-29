@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="content">
+
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Todo</div>
+        
+        <div class="list">
+            <div class="item">
+                Hi! You've reached a part of the site that is still under development.
+            </div>
+        </div>
+        
+        {% include "includes/search.html" %}
+
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+        
+    </div>
+{% endblock %}

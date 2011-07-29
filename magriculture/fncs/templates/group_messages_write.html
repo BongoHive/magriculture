@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; New Message</div>
+    
+    <div class="h2">Compose Message</div>
+    
+    <form class="standard" action="" method="post">
+        {{form}}
+        <p>Recipients: {{farmergroups|join:", "}}</p>
+    
+        <input type="submit" name="submit" class="submit" value="Send Message &raquo;" />
+        <input type="submit" name="cancel" class="submit" value="cancel" />
+        {% csrf_token %}
+    </form>        
+    
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->
+{% endblock %}

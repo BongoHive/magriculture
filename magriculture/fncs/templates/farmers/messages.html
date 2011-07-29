@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; {{farmer.actor.name}}</div>
+    
+    <div class="meta">
+        {% include "includes/farmer_header.html" %}
+    </div> <!-- /.meta -->
+    
+    {% include "includes/farmer_menu.html" %}
+
+    <div class="tabs">
+        <a href="{% url fncs:farmer_sales farmer_pk=farmer.pk %}">Sales</a> | 
+        Messages | 
+        <a href="{% url fncs:farmer_notes farmer_pk=farmer.pk %}">Notes</a>
+    </div>
+
+    <div class="list">
+        {% for message in page.object_list %}
+        <div class="item">
+            <span class="text">{{message.content}}</span><br/>
+            <span class="subtitle">{{message.created_at|date:"j b Y, g:iA"|upper}}</span>
+        </div>
+        {% empty %}
+        <div class="item">
+            <span class="text">You haven't sent any messages to {{farmer.actor.name}} yet</span><br/>
+        </div>
+        {% endfor %}
+        {% include "includes/pagination.html" %}
+    </div>
+    
+    {% include "includes/search.html" %}
+
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->
+{% endblock %}

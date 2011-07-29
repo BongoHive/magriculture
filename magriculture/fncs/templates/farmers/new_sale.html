@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="content">
+
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; New Sale</div>
+        
+        <div class="h2">New Sale</div>
+        
+        <form class="standard" action="{% url fncs:farmer_new_sale_detail farmer_pk=farmer.pk %}">
+            {{form}}
+            <input type="submit" class="submit" value="Continue &raquo;" />
+        </form>
+        
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+{% endblock %}

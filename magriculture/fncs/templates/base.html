@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+    <head>
+        <title>{{title|default:"Farmers Network"}}</title>
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/styles.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+<body>
+    <div class="header">
+        <a href="{% url fncs:home %}"><img src="{{ STATIC_URL }}images/logo.gif" alt="Farmers Network" width="120" height="47" /></a>
+    </div>
+    {% block content %}
+    {% endblock %}
+    <div class="footer">&copy; {% now "Y" %} {{title|default:"Farmers Network"}} <a href="{% url fncs:todo %}terms/">Terms</a> | <a href="{% url fncs:todo %}privacy/">Privacy</a></div>
+</body>
+</html>

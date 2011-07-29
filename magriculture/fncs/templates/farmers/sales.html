@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; {{farmer.actor.name}}</div>
+    <div class="meta">
+        {% include "includes/farmer_header.html" %}
+    </div> <!-- /.meta -->
+    
+    {% include "includes/farmer_menu.html" %}
+
+    <div class="tabs">
+        Sales | 
+        <a href="{% url fncs:farmer_messages farmer_pk=farmer.pk %}">Messages</a> | 
+        <a href="{% url fncs:farmer_notes farmer_pk=farmer.pk %}">Notes</a>
+    </div>
+
+    <div class="list">
+        {% for transaction in page.object_list %}
+        <div class="item">
+            <span class="text"><a href="{% url fncs:farmer_sale farmer_pk=farmer.pk,sale_pk=transaction.pk %}">{{transaction}}</a></span><br/>
+            <span class="subtitle">{{transaction.created_at|date:"j b Y, g:iA"|upper}}</span>
+        </div class="item">
+        {% endfor %}
+        {% include "includes/pagination.html" %}
+    </div class="item">
+    
+    {% include "includes/search.html" %}
+
+	<div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->
+{% endblock %}

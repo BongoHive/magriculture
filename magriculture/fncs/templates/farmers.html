@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Farmers</div>
+    <div class="menu">
+        <div class="item"><a href="{% url fncs:farmer_new %}"><img src="{{ STATIC_URL }}images/icon-profile.gif" alt="Farmers" width="16" height="16" />+ Add new Farmer &raquo;</a></div>
+    </div>
+    
+    <div class="content">
+        <div class="list">
+            {% for farmer in page.object_list %}
+                <div class="item">
+                    <a href="{% url fncs:farmer farmer_pk=farmer.pk %}">{{farmer.actor.name}}</a> 
+                    <span class="area">{{farmer.districts.all|join:", "}}</span><br />
+                    <span class="subtitle">{{farmer.crops.all|join:", "}}</span>
+                </div>
+            {% endfor %}
+            {% if page.has_other_pages %}
+                <div class="pagination">
+                    {% if page.has_previous %}
+                        <a href="?p={{page.previous_page_number}}&amp;qu={{q}}">&laquo; Prev</a>
+                    {% endif %}
+                    
+                    {% if page.has_previous and page.has_next %}
+                        |
+                    {% endif %}
+                    
+                    {% if page.has_next %}
+                        <a href="?p={{page.next_page_number}}&amp;q={{q}}">Next &raquo;</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        
+        {% include "includes/search.html" %}
+    
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+{% endblock %}

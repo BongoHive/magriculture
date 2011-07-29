@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Messages</div>
+    
+    <div class="menu">
+        <div class="item"><a href="{% url fncs:group_message_new %}"><img src="{{ STATIC_URL }}images/icon-message.gif" alt="icon-message" width="16" height="16" />Send a new message &raquo;</a></div>
+    </div>
+
+    <div class="list">
+        {% include "includes/messages.html" %}
+        {% for groupmessage in page.object_list %}
+            <div class="item">
+                <span class="heading">{{groupmessage.farmergroups.all|join:", "}}</span><br/>
+                <span class="text">{{groupmessage.content}}</span><br/>
+                <span class="subtitle">{{groupmessage.created_at|date:"j b Y, g:iA"|upper}}</span>
+            </div>
+        {% empty %}
+            <div class="item">
+                <span class="text">You haven't sent any messages yet</span><br/>
+            </div>
+        {% endfor %}
+        {% include "includes/pagination.html" %}
+    </div>
+    
+    {% include "includes/search.html" %}
+
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->
+{% endblock %}
