@@ -5,14 +5,15 @@
 
         <div class="breadcrumb">
             <a href="{% url fncs:home %}">Home</a> &gt;
-            <a href="{% url fncs:markets %}">Markets</a> &gt;
+            <a href="{% url fncs:market_prices %}">Market Prices</a> &gt; 
+            <a href="{% url fncs:market_offers %}">Opening Prices</a> &gt; 
             {{market}}
         </div>
 
         <div class="list">
             {% for crop in page.object_list %}
             <div class="item">
-                <span class="heading"><a href="{% url fncs:crop market_pk=market.pk,crop_pk=crop.pk %}">{{crop}}</a></span><br/>
+                <span class="heading"><a href="{% url fncs:offer market_pk=market.pk,crop_pk=crop.pk %}">{{crop}}</a></span><br/>
                 <span class="text">{{crop.units.all|safeseq|join:", "}}</span><br/>
             </div>
             {% empty %}

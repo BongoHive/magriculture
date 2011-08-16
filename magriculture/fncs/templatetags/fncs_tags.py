@@ -39,6 +39,11 @@ def deviation(value, average):
 def average_crop_price(market, crop, unit):
     prices = list(Transaction.price_history_for(market, crop, unit)[:10])
     return floatformat(mean(prices), 2)
+    
+@register.simple_tag
+def average_opening_price(market, crop, unit):
+    prices = list(Transaction.price_history_for(market, crop, unit)[:10])
+    return floatformat(mean(prices), 2)
 
 @register.simple_tag
 def price_sparkline(market, crop, unit):
@@ -47,6 +52,15 @@ def price_sparkline(market, crop, unit):
     average = mean(prices)
     values = [deviation(price, average) for price in prices]
     return sparkline(values, "%s ZMK" % int(last_price))
+
+@register.simple_tag
+def opening_price_sparkline(market, crop, unit):
+    prices = list(Transaction.price_history_for(market, crop, unit)[:10])
+    last_price = prices[-1]
+    average = mean(prices)
+    values = [deviation(price, average) for price in prices]
+    return sparkline(values, "%s ZMK" % int(last_price))
+
 
 @register.filter
 def sparkline(values, label='', position=50):

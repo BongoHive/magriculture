@@ -7,18 +7,17 @@
         <div class="breadcrumb">
             <a href="{% url fncs:home %}">Home</a> &gt;
             <a href="{% url fncs:market_prices %}">Market Prices</a> &gt; 
-            <a href="{% url fncs:market_sales %}">Crop Sales</a> &gt; 
-            <a href="{% url fncs:market_sale market_pk=market.pk %}">{{market}}</a> &gt; 
-            <a href="{% url fncs:crop market_pk=market.pk,crop_pk=crop.pk %}">{{crop}}</a> &gt; 
-            {{unit|title}}
+            <a href="{% url fncs:market_offers %}">Opening Prices</a> &gt; 
+            <a href="{% url fncs:market_offer market_pk=market.pk %}">{{market}}</a> &gt; 
+            {{crop}}
         </div>
 
         <div class="list">
-            {% for transaction in page.object_list %}
+            {% for unit in page.object_list %}
             <div class="item">
-                <span class="heading">{{transaction.farmer.actor.name}}</span><br/>
-                <span class="text">{{transaction}} at ZMK {{transaction.price|floatformat:2}} each, ZMK {{transaction.total|floatformat:2}} total</span><br/>
-                <span class="subtitle">{{transaction.created_at|date:"j b Y, g:iA"|upper}}</span>
+                <span class="heading"><a href="{% url fncs:offer_unit unit_pk=unit.pk,crop_pk=crop.pk,market_pk=market.pk %}">{{crop}} in {{unit}}</a></span><br/>
+                <span class="subtitle">Average Opening price {% average_opening_price market crop unit %} ZMK.</span><br/>
+                <img src="{% opening_price_sparkline market crop unit %}"><br/>
             </div>
             {% empty %}
             <div class="item">

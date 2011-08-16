@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Market Prices</div>
+    
+    <div class="menu">
+        <div class="item"><a href="{% url fncs:market_sales %}"><img src="{{ STATIC_URL }}images/icon-crop-history.gif" alt="Crop sales" width="16" height="16" />Crop sales &raquo;</a></div>
+        <div class="item"><a href="{% url fncs:market_offers %}"><img src="{{ STATIC_URL }}images/icon-agent-history.gif" alt="Opening prices" width="16" height="16" />Opening prices &raquo;</a></div>
+    </div>
+</div> <!-- /.content -->
+<div class="content">
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->
+{% endblock %}

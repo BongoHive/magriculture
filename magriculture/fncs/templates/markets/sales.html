@@ -3,12 +3,16 @@
 {% block content %}
     <div class="content">
 
-        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Markets</div>
+        <div class="breadcrumb">
+            <a href="{% url fncs:home %}">Home</a> &gt; 
+            <a href="{% url fncs:market_prices %}">Market Prices</a> &gt; 
+            Crop Sales
+        </div>
 
         <div class="list">
             {% for market in page.object_list %}
             <div class="item">
-                <span class="heading"><a href="{% url fncs:market market_pk=market.pk %}">{{market}}</a></span><br/>
+                <span class="heading"><a href="{% url fncs:market_sale market_pk=market.pk %}">{{market}}</a></span><br/>
                 <span class="text">{{market.district}}</span><br/>
                 <span class="subtitle">Last transaction at {{market.transaction_set.latest.created_at|date:"j b Y, g:iA"|upper}}</span>
             </div>

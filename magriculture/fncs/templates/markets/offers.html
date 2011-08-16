@@ -1,23 +1,20 @@
 {% extends "base.html" %}
-{% load fncs_tags %}
 
 {% block content %}
     <div class="content">
 
         <div class="breadcrumb">
-            <a href="{% url fncs:home %}">Home</a> &gt;
+            <a href="{% url fncs:home %}">Home</a> &gt; 
             <a href="{% url fncs:market_prices %}">Market Prices</a> &gt; 
-            <a href="{% url fncs:market_sales %}">Crop Sales</a> &gt; 
-            <a href="{% url fncs:market_sale market_pk=market.pk %}">{{market}}</a> &gt; 
-            {{crop}}
+            Opening Prices
         </div>
 
         <div class="list">
-            {% for unit in page.object_list %}
+            {% for market in page.object_list %}
             <div class="item">
-                <span class="heading"><a href="{% url fncs:crop_unit unit_pk=unit.pk,crop_pk=crop.pk,market_pk=market.pk %}">{{crop}} sold in {{unit}}</a></span><br/>
-                <span class="subtitle">Average price {% average_crop_price market crop unit %} ZMK.</span><br/>
-                <img src="{% price_sparkline market crop unit %}"><br/>
+                <span class="heading"><a href="{% url fncs:market_offer market_pk=market.pk %}">{{market}}</a></span><br/>
+                <span class="text">{{market.district}}</span><br/>
+                <span class="subtitle">Last transaction at {{market.transaction_set.latest.created_at|date:"j b Y, g:iA"|upper}}</span>
             </div>
             {% empty %}
             <div class="item">

@@ -369,21 +369,25 @@ def farmer_edit(request, farmer_pk):
     }, context_instance=RequestContext(request))
 
 @login_required
-def markets(request):
+def market_prices(request):
+    return render_to_response('markets/prices.html', {
+    }, context_instance=RequestContext(request))
+
+@login_required
+def market_sales(request):
     paginator = Paginator(Market.objects.all(), 5)
     page = paginator.page(request.GET.get('p', 1))
-    return render_to_response('markets/list.html', {
+    return render_to_response('markets/sales.html', {
         'paginator': paginator,
         'page': page,
     }, context_instance=RequestContext(request))
 
-
 @login_required
-def market(request, market_pk):
+def market_sale(request, market_pk):
     market = get_object_or_404(Market, pk=market_pk)
     paginator = Paginator(market.crops(), 5)
     page = paginator.page(request.GET.get('p',1))
-    return render_to_response('markets/show.html', {
+    return render_to_response('markets/sale.html', {
         'market': market,
         'paginator': paginator,
         'page': page
@@ -411,7 +415,7 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
                                                 market=market)
     paginator = Paginator(transactions, 5)
     page = paginator.page(request.GET.get('p', 1))
-    
+
     return render_to_response('crops/unit.html', {
         'crop': crop,
         'unit': unit,
@@ -419,6 +423,58 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
         'paginator': paginator,
         'page': page
     }, context_instance=RequestContext(request))
+
+@login_required
+def market_offers(request):
+    paginator = Paginator(Market.objects.all(), 5)
+    page = paginator.page(request.GET.get('p', 1))
+    return render_to_response('markets/offers.html', {
+        'paginator': paginator,
+        'page': page
+    }, context_instance=RequestContext(request))
+
+@login_required
+def market_offer(request, market_pk):
+    market = get_object_or_404(Market, pk=market_pk)
+    paginator = Paginator(market.crops(), 5)
+    page = paginator.page(request.GET.get('p', 1))
+    return render_to_response('markets/offer.html', {
+        'market': market,
+        'paginator': paginator,
+        'page': page
+    }, context_instance=RequestContext(request))
+
+@login_required
+def offer(request, market_pk, crop_pk):
+    market = get_object_or_404(Market, pk=market_pk)
+    crop = get_object_or_404(Crop, pk=crop_pk)
+    paginator = Paginator(crop.units.all(), 5)
+    page = paginator.page(request.GET.get('p', 1))
+    return render_to_response('offers/show.html', {
+        'crop': crop,
+        'market': market,
+        'paginator': paginator,
+        'page': page
+    }, context_instance=RequestContext(request))
+    
+@login_required
+def offer_unit(request, market_pk, crop_pk, unit_pk):
+    market = get_object_or_404(Market, pk=market_pk)
+    crop = get_object_or_404(Crop, pk=crop_pk)
+    unit = get_object_or_404(CropUnit, pk=unit_pk)
+    transactions = Transaction.objects.filter(unit=unit, crop=crop, 
+                                                market=market)
+    paginator = Paginator(transactions, 5)
+    page = paginator.page(request.GET.get('p', 1))
+
+    return render_to_response('offers/unit.html', {
+        'crop': crop,
+        'unit': unit,
+        'market': market,
+        'paginator': paginator,
+        'page': page
+    }, context_instance=RequestContext(request))
+
 
 def todo(request):
     """Anything that resolves to here still needs to be completed"""

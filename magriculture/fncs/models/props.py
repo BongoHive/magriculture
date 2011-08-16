@@ -75,10 +75,10 @@ class Offer(models.Model):
     
     crop = models.ForeignKey('fncs.Crop')
     unit = models.ForeignKey('fncs.CropUnit')
-    agent = models.ForeignKey('fncs.Agent')
     market = models.ForeignKey('fncs.Market')
     marketmonitor = models.ForeignKey('fncs.MarketMonitor')
-    price = models.FloatField()
+    price_floor = models.FloatField()
+    price_ceiling = models.FloatField()
     created_at = models.DateTimeField(blank=False, auto_now_add=True)
     
     class Meta:
