@@ -14,7 +14,7 @@
         <div class="list">
             {% for unit in page.object_list %}
             <div class="item">
-                <span class="heading"><a href="{% url fncs:crop_unit unit_pk=unit.pk,crop_pk=crop.pk,market_pk=market.pk %}">{{unit|title}} of {{crop}}</a></span><br/>
+                <span class="heading"><a href="{% url fncs:crop_unit unit_pk=unit.pk,crop_pk=crop.pk,market_pk=market.pk %}">{{crop}} sold in {{unit}}</a></span><br/>
                 <span class="subtitle">Average price {% average_crop_price market crop unit %} ZMK.</span><br/>
                 <img src="{% price_sparkline market crop unit %}"><br/>
             </div>
