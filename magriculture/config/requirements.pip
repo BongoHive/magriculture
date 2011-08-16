@@ -5,4 +5,5 @@ South==0.7.3
 gunicorn
 pyflakes
 pep8
+coverage
 psycopg2
