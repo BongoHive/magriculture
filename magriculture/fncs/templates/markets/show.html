@@ -3,7 +3,11 @@
 {% block content %}
     <div class="content">
 
-        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Crops in {{market}}</div>
+        <div class="breadcrumb">
+            <a href="{% url fncs:home %}">Home</a> &gt;
+            <a href="{% url fncs:markets %}">Markets</a> &gt;
+            {{market}}
+        </div>
 
         <div class="list">
             {% for crop in page.object_list %}
