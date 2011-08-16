@@ -64,6 +64,10 @@ class Offer(models.Model):
     are being exchanged. It is setting the opening prices of goods
     at the start of the day
     """
+    
+    # - market 
+    # - price is range
+    
     crop = models.ForeignKey('fncs.Crop')
     unit = models.ForeignKey('fncs.CropUnit')
     agent = models.ForeignKey('fncs.Agent')

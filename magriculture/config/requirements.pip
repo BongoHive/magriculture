@@ -3,3 +3,5 @@ django-nose
 supervisor
 South==0.7.3
 gunicorn
+pyflakes
+pep8
