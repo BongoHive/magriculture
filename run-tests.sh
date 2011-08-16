@@ -6,7 +6,7 @@ source ve/bin/activate && \
     cd magriculture && \
     ./manage.py test fncs --with-coverage --cover-erase --cover-package=magriculture --cover-html --with-xunit && \
     coverage xml --omit="ve/*" && \
-    cd ../
+    cd ../ && \
     (pyflakes magriculture/ > pyflakes.log || true) && \
     (pep8 magriculture/ > pep8.log || true ) && \
 deactivate
