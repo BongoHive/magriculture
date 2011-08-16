@@ -4,14 +4,16 @@ from magriculture.fncs.models.props import Transaction
 
 register = template.Library()
 
-SPARKLINE_COLOR = '98B785'
-SPARKLINE_FILL_COLOR = '98B785'
-SPARKLINE_LABEL_COLOR = '2E5333'
+BLACK = '000000'
+SPARKLINE_COLOR = BLACK
+SPARKLINE_FILL_COLOR = BLACK
+SPARKLINE_LABEL_COLOR = BLACK
 SPARKLINE_BACKGROUND = 'F7F8F4'
+SPARKLINE_DIMENSIONS = (100,20)
 SPARKLINE_TEMPLATE = ''.join([
     'http://chart.apis.google.com/chart?',
     'cht=lc',
-    '&chs=100x20',           # dimensions
+    '&chs=%sx%s' % SPARKLINE_DIMENSIONS,
     '&chd=t:%(values)s',    # csv delimited values
     '&chco=%s' % SPARKLINE_COLOR,
     '&chls=1,1,0',          # line style
