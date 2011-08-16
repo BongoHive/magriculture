@@ -5,7 +5,7 @@ source ve/bin/activate && \
     find ./magriculture -name '*.pyc' -delete && \
     cd magriculture && \
     ./manage.py test fncs --with-coverage --cover-erase --cover-package=magriculture --cover-html --with-xunit && \
-    coverage xml --omit="ve/*" && \
+    coverage xml --include="fncs/*" && \
     cd ../ && \
     (pyflakes magriculture/ > pyflakes.log || true) && \
     (pep8 magriculture/ > pep8.log || true ) && \
