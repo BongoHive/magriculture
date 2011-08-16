@@ -46,6 +46,11 @@ class Transaction(models.Model):
     total = models.FloatField()
     created_at = models.DateTimeField(blank=False)
     
+    @classmethod
+    def price_history_for(cls, market, crop, unit, limit=None):
+        return cls.objects.filter(market=market, crop=crop, unit=unit).\
+                values_list('price', flat=True)
+    
     def save(self, *args, **kwargs):
         if not self.total:
             self.total = self.amount * self.price

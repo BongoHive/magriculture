@@ -26,6 +26,10 @@ urlpatterns = patterns('',
     url(r'^sales/crops/$', views.sales_crops, name='sales_crops'),
     url(r'^sales/agents/$', views.sales_agents, name='sales_agents'),
     url(r'^sales/agents/breakdown/$', views.sales_agent_breakdown, name='sales_agent_breakdown'),
+    url(r'^markets/$', views.markets, name='markets'),
+    url(r'^markets/(?P<market_pk>\d+)/$', views.market, name='market'),
+    url(r'^markets/(?P<market_pk>\d+)/crops/(?P<crop_pk>\d+)/$', views.crop, name='crop'),
+    url(r'^markets/(?P<market_pk>\d+)/crops/(?P<crop_pk>\d+)/unit/(?P<unit_pk>\d+)/$', views.crop_unit, name='crop_unit'),
     url(r'^todo/.*', views.todo, name='todo'),
 )
 

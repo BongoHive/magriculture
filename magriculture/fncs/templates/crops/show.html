@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load fncs_tags %}
+
+{% block content %}
+    <div class="content">
+
+        <div class="breadcrumb">
+            <a href="{% url fncs:home %}">Home</a> &gt; 
+            <a href="{% url fncs:market market_pk=market.pk %}">{{market}}</a>
+             &gt; {{crop}}
+        </div>
+
+        <div class="list">
+            {% for unit in page.object_list %}
+            <div class="item">
+                <span class="heading"><a href="{% url fncs:crop_unit unit_pk=unit.pk,crop_pk=crop.pk,market_pk=market.pk %}">{{unit|title}} of {{crop}}</a></span><br/>
+                <span class="text"><img src="{% price_sparkline market crop unit %}"></span><br/>
+                <span class="subtitle">Average price {% average_crop_price market crop unit %} ZMK.</span>
+            </div>
+            {% empty %}
+            <div class="item">
+                <span class="text">No sales recorded yet</span><br/>
+            </div>
+            {% endfor %}
+            {% include "includes/pagination.html" %}
+        </div>
+
+        {% include "includes/search.html" %}
+
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+    
+{% endblock %}

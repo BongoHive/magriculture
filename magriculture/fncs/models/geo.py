@@ -1,4 +1,5 @@
 from django.db import models
+from magriculture.fncs.models.props import Crop
 
 class Province(models.Model):
     """A province, the normal geographic kind"""
@@ -87,7 +88,12 @@ class Market(models.Model):
     """A market is a location of trade in a certain district"""
     name = models.CharField(blank=False, max_length=255)
     district = models.ForeignKey('fncs.District')
-
+    
+    def crops(self):
+        transactions = self.transaction_set.all()
+        crop_ids = [tx.crop_id for tx in transactions]
+        return Crop.objects.filter(pk__in=crop_ids)
+    
     class Meta:
         ordering = ['name']
         get_latest_by = 'pk'

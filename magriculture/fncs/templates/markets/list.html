@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="content">
+
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Markets</div>
+
+        <div class="list">
+            {% for market in page.object_list %}
+            <div class="item">
+                <span class="heading"><a href="{% url fncs:market market_pk=market.pk %}">{{market}}</a></span><br/>
+                <span class="text">{{market.district}}</span><br/>
+                <span class="subtitle">Last transaction at {{market.transaction_set.latest.created_at|date:"j b Y, g:iA"|upper}}</span>
+            </div>
+            {% empty %}
+            <div class="item">
+                <span class="text">No sales recorded yet</span><br/>
+            </div>
+            {% endfor %}
+            {% include "includes/pagination.html" %}
+        </div>
+
+        {% include "includes/search.html" %}
+
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+    
+{% endblock %}

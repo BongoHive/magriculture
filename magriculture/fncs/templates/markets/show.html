@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="content">
+
+        <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Crops in {{market}}</div>
+
+        <div class="list">
+            {% for crop in page.object_list %}
+            <div class="item">
+                <span class="heading"><a href="{% url fncs:crop market_pk=market.pk,crop_pk=crop.pk %}">{{crop}}</a></span><br/>
+                <span class="text">{{crop.units.all|safeseq|join:", "}}</span><br/>
+            </div>
+            {% empty %}
+            <div class="item">
+                <span class="text">No sales recorded yet</span><br/>
+            </div>
+            {% endfor %}
+            {% include "includes/pagination.html" %}
+        </div>
+
+        {% include "includes/search.html" %}
+
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+    
+{% endblock %}
