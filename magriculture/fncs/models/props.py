@@ -47,7 +47,7 @@ class Transaction(models.Model):
     created_at = models.DateTimeField(blank=False)
     
     @classmethod
-    def price_history_for(cls, market, crop, unit, limit=None):
+    def price_history_for(cls, market, crop, unit):
         return cls.objects.filter(market=market, crop=crop, unit=unit).\
                 values_list('price', flat=True)
     
@@ -70,9 +70,6 @@ class Offer(models.Model):
     at the start of the day
     """
     
-    # - market 
-    # - price is range
-    
     crop = models.ForeignKey('fncs.Crop')
     unit = models.ForeignKey('fncs.CropUnit')
     market = models.ForeignKey('fncs.Market')
@@ -81,13 +78,24 @@ class Offer(models.Model):
     price_ceiling = models.FloatField()
     created_at = models.DateTimeField(blank=False, auto_now_add=True)
     
+    @classmethod
+    def price_history_for(cls, market, crop, unit):
+        return cls.objects.filter(market=market, crop=crop, unit=unit). \
+                values_list('price_floor', 'price_ceiling')
+    
+    @classmethod
+    def average_price_history_for(cls, market, crop, unit):
+        return [sum(price_range) / 2.0 for price_range in 
+                    cls.price_history_for(market, crop, unit)]
+    
     class Meta:
         ordering = ['-created_at']
         get_latest_by = 'created_at'
         app_label = 'fncs'
 
     def __unicode__(self): # pragma: no cover
-        return u"%s of %s at %s (Offer)" % (self.unit, self.crop, self.price)
+        return u"%s of %s between %s and %s (Offer)" % (self.unit, self.crop,
+            self.price_floor, self.price_ceiling)
 
 class Message(models.Model):
     """A message sent or received via FNCS"""

@@ -145,13 +145,13 @@ class MarketMonitor(models.Model):
     markets = models.ManyToManyField('fncs.Market')
     rpiareas = models.ManyToManyField('fncs.RPIArea')
     
-    def register_offer(self, market, agent, crop, unit, price):
-        offer = self.offer_set.create(crop=crop, unit=unit, agent=agent, 
-                                        price=price, market=market)
+    def register_offer(self, market, crop, unit, price_floor, price_ceiling):
+        offer = self.offer_set.create(crop=crop, unit=unit, 
+                    price_floor=price_floor, price_ceiling=price_ceiling, 
+                    market=market)
         self.markets.add(market)
         self.rpiareas.add(market.district.rpiarea)
         return offer
-        
     
     def is_monitoring(self, market):
         return self.markets.filter(pk=market.pk).exists()
@@ -160,7 +160,7 @@ class MarketMonitor(models.Model):
         app_label = 'fncs'
     
     def __unicode__(self): # pragma: no cover
-        return u"%s at %s (MarketMonitor)" % (self.actor, self.market)
+        return u"%s (MarketMonitor)" % (self.actor,)
 
 class Agent(models.Model):
     """An agent is an actor that is linked to a market and does a financial

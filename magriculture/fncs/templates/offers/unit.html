@@ -14,11 +14,11 @@
         </div>
 
         <div class="list">
-            {% for transaction in page.object_list %}
+            {% for offer in page.object_list %}
             <div class="item">
-                <span class="heading">{{transaction}}</span><br/>
-                <span class="text">ZMK {{transaction.price|floatformat:2}} each, ZMK {{transaction.total|floatformat:2}} total</span><br/>
-                <span class="subtitle">{{transaction.created_at|date:"j b Y, g:iA"|upper}}</span>
+                <span class="heading">{{offer.unit|title}} of {{offer.crop|title}}</span><br/>
+                <span class="text">Between {{offer.price_floor|floatformat:2}} and {{offer.price_ceiling|floatformat:2}} ZMK</span><br/>
+                <span class="subtitle">{{offer.created_at|date:"j b Y, g:iA"|upper}}</span>
             </div>
             {% empty %}
             <div class="item">

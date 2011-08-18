@@ -93,20 +93,20 @@ class MarketMonitorTestCase(TestCase):
         rpiarea = utils.create_rpiarea("rpiarea")
         district = utils.create_district("district", rpiarea)
         market = utils.create_market("market", district)
-        agent = utils.create_agent()
         
         crop = utils.create_crop("potatoes")
         unit = utils.create_crop_unit("boxes")
-        price = 200
+        price_floor = 150
+        price_ceiling = 200
         
-        offer = monitor.register_offer(market, agent, crop, unit, price)
+        offer = monitor.register_offer(market, crop, unit, price_floor, price_ceiling)
         self.assertTrue(monitor.is_monitoring(market))
         self.assertIn(market, monitor.markets.all())
         self.assertIn(market.district.rpiarea, monitor.rpiareas.all())
-        self.assertEquals(offer.price, 200.0)
+        self.assertEquals(offer.price_floor, 150.0)
+        self.assertEquals(offer.price_ceiling, 200.0)
         self.assertEquals(offer.crop, crop)
         self.assertEquals(offer.unit, unit)
-        self.assertEquals(offer.agent, agent)
         self.assertEquals(offer.market, market)
         self.assertAlmostEqual(offer.created_at, datetime.now(),
             delta=timedelta(seconds=2))
@@ -182,9 +182,9 @@ class FarmerTestCase(TestCase):
     
     def test_farmer_crop_setting(self):
         farmer = utils.create_farmer()
-        crop1 = utils.random_crop()
-        crop2 = utils.random_crop()
-        crop3 = utils.random_crop()
+        crop1 = utils.create_crop("apples")
+        crop2 = utils.create_crop("oranges")
+        crop3 = utils.create_crop("potatoes")
         farmer.grows_crop(crop1)
         self.assertIn(crop1, farmer.crops.all())
         farmer.grows_crops_exclusively([crop2, crop3])

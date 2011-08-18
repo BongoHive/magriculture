@@ -10,7 +10,7 @@ import urllib
 
 from magriculture.fncs.models.actors import Farmer, FarmerGroup
 from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
-                                            CropUnit)
+                                            CropUnit, Offer)
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs import forms
 
@@ -426,7 +426,9 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
 
 @login_required
 def market_offers(request):
-    paginator = Paginator(Market.objects.all(), 5)
+    market_ids = [offer.market_id for offer in Offer.objects.all()]
+    markets = Market.objects.filter(pk__in=market_ids)
+    paginator = Paginator(markets, 5)
     page = paginator.page(request.GET.get('p', 1))
     return render_to_response('markets/offers.html', {
         'paginator': paginator,
@@ -436,7 +438,8 @@ def market_offers(request):
 @login_required
 def market_offer(request, market_pk):
     market = get_object_or_404(Market, pk=market_pk)
-    paginator = Paginator(market.crops(), 5)
+    crops = [offer.crop for offer in Offer.objects.filter(market=market)]
+    paginator = Paginator(crops, 5)
     page = paginator.page(request.GET.get('p', 1))
     return render_to_response('markets/offer.html', {
         'market': market,
@@ -448,7 +451,9 @@ def market_offer(request, market_pk):
 def offer(request, market_pk, crop_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
-    paginator = Paginator(crop.units.all(), 5)
+    offers = Offer.objects.filter(market=market,crop=crop)
+    units = list(set([offer.unit for offer in offers]))
+    paginator = Paginator(units, 5)
     page = paginator.page(request.GET.get('p', 1))
     return render_to_response('offers/show.html', {
         'crop': crop,
@@ -462,9 +467,9 @@ def offer_unit(request, market_pk, crop_pk, unit_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
     unit = get_object_or_404(CropUnit, pk=unit_pk)
-    transactions = Transaction.objects.filter(unit=unit, crop=crop, 
+    offers = Offer.objects.filter(unit=unit, crop=crop, 
                                                 market=market)
-    paginator = Paginator(transactions, 5)
+    paginator = Paginator(offers, 5)
     page = paginator.page(request.GET.get('p', 1))
 
     return render_to_response('offers/unit.html', {

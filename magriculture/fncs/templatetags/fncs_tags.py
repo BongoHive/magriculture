@@ -1,6 +1,6 @@
 from django import template
 from django.template.defaultfilters import floatformat
-from magriculture.fncs.models.props import Transaction
+from magriculture.fncs.models.props import Transaction, Offer
 
 register = template.Library()
 
@@ -42,7 +42,7 @@ def average_crop_price(market, crop, unit):
     
 @register.simple_tag
 def average_opening_price(market, crop, unit):
-    prices = list(Transaction.price_history_for(market, crop, unit)[:10])
+    prices = list(Offer.average_price_history_for(market, crop, unit)[:10])
     return floatformat(mean(prices), 2)
 
 @register.simple_tag
@@ -55,7 +55,7 @@ def price_sparkline(market, crop, unit):
 
 @register.simple_tag
 def opening_price_sparkline(market, crop, unit):
-    prices = list(Transaction.price_history_for(market, crop, unit)[:10])
+    prices = list(Offer.average_price_history_for(market, crop, unit)[:10])
     last_price = prices[-1]
     average = mean(prices)
     values = [deviation(price, average) for price in prices]
