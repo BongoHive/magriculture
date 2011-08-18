@@ -8,6 +8,9 @@
     <div class="menu">
         <div class="item"><a href="{% url fncs:market_sales %}"><img src="{{ STATIC_URL }}images/icon-crop-history.gif" alt="Crop sales" width="16" height="16" />Crop sales &raquo;</a></div>
         <div class="item"><a href="{% url fncs:market_offers %}"><img src="{{ STATIC_URL }}images/icon-agent-history.gif" alt="Opening prices" width="16" height="16" />Opening prices &raquo;</a></div>
+        {% if user.get_profile.as_marketmonitor %}
+            <div class="item"><a href="{% url fncs:market_new_offer %}"><img src="{{ STATIC_URL }}images/icon-crop-history.gif" alt="Provide opening price" width="16" height="16" />Provide opening price &raquo;</a></div>
+        {% endif %}
     </div>
 </div> <!-- /.content -->
 <div class="content">

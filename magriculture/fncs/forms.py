@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms.widgets import HiddenInput, Textarea, CheckboxSelectMultiple
 from magriculture.fncs.models.props import (Crop, Transaction, Message, 
-                                            GroupMessage, Note)
+                                            GroupMessage, Note, Offer)
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs.models.actors import Actor, FarmerGroup
 from magriculture.fncs.widgets import SplitSelectDateTimeWidget
@@ -29,6 +29,25 @@ class TransactionForm(forms.ModelForm):
             'unit',
             'price',
             'created_at'
+        ]
+
+class OfferForm(forms.ModelForm):
+    crop = forms.ModelChoiceField(queryset=Crop.objects.all())
+    market = forms.ModelChoiceField(queryset=Market.objects.all(), 
+                                        widget=HiddenInput())
+    # created_at = forms.DateTimeField(label='Date', required=True, 
+    #                 widget=SplitSelectDateTimeWidget(attrs={
+    #                     'class':'date-form'
+    #                 }))
+
+    class Meta:
+        model = Offer
+        fields = [
+            'crop',
+            'unit',
+            'price_floor',
+            'price_ceiling',
+            # 'created_at'
         ]
     
 

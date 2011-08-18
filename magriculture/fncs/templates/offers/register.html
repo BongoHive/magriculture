@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+    
+    <div class="content">
+        <div class="breadcrumb">
+            <a href="{% url fncs:home %}">Home</a> &gt; 
+            <a href="{% url fncs:market_prices %}">Market Prices</a> &gt; 
+            <a href="{% url fncs:market_new_offer %}">Provide opening price</a> &gt;
+            {{market}}
+        </div>
+        
+        <div class="h2">New Opening Price for {{market}}</div>
+        
+        <form class="standard" action="" method="post">
+            {{ form.non_field_errors }}
+            {% if form.errors %}
+                <div class="error">Please see error below.</div>
+            {% endif %}
+            {{form}}
+            <input type="submit" name="submit" class="submit" value="Register Opening Price &raquo;" />
+            <input type="submit" name="cancel" class="submit" value="Cancel" />
+            {% csrf_token %}
+        </form>
+        
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+
+{% endblock %}

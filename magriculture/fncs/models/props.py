@@ -74,8 +74,8 @@ class Offer(models.Model):
     unit = models.ForeignKey('fncs.CropUnit')
     market = models.ForeignKey('fncs.Market')
     marketmonitor = models.ForeignKey('fncs.MarketMonitor')
-    price_floor = models.FloatField()
-    price_ceiling = models.FloatField()
+    price_floor = models.FloatField('Floor price')
+    price_ceiling = models.FloatField('Ceiling price')
     created_at = models.DateTimeField(blank=False, auto_now_add=True)
     
     @classmethod

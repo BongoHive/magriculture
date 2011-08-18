@@ -480,6 +480,47 @@ def offer_unit(request, market_pk, crop_pk, unit_pk):
         'page': page
     }, context_instance=RequestContext(request))
 
+@login_required
+def market_new_offer(request, *args, **kwargs):
+    paginator = Paginator(Market.objects.all(), 5)
+    page = paginator.page(request.GET.get('p', 1))
+    return render_to_response('offers/markets.html', {
+        'paginator': paginator,
+        'page': page
+    }, context_instance=RequestContext(request))
+
+@login_required
+def market_register_offer(request, market_pk):
+    actor = request.user.get_profile()
+    marketmonitor = actor.as_marketmonitor()
+    market = get_object_or_404(Market, pk=market_pk)
+    if request.POST:
+        
+        if 'cancel' in request.POST:
+            return HttpResponseRedirect(reverse('fncs:market_new_offer'))
+        
+        form = forms.OfferForm(request.POST)
+        if form.is_valid():
+            print form.cleaned_data
+            crop = form.cleaned_data['crop']
+            unit = form.cleaned_data['unit']
+            price_floor = form.cleaned_data['price_floor']
+            price_ceiling = form.cleaned_data['price_ceiling']
+            market = form.cleaned_data['market']
+            marketmonitor.register_offer(market, crop, unit, price_floor, 
+                                            price_ceiling)
+            messages.add_message(request, messages.INFO, 'Opening price has '
+                'been registered')
+            return HttpResponseRedirect(reverse('fncs:market_new_offer'))
+    else:
+        form = forms.OfferForm(initial={
+            'created_at': datetime.now(),
+            'market': market
+        })
+    return render_to_response('offers/register.html', {
+        'form': form,
+        'market': market
+    }, context_instance=RequestContext(request))
 
 def todo(request):
     """Anything that resolves to here still needs to be completed"""

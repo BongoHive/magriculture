@@ -31,6 +31,12 @@ class Actor(models.Model):
             raise Exception, 'More than one agent for an actor'
         return agents[0]
     
+    def as_marketmonitor(self):
+        marketmonitors = self.marketmonitor_set.all()
+        if marketmonitors.count() > 1:
+            raise Exception, 'More than one marketmonitor for an actor'
+        return marketmonitors[0]
+    
     def send_message(self, recipient, message, group):
         return Message.objects.create(sender=self, recipient=recipient, 
             content=message, group=group)
