@@ -118,7 +118,7 @@ class FarmerGroup(models.Model):
     name = models.CharField(blank=False, max_length=255)
     zone = models.ForeignKey('fncs.Zone')
     district = models.ForeignKey('fncs.District')
-    villages = models.ManyToManyField('fncs.Village')
+    wards = models.ManyToManyField('fncs.Ward')
     extensionofficer = models.ForeignKey('fncs.ExtensionOfficer', null=True)
     
     def members(self):

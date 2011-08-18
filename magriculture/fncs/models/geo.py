@@ -71,19 +71,6 @@ class Ward(models.Model):
         return u"%s (Ward)" % (self.name,)
     
 
-class Village(models.Model):
-    """A village, part of a ward, in a district"""
-    ward = models.ForeignKey('fncs.Ward')
-    name = models.CharField(blank=False, max_length=255)
-    
-    class Meta:
-        ordering = ['-name']
-        get_latest_by = 'pk'
-        app_label = 'fncs'
-    
-    def __unicode__(self): # pragma: no cover
-        return u"%s (Village)"  % (self.name,)
-
 class Market(models.Model):
     """A market is a location of trade in a certain district"""
     name = models.CharField(blank=False, max_length=255)

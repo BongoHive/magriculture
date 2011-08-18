@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from magriculture.fncs.models.actors import (FarmerGroup, Farmer, 
         Agent, MarketMonitor)
 from magriculture.fncs.models.geo import (Province, RPIArea, District, Ward,
-        Village, Zone, Market)
+        Zone, Market)
 from magriculture.fncs.models.props import (Crop, CropUnit)
 import random
 
@@ -119,11 +119,10 @@ def create_district(name, rpiarea):
     district, _ = District.objects.get_or_create(rpiarea=rpiarea, name=name)
     return district
 
-def create_village(name, district):
+def create_ward(name, district):
     ward, _ = Ward.objects.get_or_create(name="Ward in %s" %
             district.name, district=district)
-    village, _ = Village.objects.get_or_create(name=name, ward=ward)
-    return village
+    return ward
 
 def create_zone(name, rpiarea):
     zone, _ = Zone.objects.get_or_create(rpiarea=rpiarea, name=name)
@@ -133,9 +132,9 @@ def create_market(name, district):
     market, _ = Market.objects.get_or_create(name=name, district=district)
     return market
 
-def create_farmergroup(name, zone, district, village):
+def create_farmergroup(name, zone, district, ward):
     fg, _ = FarmerGroup.objects.get_or_create(name=name, district=district, zone=zone)
-    fg.villages.add(village)
+    fg.wards.add(ward)
     return fg
 
 def create_crop(name, units=["boxes","bunches","kilos"]):
@@ -150,13 +149,13 @@ def create_crop_unit(name):
 
 def create_farmer(msisdn='27761234567', name="name", surname="surname", 
         farmergroup_name="farmer group", rpiarea_name="rpi area", 
-        zone_name="zone", district_name="district", village_name="village"):
+        zone_name="zone", district_name="district", ward_name="ward"):
     rpiarea = create_rpiarea(rpiarea_name)
     zone = create_zone(zone_name, rpiarea)
     district = create_district(district_name, rpiarea)
-    village = create_village(village_name, district)
+    ward = create_ward(ward_name, district)
     farmergroup = create_farmergroup(farmergroup_name, zone, district,
-            village)
+            ward)
     user, _ = User.objects.get_or_create(username=msisdn)
     user.first_name = name
     user.last_name = surname
