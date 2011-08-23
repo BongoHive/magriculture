@@ -91,7 +91,7 @@ def random_crop_name():
     return random.choice(CROP_NAMES)
 
 def random_district():
-    return create_district(random_district_name(), create_rpiarea("rpiarea"))
+    return create_district(random_district_name(), create_province("province"))
 
 def random_crop():
     return create_crop(random_crop_name())
@@ -115,8 +115,8 @@ def create_rpiarea(name):
     rpiarea.provinces.add(create_province("province in %s" % name))
     return rpiarea
 
-def create_district(name, rpiarea):
-    district, _ = District.objects.get_or_create(rpiarea=rpiarea, name=name)
+def create_district(name, province):
+    district, _ = District.objects.get_or_create(province=province, name=name)
     return district
 
 def create_ward(name, district):
@@ -148,11 +148,13 @@ def create_crop_unit(name):
     return unit
 
 def create_farmer(msisdn='27761234567', name="name", surname="surname", 
-        farmergroup_name="farmer group", rpiarea_name="rpi area", 
-        zone_name="zone", district_name="district", ward_name="ward"):
+        farmergroup_name="farmer group", province_name="province", 
+        zone_name="zone", district_name="district", ward_name="ward", 
+        rpiarea_name="rpiarea"):
     rpiarea = create_rpiarea(rpiarea_name)
+    province = create_province(province_name)
     zone = create_zone(zone_name, rpiarea)
-    district = create_district(district_name, rpiarea)
+    district = create_district(district_name, province)
     ward = create_ward(ward_name, district)
     farmergroup = create_farmergroup(farmergroup_name, zone, district,
             ward)

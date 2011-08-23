@@ -4,6 +4,7 @@ from django.template.defaultfilters import floatformat
 class Crop(models.Model):
     """A crop is an item that is being traded"""
     name = models.CharField(blank=False, max_length=255)
+    description = models.TextField(blank=True)
     units = models.ManyToManyField('fncs.CropUnit')
     
     class Meta:
@@ -17,6 +18,7 @@ class Crop(models.Model):
 class CropUnit(models.Model):
     """A unit that a crop is traded in"""
     name = models.CharField(blank=False, max_length=255)
+    description = models.TextField(blank=True)
     
     class Meta:
         ordering = ['-name']

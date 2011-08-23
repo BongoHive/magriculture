@@ -90,8 +90,10 @@ class MarketMonitorTestCase(TestCase):
     
     def test_market_monitor_registration(self):
         monitor = utils.create_market_monitor()
+        province = utils.create_province("province")
         rpiarea = utils.create_rpiarea("rpiarea")
-        district = utils.create_district("district", rpiarea)
+        rpiarea.provinces.add(province)
+        district = utils.create_district("district", province)
         market = utils.create_market("market", district)
         
         crop = utils.create_crop("potatoes")
@@ -102,7 +104,8 @@ class MarketMonitorTestCase(TestCase):
         offer = monitor.register_offer(market, crop, unit, price_floor, price_ceiling)
         self.assertTrue(monitor.is_monitoring(market))
         self.assertIn(market, monitor.markets.all())
-        self.assertIn(market.district.rpiarea, monitor.rpiareas.all())
+        for rpiarea in market.rpiareas():
+            self.assertIn(rpiarea, monitor.rpiareas.all())
         self.assertEquals(offer.price_floor, 150.0)
         self.assertEquals(offer.price_ceiling, 200.0)
         self.assertEquals(offer.crop, crop)
@@ -133,11 +136,11 @@ class FarmerTestCase(TestCase):
         self.assertIn(market, farmer.markets.all())
     
     def test_farmer_districts(self):
-        rpiarea = utils.create_rpiarea("rpiarea")
-        district1 = utils.create_district("district 1", rpiarea)
+        province = utils.create_province("province")
+        district1 = utils.create_district("district 1", province)
         market1 = utils.create_market("market 1", district1)
         
-        district2 = utils.create_district("district 2", rpiarea)
+        district2 = utils.create_district("district 2", province)
         market2 = utils.create_market("market 2", district2)
         
         farmer = utils.create_farmer()

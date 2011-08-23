@@ -3,7 +3,14 @@ from magriculture.fncs.models.props import Crop
 
 class Province(models.Model):
     """A province, the normal geographic kind"""
+    code = models.IntegerField(blank=True, null=True)
     name = models.CharField(blank=False, max_length=255)
+    country = models.CharField(blank=False, max_length=100, default='--',
+        choices=(
+            ('--', 'Unspecified'),
+            ('ZM', 'Zambia'),
+            ('KE', 'Kenya'),
+        ))
     
     class Meta:
         ordering = ['-name']
@@ -46,8 +53,9 @@ class Zone(models.Model):
 
 class District(models.Model):
     """A geographic area"""
-    rpiarea = models.ForeignKey('fncs.RPIArea')
+    province = models.ForeignKey('fncs.Province')
     name = models.CharField(blank=False, max_length=255)
+    code = models.CharField(blank=True, max_length=100)
     
     class Meta:
         ordering = ['-name']
@@ -61,6 +69,7 @@ class Ward(models.Model):
     """A geographic area, smaller than a District"""
     district = models.ForeignKey('fncs.District')
     name = models.CharField(blank=False, max_length=255)
+    code = models.CharField(blank=True, max_length=100)
 
     class Meta:
         ordering = ['-name']
@@ -75,6 +84,19 @@ class Market(models.Model):
     """A market is a location of trade in a certain district"""
     name = models.CharField(blank=False, max_length=255)
     district = models.ForeignKey('fncs.District')
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+    altitude = models.FloatField(blank=True, null=True)
+    volume = models.CharField(blank=True, max_length=100, default='unknown',
+        choices=(
+            ('unknown', 'Unknown'),
+            ('low', 'Low'),
+            ('high', 'High'),
+        ))
+    
+    def rpiareas(self):
+        province = self.district.province
+        return RPIArea.objects.filter(provinces=province)
     
     def crops(self):
         transactions = self.transaction_set.all()

@@ -24,6 +24,10 @@ class Actor(models.Model):
     user = models.OneToOneField('auth.User')
     # TODO: do we need a name here, it's duplicated from the Django User model
     name = models.CharField(blank=False, max_length=255)
+    gender = models.CharField(blank=True, max_length=100, choices=(
+        ('M', 'Male'),
+        ('F', 'Female'),
+    ))
     
     def as_agent(self):
         agents = self.agent_set.all()
@@ -53,10 +57,18 @@ class Actor(models.Model):
 class Farmer(models.Model):
     """A farmer is an actor that provides goods to be sold in a market"""
     actor = models.ForeignKey('fncs.Actor')
-    farmergroup = models.ForeignKey('fncs.FarmerGroup')
+    farmergroup = models.ForeignKey('fncs.FarmerGroup', null=True)
     agents = models.ManyToManyField('fncs.Agent')
     markets = models.ManyToManyField('fncs.Market')
+    wards = models.ManyToManyField('fncs.Ward')
     crops = models.ManyToManyField('fncs.Crop')
+    hh_id = models.CharField(blank=True, max_length=100)
+    participant_type = models.CharField(blank=True, max_length=100, choices=(
+        ('Y', 'Y'),
+        ('N', 'N'),
+    ))
+    number_of_males = models.IntegerField(blank=True, null=True)
+    number_of_females = models.IntegerField(blank=True, null=True)
     
     class Meta:
         app_label = 'fncs'
@@ -156,7 +168,8 @@ class MarketMonitor(models.Model):
                     price_floor=price_floor, price_ceiling=price_ceiling, 
                     market=market)
         self.markets.add(market)
-        self.rpiareas.add(market.district.rpiarea)
+        for rpiarea in market.rpiareas():
+            self.rpiareas.add(rpiarea)
         return offer
     
     def is_monitoring(self, market):
