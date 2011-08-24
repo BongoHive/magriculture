@@ -48,18 +48,24 @@ def average_opening_price(market, crop, unit):
 @register.simple_tag
 def price_sparkline(market, crop, unit):
     prices = list(Transaction.price_history_for(market, crop, unit)[:10])
-    last_price = prices[-1]
-    average = mean(prices)
-    values = [deviation(price, average) for price in prices]
-    return sparkline(values, "%s ZMK" % int(last_price))
+    if prices:
+        last_price = prices[-1]
+        average = mean(prices)
+        values = [deviation(price, average) for price in prices]
+        return sparkline(values, "%s ZMK" % int(last_price))
+    else:
+        return sparkline([], "No transactions yet")
 
 @register.simple_tag
 def opening_price_sparkline(market, crop, unit):
     prices = list(Offer.average_price_history_for(market, crop, unit)[:10])
-    last_price = prices[-1]
-    average = mean(prices)
-    values = [deviation(price, average) for price in prices]
-    return sparkline(values, "%s ZMK" % int(last_price))
+    if prices:
+        last_price = prices[-1]
+        average = mean(prices)
+        values = [deviation(price, average) for price in prices]
+        return sparkline(values, "%s ZMK" % int(last_price))
+    else:
+        return sparkline([], "No opening prices yet")
 
 
 @register.filter
