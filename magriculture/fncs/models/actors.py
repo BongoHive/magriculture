@@ -128,8 +128,8 @@ class Farmer(models.Model):
 class FarmerGroup(models.Model):
     """A collection of farmers in a geographic area"""
     name = models.CharField(blank=False, max_length=255)
-    zone = models.ForeignKey('fncs.Zone')
-    district = models.ForeignKey('fncs.District')
+    zone = models.ForeignKey('fncs.Zone', null=True)
+    district = models.ForeignKey('fncs.District', null=True)
     wards = models.ManyToManyField('fncs.Ward')
     extensionofficer = models.ForeignKey('fncs.ExtensionOfficer', null=True)
     

@@ -6,6 +6,10 @@ class Command(ImportCommand):
     help = "Import farmers from an excel file"
     
     def handle_row(self, row):
+        if not row['HH id']:
+            print 'Cannot work without a value for HH id', row
+            return
+        
         user, _ = User.objects.get_or_create(username=row['HH id'])
         group, _ = Group.objects.get_or_create(name="FNCS Farmers")
         
@@ -19,6 +23,7 @@ class Command(ImportCommand):
         actor.save()
         
         farmer, _ = Farmer.objects.get_or_create(actor=actor)
+        farmer.hh_id = row['HH id']
         farmer.participant_type = row['Main participant type']
         farmer.number_of_males = row['Family sze M'] or None
         farmer.number_of_females = row['Family size F'] or None

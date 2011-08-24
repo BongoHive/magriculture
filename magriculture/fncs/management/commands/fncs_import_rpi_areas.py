@@ -7,7 +7,7 @@ class Command(ImportCommand):
     def handle_row(self, row):
         try:
             rpiarea, _ = RPIArea.objects.get_or_create(name=row['RPI AREA'])
-            province = Province.objects.get(name=row['PROVINCE'])
+            province = Province.objects.get(name__startswith=row['PROVINCE'])
             rpiarea.provinces.add(province)
         except Province.DoesNotExist:
             print 'Province %s does not exist' % row['PROVINCE']
