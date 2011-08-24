@@ -133,6 +133,7 @@ def farmer_new_sale_detail(request, farmer_pk):
             'crop': crop.pk,
             'created_at': datetime.now()
         })
+        form.fields["unit"].queryset = CropUnit.objects.filter(crop=crop)
     
     return render_to_response('farmers/new_sale_detail.html', {
         'form': form,
