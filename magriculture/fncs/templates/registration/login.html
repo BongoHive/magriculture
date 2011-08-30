@@ -8,10 +8,12 @@
         {% endif %}
 
         <label for="form-cell">Cell number</label>
-        {{form.username}}<br>
+        <input type="tel" name="username" value="{{form.username.value|default_if_none:""}}" id="username"><br>
+        {# {{form.username}}<br> #}
 
         <label for="form-pin">Pin</label>
-        {{form.password}}
+        <input type="tel" name="password" value="" id="password">
+        {# {{form.password}} #}
 
         <input type="submit" class="submit" value="Sign In &raquo;" name="submit" />
         <input type="hidden" name="next" value="{{next}}">
