@@ -9,4 +9,5 @@
 ./manage.py fncs_import_farmers --filename=./sample_data/t_farmer_details.xls && \
 ./manage.py fncs_import_farmer_groups --filename=./sample_data/t_farmers_groups.xls && \
 ./manage.py fncs_import_farmer_wards --filename=./sample_data/t_farmers_wards.xls && \
+./manage.py fncs_import_agents --filename="./sample_data/market agent pilot sheet-updated.xls" && \
 true
