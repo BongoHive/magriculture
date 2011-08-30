@@ -11,6 +11,9 @@
     </div>
     {% block content %}
     {% endblock %}
-    <div class="footer">&copy; {% now "Y" %} {{title|default:"Farmers Network"}} <a href="{% url fncs:todo %}terms/">Terms</a> | <a href="{% url fncs:todo %}privacy/">Privacy</a></div>
+    <div class="footer">&copy; {% now "Y" %} {{title|default:"Farmers Network"}} <a href="{% url fncs:todo %}terms/">Terms</a> | <a href="{% url fncs:todo %}privacy/">Privacy</a>
+    {% if not user.is_anonymous %}
+        | <a href="{% url logout %}">Sign Out</a></div>
+    {% endif %}
 </body>
 </html>

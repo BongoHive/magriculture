@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="h2">Sign Out</div>
+    <div class="list"> 
+        <div class="item"> 
+            <p>You've been logged out.</p>
+            <p><a href="{% url fncs:home %}">Sign In</a> if you want to access the farmer network again.</p>
+        </div> 
+    </div>
+{% endblock %}
