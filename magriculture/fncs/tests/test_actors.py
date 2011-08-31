@@ -118,6 +118,21 @@ class MarketMonitorTestCase(TestCase):
 
 class FarmerTestCase(TestCase):
     
+    def test_farmer_create_helper(self):
+        rpiarea = utils.create_rpiarea("rpiarea")
+        zone = utils.create_zone("zone", rpiarea)
+        province = utils.create_province("province")
+        district = utils.create_district("district", province)
+        ward = utils.create_ward("ward", district)
+        farmergroup = utils.create_farmergroup("fg", zone, district, ward)
+        self.assertFalse(Farmer.objects.exists())
+        farmer1 = Farmer.create("0761234567", "name", "surname", farmergroup)
+        self.assertTrue(Farmer.objects.count(), 1)
+        self.assertEqual(farmer1.actor.name, 'name surname')
+        farmer2 = Farmer.create("0761234567", "new name", "new surname", farmergroup)
+        self.assertTrue(Farmer.objects.count(), 1)
+        self.assertEqual(farmer2.actor.name, 'new name new surname')
+    
     def test_farmer_creation(self):
         farmer = utils.create_farmer(name="joe") 
         self.assertEquals(farmer.actor.user.first_name, "joe")

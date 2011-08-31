@@ -43,6 +43,13 @@ class Actor(models.Model):
         if marketmonitors.exists():
             return marketmonitors[0]
     
+    def as_farmer(self):
+        farmers = self.farmer_set.all()
+        if farmers.count() > 1:
+            raise Exception, 'More than one farmer for an actor'
+        if farmers.exists():
+            return farmers[0]
+    
     def send_message(self, recipient, message, group):
         return Message.objects.create(sender=self, recipient=recipient, 
             content=message, group=group)
@@ -111,12 +118,14 @@ class Farmer(models.Model):
     
     @classmethod
     def create(cls, msisdn, name, surname, farmergroup):
-        user = User.objects.create(username=msisdn)
+        user, _ = User.objects.get_or_create(username=msisdn)
         user.first_name = name
         user.last_name = surname
         user.save()
         
         actor = user.get_profile()
+        if actor.farmer_set.exists():
+            return actor.as_farmer()
         
         farmer = cls(actor=actor, farmergroup=farmergroup)
         farmer.save()
