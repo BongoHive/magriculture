@@ -28,6 +28,57 @@ class CropUnit(models.Model):
     def __unicode__(self): # pragma: no cover
         return self.name
 
+
+class CropReceipt(models.Model):
+    """A receipt records crops left with an agent by a farmer"""
+    crop = models.ForeignKey('fncs.Crop')
+    unit = models.ForeignKey('fncs.CropUnit')
+    farmer = models.ForeignKey('fncs.Farmer')
+    agent = models.ForeignKey('fncs.Agent')
+    market = models.ForeignKey('fncs.Market')
+    quality = models.IntegerField(blank=False, default=5, choices=(
+        (10, 'Excellent'),
+        (7, 'Good'),
+        (5, 'Standard'),
+        (3, 'Mediocre'),
+        (0, 'Poor'),
+    ))
+    amount = models.FloatField('Quantity')
+    created_at = models.DateTimeField(blank=False)
+    reconciled = models.BooleanField(blank=False, default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+        get_latest_by = 'created_at'
+        app_label = 'fncs'
+
+    def __unicode__(self):  # pragma: no cover
+        return u"Receipt: %s %s of %s" % (floatformat(self.amount), self.unit,
+                                          self.crop)
+
+
+class DirectSale(models.Model):
+    """A direct sale is when an agent buys crops directly from a farmer."""
+    pass
+
+
+class Sale(models.Model):
+    """..."""
+    crop_receipt = models.ForeignKey('fncs.CropReceipt')
+    market = models.ForeignKey('fncs.Market')
+    quality = models.IntegerField(blank=False, default=5, choices=(
+        (10, 'Excellent'),
+        (7, 'Good'),
+        (5, 'Standard'),
+        (3, 'Mediocre'),
+        (0, 'Poor'),
+    ))
+    amount = models.FloatField('Quantity')
+    price = models.FloatField()
+    total = models.FloatField()
+    created_at = models.DateTimeField(blank=False)
+
+
 class Transaction(models.Model):
     """A transaction is an exchange of a crop at a certain unit
     at a given price"""
