@@ -6,6 +6,7 @@ from magriculture.fncs.models.geo import (Province, RPIArea, District, Ward,
 from magriculture.fncs.models.props import (Crop, CropUnit)
 import random
 
+
 NAMES = ['Aaliyah', 'Abayomi', 'Abebe', 'Abebi', 'Abena', 'Abeo', 'Ada', 
             'Adah', 'Adana', 'Adanna', 'Adanya', 'Akili', 'Alika', 'Ama', 
             'Amadi', 'Amai', 'Amare', 'Amari', 'Abayomi', 'Abiola', 'Abu', 
@@ -71,6 +72,9 @@ AGRICULTURE_QUOTES = [
     """I have always said there is only one thing that can bring our nation down - our dependence on foreign countries for food and energy. Agriculture is the backbone of our economy. - John Salazar """,
     """If we win, we'll make history, and I'll serve you on the Agriculture Committee. - George Nethercutt""",
 ]
+
+def reload_record(record):
+    return record.__class__.objects.get(pk=record.pk)
 
 def random_quote():
     return random.choice(AGRICULTURE_QUOTES)

@@ -1,0 +1,3 @@
+class CropReceiptException(Exception):
+    pass
+

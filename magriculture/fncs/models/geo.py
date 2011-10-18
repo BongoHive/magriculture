@@ -99,9 +99,11 @@ class Market(models.Model):
         return RPIArea.objects.filter(provinces=province)
     
     def crops(self):
-        transactions = self.transaction_set.all()
-        crop_ids = [tx.crop_id for tx in transactions]
-        return Crop.objects.filter(pk__in=crop_ids)
+        return Crop.objects.filter(cropreceipt__market=self)
+        # receipts = CropReceipt.objects.filter(market=self)
+        # transactions = self.transaction_set.all()
+        # crop_ids = [tx.crop_id for tx in transactions]
+        # return Crop.objects.filter(pk__in=crop_ids)
     
     class Meta:
         ordering = ['name']
