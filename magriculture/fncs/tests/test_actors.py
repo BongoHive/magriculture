@@ -165,7 +165,6 @@ class FarmerTestCase(TestCase):
 
         receipt = agent.take_in_crop(market, farmer, amount, unit, crop)
 
-        # farmer.sells_at(market, agent)
         self.assertTrue(agent.is_selling_for(farmer, market))
         self.assertIn(market, agent.markets.all())
         self.assertIn(farmer, agent.farmers.all())
@@ -183,8 +182,8 @@ class FarmerTestCase(TestCase):
         agent1 = utils.create_agent("agent 1")
         agent2 = utils.create_agent("agent 2")
 
-        farmer.sells_at(market1, agent1)
-        farmer.sells_at(market2, agent2)
+        farmer.operates_at(market1, agent1)
+        farmer.operates_at(market2, agent2)
 
         self.assertEquals(farmer.districts().count(), 2)
         self.assertIn(district1, farmer.districts())
@@ -214,7 +213,7 @@ class FarmerTestCase(TestCase):
         # prime the farmer with 1 market
         farmer.markets.add(market1)
         # test the destructive set
-        farmer.sells_at_markets_exclusively([market2,market3])
+        farmer.operates_at_markets_exclusively([market2,market3])
         self.assertNotIn(market1, farmer.markets.all())
         self.assertIn(market2, farmer.markets.all())
         self.assertIn(market3, farmer.markets.all())

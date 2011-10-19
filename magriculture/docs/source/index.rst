@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    models
+   exceptions
 
 Indices and tables
 ==================
