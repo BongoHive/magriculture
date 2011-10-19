@@ -70,29 +70,9 @@ class DirectSale(models.Model):
     """A direct sale is when an agent buys crops directly from a farmer."""
     pass
 
-
-class Sale(models.Model):
-    """..."""
-    crop_receipt = models.ForeignKey('fncs.CropReceipt')
-    market = models.ForeignKey('fncs.Market')
-    quality = models.IntegerField(blank=False, default=5,
-        choices=CROP_QUALITY_CHOICES)
-    amount = models.FloatField('Quantity')
-    price = models.FloatField()
-    total = models.FloatField()
-    created_at = models.DateTimeField(blank=False)
-
-
 class Transaction(models.Model):
     """A transaction is an exchange of a crop at a certain unit
     at a given price"""
-    # crop = models.ForeignKey('fncs.Crop')
-    # unit = models.ForeignKey('fncs.CropUnit')
-    # farmer = models.ForeignKey('fncs.Farmer')
-    # agent = models.ForeignKey('fncs.Agent')
-    # market = models.ForeignKey('fncs.Market')
-    # quality = models.IntegerField(blank=False, default=5,
-        # choices=CROP_QUALITY_CHOICES)
     crop_receipt = models.ForeignKey('fncs.CropReceipt')
     amount = models.FloatField('Quantity')
     price = models.FloatField()

@@ -226,6 +226,7 @@ class Agent(models.Model):
             raise errors.CropReceiptException, 'not enough inventory'
         transaction = Transaction.objects.create(crop_receipt=crop_receipt,
             amount=amount, price=price, created_at=datetime.now())
+
         # see if we've sold everything we have and then update the
         # reconciled boolean
         if crop_receipt.remaining_inventory() <= 0:
