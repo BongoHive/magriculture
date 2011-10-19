@@ -222,12 +222,15 @@ class Agent(models.Model):
             amount=amount, unit=unit, crop=crop, created_at=datetime.now())
 
     def register_sale(self, crop_receipt, amount, price):
-        if(crop_receipt.amount < amount):
-            raise errors.CropReceiptException, 'selling outside of inventory'
-        # atomic update of a single crop receipt
-        new_receipt = crop_receipt.deduct(amount)
-        transaction = Transaction.objects.create(crop_receipt=new_receipt,
+        if crop_receipt.remaining_inventory() < amount:
+            raise errors.CropReceiptException, 'not enough inventory'
+        transaction = Transaction.objects.create(crop_receipt=crop_receipt,
             amount=amount, price=price, created_at=datetime.now())
+        # see if we've sold everything we have and then update the
+        # reconciled boolean
+        if crop_receipt.remaining_inventory() <= 0:
+            crop_receipt.reconciled = True
+            crop_receipt.save()
         return transaction
 
     def sales_for(self, farmer):

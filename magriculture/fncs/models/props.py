@@ -36,7 +36,6 @@ class CropUnit(models.Model):
     def __unicode__(self): # pragma: no cover
         return self.name
 
-
 class CropReceipt(models.Model):
     """A receipt records crops left with an agent by a farmer"""
     crop = models.ForeignKey('fncs.Crop')
@@ -55,16 +54,12 @@ class CropReceipt(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
 
-    def deduct(self, amount):
-        """
-        Deduct the amount from the inventory and return the new
-        crop receipt object that reflects the new values as in
-        the db.
-        """
-        cls = self.__class__
-        cls.objects.filter(pk=self.pk).update(
-            amount=models.F('amount') - amount)
-        return cls.objects.get(pk=self.pk)
+    def remaining_inventory(self):
+        aggregate = Transaction.objects.filter(crop_receipt=self).aggregate(
+            total_sold=models.Sum('amount'))
+        # If there are no transactions, total_sold will be None, if that's the case then we want to return zero
+        sold_inventory = aggregate.get('total_sold') or 0
+        return self.amount - sold_inventory
 
     def __unicode__(self):  # pragma: no cover
         return u"Receipt: %s %s of %s" % (floatformat(self.amount),

@@ -38,6 +38,7 @@ class AgentTestCase(TestCase):
 
         # create inventory
         receipt = agent.take_in_crop(market, farmer, amount, unit, crop)
+        self.assertTrue(receipt.remaining_inventory(), 10)
         transaction = agent.register_sale(receipt, amount, price)
 
         self.assertTrue(agent.is_selling_for(farmer, market))
@@ -55,8 +56,11 @@ class AgentTestCase(TestCase):
         self.assertEquals(crop_receipt.farmer, farmer)
         self.assertEquals(crop_receipt.market, market)
 
-        # had 20 crops in inventory, sold inventory, should have 0 left
-        self.assertEquals(crop_receipt.amount, 0)
+        # had 20 crops in inventory, inventory should be reconciled
+        # and the calculated stock count should reflect this
+        self.assertEquals(crop_receipt.amount, 10)
+        self.assertTrue(crop_receipt.reconciled)
+        self.assertEquals(crop_receipt.remaining_inventory(), 0)
 
         self.assertAlmostEqual(transaction.created_at, datetime.now(),
             delta=timedelta(seconds=2))
