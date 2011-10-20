@@ -10,6 +10,10 @@ from datetime import datetime
 import logging
 
 def create_actor(sender, instance, created, **kwargs):
+    """
+    Signal handler for Django, creates a new blank actor for
+    every user created.
+    """
     if created:
         Actor.objects.create(user=instance)
     else:
@@ -258,13 +262,24 @@ class FarmerGroup(models.Model):
     A collection of farmers in a geographic area
 
     """
+    #: The name of the group
     name = models.CharField(blank=False, max_length=255)
+    #: The :class:`magriculture.fncs.models.geo.Zone` this group operates in. About to be deprecated.
     zone = models.ForeignKey('fncs.Zone', null=True)
+    #: The :class:`magriculture.fncs.models.geo.District` this group operates in
     district = models.ForeignKey('fncs.District', null=True)
+    #: Which :class:`magriculture.fncs.models.geo.Ward` this group is active in,
+    #: a M2M relationship.
     wards = models.ManyToManyField('fncs.Ward')
+    #: The :class:`magriculture.fncs.models.actors.ExtensionOfficer` assigned to
+    #: this FarmerGroup
     extensionofficer = models.ForeignKey('fncs.ExtensionOfficer', null=True)
 
     def members(self):
+        """
+        :returns: the farmers member to this group
+        :rtype: magriculture.fncs.models.actors.Farmer
+        """
         return self.farmer_set.all()
 
     class Meta:
@@ -295,6 +310,28 @@ class MarketMonitor(models.Model):
     rpiareas = models.ManyToManyField('fncs.RPIArea')
 
     def register_offer(self, market, crop, unit, price_floor, price_ceiling):
+        """
+        Register the opening price range of a crop.
+
+        :param market: the market the price range applies to
+        :type market: magriculture.fncs.models.geo.Market
+
+        :param crop: the crop the price range applies to
+        :type crop: magriculture.fncs.models.props.Crop
+
+        :param unit: the unit the crop is being offered in
+        :type unit: magriculture.fncs.models.props.CropUnit
+
+        :param price_floor: the cheapest the crop is going for
+        :type price_floor: float
+
+        :param price_ceiling: the most expensive the crop is going for
+        :type price_ceiling: float
+
+        :returns: the offer object
+        :rtype: magriculture.fncs.models.props.Offer
+
+        """
         offer = self.offer_set.create(crop=crop, unit=unit,
                     price_floor=price_floor, price_ceiling=price_ceiling,
                     market=market)
@@ -313,20 +350,63 @@ class MarketMonitor(models.Model):
         return u"%s (MarketMonitor)" % (self.actor,)
 
 class Agent(models.Model):
-    """An agent is an actor that is linked to a market and does a financial
-    transaction on behalf of a Farmer"""
+    """
+    An agent is an actor that is linked to a market and does a financial
+    transaction on behalf of a Farmer
+    """
+    #: the :class:`magriculture.fncs.models.actors.Actor` this agent belongs to
     actor = models.ForeignKey('fncs.Actor')
+    #: the :class:`magriculture.fncs.models.actors.Farmer` this agent is doing
+    #: business for
     farmers = models.ManyToManyField('fncs.Farmer')
+    #: the :class:`magriculture.fncs.models.actors.Market` this agent is doing
+    #: business at
     markets = models.ManyToManyField('fncs.Market')
 
     class Meta:
         app_label = 'fncs'
 
     def is_selling_for(self, farmer, market):
+        """
+        Check to see if an agent is selling for a farmer at a given market,
+        does so by checking the crop-receipt history for the given farmer.
+
+        :param farmer: the farmer to check
+        :type farmer: magriculture.fncs.models.actors.Farmer
+
+        :param market: the market to check
+        :type market: magriculture.fncs.models.geo.Market
+
+        :returns: True/False
+        :rtype: :func:`bool`
+
+        """
         return self.cropreceipt_set.filter(farmer=farmer,
             market=market).exists()
 
     def take_in_crop(self, market, farmer, amount, unit, crop):
+        """
+        Add to the agent's crop inventory
+
+        :param market: the market the crop is taken in on
+        :type market: magriculture.fncs.models.geo.Market
+
+        :param farmer: the farmer the crop is taken in from
+        :type farmer: magriculture.fncs.models.actors.Farmer
+
+        :param amount: the number of goods
+        :type amount: int
+
+        :param unit: the unit the crops were delivered in
+        :type unit: magriculture.fncs.models.props.CropUnit
+
+        :param crop: the crop taken in
+        :type crop: magriculture.fncs.models.props.Crop
+
+        :returns: the crop receipt
+        :rtype: magriculture.fncs.models.props.CropReceipt
+
+        """
         # keep track of who this agent is selling for & which markets he
         # is active in
         self.markets.add(market)
@@ -339,6 +419,20 @@ class Agent(models.Model):
             amount=amount, unit=unit, crop=crop, created_at=datetime.now())
 
     def register_sale(self, crop_receipt, amount, price):
+        """
+        Register a sale from a given crop-receipt.
+
+        :param crop_receipt: which crop receipt this sale is going out of
+        :type crop_receipt: magriculture.fncs.models.props.CropReceipt
+
+        :param amount: the number sold
+        :type amount: int
+
+        :param price: the price at which it was sold
+        :type price: float
+
+        :raises: :class:`magriculture.fncs.errors.CropReceiptException` if not enough inventory
+        """
         if crop_receipt.remaining_inventory() < amount:
             raise errors.CropReceiptException, 'not enough inventory'
         transaction = Transaction.objects.create(crop_receipt=crop_receipt,
@@ -352,13 +446,36 @@ class Agent(models.Model):
         return transaction
 
     def sales_for(self, farmer):
+        """
+        Return a list of transactions for the given farmer
+
+        :param farmer: :class:`magriculture.fncs.models.actors.Farmer`
+        :returns: list of :class:`magriculture.fncs.models.props.Transaction`
+
+        """
         return Transaction.objects.filter(crop_receipt__farmer=farmer,
             crop_receipt__agent=self)
 
     def send_message_to_farmer(self, farmer, message, group=None):
+        """
+        Send a message to a farmer
+
+        :param farmer: :class:`magriculture.fncs.models.actors.Farmer`
+        :param message: :func:`str`, the message text
+        :param group: :class:`magriculture.fncs.models.props.GroupMessage`, defaults to `None`
+        :returns: the message sent, `magriculture.fncs.models.props.Message`
+        """
         return self.actor.send_message(farmer.actor, message, group)
 
     def send_message_to_farmergroups(self, farmergroups, message):
+        """
+        Send a message to all farmers in the given farmer groups
+
+        :param farmergroups: list of :class:`magriculture.fncs.models.actors.FarmerGroup`
+        :param message: :func:`str`, message to send.
+        :returns: the group message sent, :class:`magriculture.fncs.models.props.GroupMessage`
+
+        """
         groupmessage = GroupMessage.objects.create(sender=self.actor,
                         content=message)
         for farmergroup in farmergroups:
@@ -368,10 +485,23 @@ class Agent(models.Model):
         return groupmessage
 
     def write_note(self, farmer, note):
+        """
+        Write a note about a farmer
+
+        :param farmer: :class:`magriculture.fncs.models.actors.Farmer`
+        :param note: the message, :func:`str`
+        :returns: the note object, :class:`magriculture.fncs.models.props.Note`
+        """
         return Note.objects.create(owner=self.actor, about_actor=farmer.actor,
             content=note)
 
     def notes_for(self, farmer):
+        """
+        Return all notes for the given farmer
+
+        :param farmer: :class:`magriculture.fncs.models.actors.Farmer`
+        :returns: list of :class:`magriculture.fncs.models.props.Note`
+        """
         return self.actor.note_set.filter(about_actor=farmer.actor)
 
     def __unicode__(self): # pragma: no cover
