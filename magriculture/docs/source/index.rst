@@ -11,7 +11,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   models
+   models/actors
+   models/geo
+   models/props
    exceptions
 
 Indices and tables
