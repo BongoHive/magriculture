@@ -271,7 +271,7 @@ class FarmerGroup(models.Model):
     #: Which :class:`magriculture.fncs.models.geo.Ward` this group is active in,
     #: a M2M relationship.
     wards = models.ManyToManyField('fncs.Ward')
-    #: The :class:`magriculture.fncs.models.actors.ExtensionOfficer` assigned to
+    #: The :class:`ExtensionOfficer` assigned to
     #: this FarmerGroup
     extensionofficer = models.ForeignKey('fncs.ExtensionOfficer', null=True)
 
@@ -354,12 +354,12 @@ class Agent(models.Model):
     An agent is an actor that is linked to a market and does a financial
     transaction on behalf of a Farmer
     """
-    #: the :class:`magriculture.fncs.models.actors.Actor` this agent belongs to
+    #: the :class:`Actor` this agent belongs to
     actor = models.ForeignKey('fncs.Actor')
-    #: the :class:`magriculture.fncs.models.actors.Farmer` this agent is doing
+    #: the :class:`Farmer` this agent is doing
     #: business for
     farmers = models.ManyToManyField('fncs.Farmer')
-    #: the :class:`magriculture.fncs.models.actors.Market` this agent is doing
+    #: the :class:`Market` this agent is doing
     #: business at
     markets = models.ManyToManyField('fncs.Market')
 
@@ -449,7 +449,7 @@ class Agent(models.Model):
         """
         Return a list of transactions for the given farmer
 
-        :param farmer: :class:`magriculture.fncs.models.actors.Farmer`
+        :param farmer: :class:`Farmer`
         :returns: list of :class:`magriculture.fncs.models.props.Transaction`
 
         """
@@ -460,7 +460,7 @@ class Agent(models.Model):
         """
         Send a message to a farmer
 
-        :param farmer: :class:`magriculture.fncs.models.actors.Farmer`
+        :param farmer: :class:`Farmer`
         :param message: :func:`str`, the message text
         :param group: :class:`magriculture.fncs.models.props.GroupMessage`, defaults to `None`
         :returns: the message sent, `magriculture.fncs.models.props.Message`
@@ -471,7 +471,7 @@ class Agent(models.Model):
         """
         Send a message to all farmers in the given farmer groups
 
-        :param farmergroups: list of :class:`magriculture.fncs.models.actors.FarmerGroup`
+        :param farmergroups: list of :class:`FarmerGroup`
         :param message: :func:`str`, message to send.
         :returns: the group message sent, :class:`magriculture.fncs.models.props.GroupMessage`
 
@@ -488,7 +488,7 @@ class Agent(models.Model):
         """
         Write a note about a farmer
 
-        :param farmer: :class:`magriculture.fncs.models.actors.Farmer`
+        :param farmer: :class:`Farmer`
         :param note: the message, :func:`str`
         :returns: the note object, :class:`magriculture.fncs.models.props.Note`
         """
@@ -499,7 +499,7 @@ class Agent(models.Model):
         """
         Return all notes for the given farmer
 
-        :param farmer: :class:`magriculture.fncs.models.actors.Farmer`
+        :param farmer: :class:`Farmer`
         :returns: list of :class:`magriculture.fncs.models.props.Note`
         """
         return self.actor.note_set.filter(about_actor=farmer.actor)
