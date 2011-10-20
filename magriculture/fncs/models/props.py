@@ -89,8 +89,7 @@ class CropReceipt(models.Model):
         return self.amount - sold_inventory
 
     def __unicode__(self):  # pragma: no cover
-        return u"Receipt: %s %s of %s" % (floatformat(self.amount),
-            self.unit, self.crop)
+        return u"%s of %s from %s" % (self.unit, self.crop, self.created_at.date())
 
 
 class DirectSale(models.Model):
@@ -143,8 +142,8 @@ class Transaction(models.Model):
         app_label = 'fncs'
 
     def __unicode__(self): # pragma: no cover
-        return u"%s %s of %s" % (floatformat(self.amount), self.unit,
-                                    self.crop)
+        return u"%s %s of %s" % (floatformat(self.amount), self.crop_receipt.unit,
+                                    self.crop_receipt.crop)
 
 class Offer(models.Model):
     """

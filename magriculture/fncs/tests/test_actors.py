@@ -73,6 +73,16 @@ class AgentTestCase(TestCase):
         actor = agent.actor
         self.assertEquals(agent, actor.as_agent())
 
+    def test_agent_crop_receipt_inventory(self):
+        farmer1 = utils.create_farmer(msisdn="27700000000")
+        farmer2 = utils.create_farmer(msisdn="27700000001")
+        market = utils.create_market("market", farmer1.farmergroup.district)
+        agent = utils.create_agent()
+        receipt1 = utils.take_in(market, agent, farmer1, 10, 'box', 'tomato')
+        receipt2 = utils.take_in(market, agent, farmer2, 10, 'box', 'onion')
+        self.assertEqual([receipt1], list(agent.cropreceipts_available_for(farmer1)))
+        self.assertEqual([receipt2], list(agent.cropreceipts_available_for(farmer2)))
+
     def test_send_farmer_message(self):
         farmer = utils.create_farmer()
         agent = utils.create_agent()

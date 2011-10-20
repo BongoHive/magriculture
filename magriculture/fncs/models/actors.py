@@ -5,7 +5,7 @@ from django.db.models.signals import post_save
 from magriculture.fncs import errors
 from magriculture.fncs.models.geo import District
 from magriculture.fncs.models.props import (Message, GroupMessage, Note,
-    Transaction)
+    Transaction, Crop)
 from datetime import datetime
 import logging
 
@@ -417,6 +417,15 @@ class Agent(models.Model):
         farmer.crops.add(crop)
         return self.cropreceipt_set.create(market=market, farmer=farmer,
             amount=amount, unit=unit, crop=crop, created_at=datetime.now())
+
+    def cropreceipts_available_for(self, farmer):
+        """
+        Get a list of :class:`magriculture.fncs.models.props.CropReceipt` avaible
+        for the given :class:`Farmer`
+
+        :param farmer: a :class:`Farmer`
+        """
+        return self.cropreceipt_set.filter(farmer=farmer, reconciled=False)
 
     def register_sale(self, crop_receipt, amount, price):
         """

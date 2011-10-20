@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
-from magriculture.fncs.models.actors import (FarmerGroup, Farmer, 
+from django.core.urlresolvers import reverse
+from magriculture.fncs.models.actors import (FarmerGroup, Farmer,
         Agent, MarketMonitor)
 from magriculture.fncs.models.geo import (Province, RPIArea, District, Ward,
         Zone, Market)
@@ -7,11 +8,11 @@ from magriculture.fncs.models.props import (Crop, CropUnit)
 import random
 
 
-NAMES = ['Aaliyah', 'Abayomi', 'Abebe', 'Abebi', 'Abena', 'Abeo', 'Ada', 
-            'Adah', 'Adana', 'Adanna', 'Adanya', 'Akili', 'Alika', 'Ama', 
-            'Amadi', 'Amai', 'Amare', 'Amari', 'Abayomi', 'Abiola', 'Abu', 
-            'Ade', 'Adeben', 'Adiel', 'Amarey', 'Amari', 'Aren', 'Azibo', 
-            'Bobo', 'Chiamaka', 'Chibale', 'Chidi', 'Chike', 'Dakarai', 
+NAMES = ['Aaliyah', 'Abayomi', 'Abebe', 'Abebi', 'Abena', 'Abeo', 'Ada',
+            'Adah', 'Adana', 'Adanna', 'Adanya', 'Akili', 'Alika', 'Ama',
+            'Amadi', 'Amai', 'Amare', 'Amari', 'Abayomi', 'Abiola', 'Abu',
+            'Ade', 'Adeben', 'Adiel', 'Amarey', 'Amari', 'Aren', 'Azibo',
+            'Bobo', 'Chiamaka', 'Chibale', 'Chidi', 'Chike', 'Dakarai',
             'Davu', 'Deion', 'Dembe', 'Diallo']
 SURNAMES = ['Azikiwe','Awolowo','Bello','Balewa','Akintola','Okotie-Eboh',
             'Nzeogwu','Onwuatuegwu','Okafor','Okereke','Okeke','Okonkwo',
@@ -30,17 +31,17 @@ SURNAMES = ['Azikiwe','Awolowo','Bello','Balewa','Akintola','Okotie-Eboh',
             'Ademola','Onobanjo','Aguda','Okpara','Mbanefo','Mbadinuju','Boro',
             'Ekwensi','Gowon', 'Saro-Wiwa']
 
-DISTRICT_NAMES = ['Chibombo', 'Kabwe', 'Kapiri Mposhi', 'Mkushi', 'Mumbwa', 
-    'Serenje', 'Chililabombwe', 'Chingola', 'Kalulushi', 'Kitwe', 'Luanshya', 
-    'Lufwanyama', 'Masaiti', 'Mpongwe', 'Mufulira', 'Ndola', 'Chadiza', 
-    'Chama', 'Chipata', 'Katete', 'Lundazi', 'Mambwe', 'Nyimba', 'Petauke', 
-    'Chiengi', 'Kawambwa', 'Mansa', 'Milenge', 'Mwense', 'Nchelenge', 'Samfya', 
-    'Chongwe', 'Kafue', 'Luangwa', 'Lusaka', 'Chavuma', 'Kabompo', 'Kasempa', 
-    'Mufumbwe', 'Mwinilunga', 'Solwezi', 'Zambezi', 'Chilubi', 'Chinsali', 
-    'Isoka', 'Kaputa', 'Kasama', 'Luwingu', 'Mbala', 'Mpika', 'Mporokoso', 
-    'Mpulungu', 'Mungwi', 'Nakonde', 'Choma', 'Gwembe', 'Itezhi Tezhi\'Kalomo', 
-    'Kazungula', 'Livingstone', 'Mazabuka', 'Monze', 'Namwala\'Siavonga', 
-    'Sinazongwe', 'Kalabo', 'Kaoma', 'Lukulu', 'Mongu', 'Senanga', 'Sesheke', 
+DISTRICT_NAMES = ['Chibombo', 'Kabwe', 'Kapiri Mposhi', 'Mkushi', 'Mumbwa',
+    'Serenje', 'Chililabombwe', 'Chingola', 'Kalulushi', 'Kitwe', 'Luanshya',
+    'Lufwanyama', 'Masaiti', 'Mpongwe', 'Mufulira', 'Ndola', 'Chadiza',
+    'Chama', 'Chipata', 'Katete', 'Lundazi', 'Mambwe', 'Nyimba', 'Petauke',
+    'Chiengi', 'Kawambwa', 'Mansa', 'Milenge', 'Mwense', 'Nchelenge', 'Samfya',
+    'Chongwe', 'Kafue', 'Luangwa', 'Lusaka', 'Chavuma', 'Kabompo', 'Kasempa',
+    'Mufumbwe', 'Mwinilunga', 'Solwezi', 'Zambezi', 'Chilubi', 'Chinsali',
+    'Isoka', 'Kaputa', 'Kasama', 'Luwingu', 'Mbala', 'Mpika', 'Mporokoso',
+    'Mpulungu', 'Mungwi', 'Nakonde', 'Choma', 'Gwembe', 'Itezhi Tezhi\'Kalomo',
+    'Kazungula', 'Livingstone', 'Mazabuka', 'Monze', 'Namwala\'Siavonga',
+    'Sinazongwe', 'Kalabo', 'Kaoma', 'Lukulu', 'Mongu', 'Senanga', 'Sesheke',
     'Shangombo']
 
 CROP_NAMES = [
@@ -151,9 +152,9 @@ def create_crop_unit(name):
     unit, _ = CropUnit.objects.get_or_create(name=name)
     return unit
 
-def create_farmer(msisdn='27761234567', name="name", surname="surname", 
-        farmergroup_name="farmer group", province_name="province", 
-        zone_name="zone", district_name="district", ward_name="ward", 
+def create_farmer(msisdn='27761234567', name="name", surname="surname",
+        farmergroup_name="farmer group", province_name="province",
+        zone_name="zone", district_name="district", ward_name="ward",
         rpiarea_name="rpiarea"):
     rpiarea = create_rpiarea(rpiarea_name)
     province = create_province(province_name)
@@ -170,8 +171,10 @@ def create_farmer(msisdn='27761234567', name="name", surname="surname",
             actor=user.get_profile())
     return farmer
 
-def create_agent(msisdn="27761234568", name="name", surname="surname"):
+def create_agent(msisdn="27761234568", name="name", surname="surname", password=None):
     user, _ = User.objects.get_or_create(username=msisdn)
+    if password:
+        user.set_password(password)
     user.first_name = name
     user.last_name = surname
     user.save()
@@ -182,3 +185,24 @@ def create_market_monitor(name="market monitor"):
     user, _ = User.objects.get_or_create(username=name, first_name=name)
     market_monitor, _ = MarketMonitor.objects.get_or_create(actor=user.get_profile())
     return market_monitor
+
+def is_farmer(msisdn):
+    return Farmer.objects.filter(actor__user__username=msisdn).exists()
+
+def farmer_url(pk, suffix='', **kwargs):
+    if suffix:
+        suffix = '_%s' % suffix
+    defaults = {
+        'farmer_pk': pk
+    }
+    defaults.update(kwargs)
+    return reverse('fncs:farmer%s' % suffix, kwargs=defaults)
+
+def take_in(market, agent, farmer, amount, unit_name, crop_name):
+    crop = create_crop(crop_name, units=[unit_name])
+    unit = create_crop_unit(unit_name)
+    return agent.take_in_crop(market, farmer, amount, unit, crop)
+
+def sell(receipt, amount, price):
+    return receipt.agent.register_sale(receipt, amount, price)
+

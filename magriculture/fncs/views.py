@@ -10,7 +10,7 @@ import urllib
 
 from magriculture.fncs.models.actors import Farmer, FarmerGroup
 from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
-                                            CropUnit, Offer)
+                                            CropUnit, Offer, CropReceipt)
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs import forms
 
@@ -62,10 +62,6 @@ def farmer_new(request):
     }, context_instance=RequestContext(request))
 
 @login_required
-def farmer_add(request):
-    return HttpResponse('ok')
-
-@login_required
 def farmer(request, farmer_pk):
     return HttpResponseRedirect(reverse('fncs:farmer_sales', kwargs={
         'farmer_pk': farmer_pk
@@ -86,7 +82,7 @@ def farmer_sales(request, farmer_pk):
 @login_required
 def farmer_sale(request, farmer_pk, sale_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
-    transaction = get_object_or_404(Transaction, farmer=farmer, pk=sale_pk)
+    transaction = get_object_or_404(Transaction, crop_receipt__farmer=farmer, pk=sale_pk)
     return render_to_response('farmers/sale.html', {
         'farmer': farmer,
         'transaction': transaction,
@@ -94,8 +90,12 @@ def farmer_sale(request, farmer_pk, sale_pk):
 
 @login_required
 def farmer_new_sale(request, farmer_pk):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     form = forms.SelectCropForm()
+    form.fields['crop_receipt'].queryset = agent.cropreceipts_available_for(farmer)
     return render_to_response('farmers/new_sale.html', {
         'farmer': farmer,
         'form': form,
@@ -103,7 +103,7 @@ def farmer_new_sale(request, farmer_pk):
 
 @login_required
 def farmer_new_sale_detail(request, farmer_pk):
-    crop = get_object_or_404(Crop, pk=request.GET.get('crop'))
+    crop_receipt = get_object_or_404(CropReceipt, pk=request.GET.get('crop_receipt'))
     farmer = get_object_or_404(Farmer, pk = farmer_pk)
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -117,27 +117,24 @@ def farmer_new_sale_detail(request, farmer_pk):
         else:
             form = forms.TransactionForm(request.POST)
             if form.is_valid():
-                crop = form.cleaned_data['crop']
-                unit = form.cleaned_data['unit']
+                crop_receipt = form.cleaned_data['crop_receipt']
                 price = form.cleaned_data['price']
                 amount = form.cleaned_data['amount']
-                market = form.cleaned_data['market']
-                agent.register_sale(market, farmer, crop, unit, price, amount)
+                agent.register_sale(crop_receipt, price, amount)
                 messages.add_message(request, messages.INFO,
-                    "New Sale Registered and %s will be notified via SMS" % (
+                    "New sale registered and %s will be notified via SMS" % (
                         farmer.actor.name,))
                 return redirect_to_farmer
 
     else:
         form = forms.TransactionForm(initial={
-            'crop': crop.pk,
-            'created_at': datetime.now()
+            'crop_receipt': crop_receipt.pk,
+            'created_at': datetime.now(),
         })
-        form.fields["unit"].queryset = CropUnit.objects.filter(crop=crop)
 
     return render_to_response('farmers/new_sale_detail.html', {
         'form': form,
-        'crop': crop
+        'crop_receipt': crop_receipt
     }, context_instance=RequestContext(request))
 
 @login_required

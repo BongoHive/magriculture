@@ -21,7 +21,7 @@
             <div class="item"><label>Total Price:</label> ZK {{transaction.total|floatformat}}</div>
             <div class="pagination">
                 <a class="del" href="{% url fncs:todo %}cancel-sale">[x] Cancel Sale</a> | 
-                <a href="{% url fncs:farmer_sales farmer_pk=transaction.farmer.pk %}">More Sales &raquo;</a>
+                <a href="{% url fncs:farmer_sales farmer_pk=transaction.crop_receipt.farmer.pk %}">More Sales &raquo;</a>
             </div>
         </div>
 
