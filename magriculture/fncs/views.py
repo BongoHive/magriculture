@@ -117,7 +117,6 @@ def farmer_new_sale_detail(request, farmer_pk):
         else:
             form = forms.TransactionForm(request.POST)
             if form.is_valid():
-                crop_receipt = form.cleaned_data['crop_receipt']
                 price = form.cleaned_data['price']
                 amount = form.cleaned_data['amount']
                 agent.register_sale(crop_receipt, price, amount)
@@ -499,7 +498,6 @@ def market_register_offer(request, market_pk):
 
         form = forms.OfferForm(request.POST)
         if form.is_valid():
-            print form.cleaned_data
             crop = form.cleaned_data['crop']
             unit = form.cleaned_data['unit']
             price_floor = form.cleaned_data['price_floor']

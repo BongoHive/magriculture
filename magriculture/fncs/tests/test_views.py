@@ -141,11 +141,7 @@ class FarmersTestCase(FNCSTestCase):
 		response = self.client.post(sale_url, {
 			'cancel': 1,
 		}, follow=True)
-		self.assertEqual(response.redirect_chain, [
-			('http://testserver%s' % self.farmer_url(), 302),
-			('http://testserver%s' % self.farmer_url('sales'), 302),
-		])
-		# self.assertRedirects(response, status_code=200, self.farmer_url('sales'))
+		self.assertRedirects(response, self.farmer_url('sales'))
 		post_args = format_timestamp('created_at', datetime.now())
 		post_args.update({
 			'crop_receipt': receipt.pk,
@@ -161,3 +157,75 @@ class FarmersTestCase(FNCSTestCase):
 		self.assertEqual(transaction.amount, receipt.amount)
 		self.assertEqual(transaction.total, 10 * receipt.amount)
 		self.assertTrue(transaction.crop_receipt.reconciled)
+
+	def test_farmer_profile(self):
+		response = self.client.get(self.farmer_url('profile'))
+		self.assertContains(response, self.farmer.actor.name)
+
+	def test_farmer_crops(self):
+		raise NotImplemented
+
+	def test_farmer_edit(self):
+		raise NotImplemented
+
+class AgentTestCase(FNCSTestCase):
+
+	def setUp(self):
+		super(AgentTestCase, self).setUp()
+		self.test_msisdn = '27861234567'
+		self.login()
+
+	def test_sales(self):
+		response = self.client.get(reverse('fncs:sales'))
+		self.assertContains(response, 'Crop sale history')
+		self.assertContains(response, 'Agent sale history')
+
+	def test_sales_crops(self):
+		raise NotImplemented
+
+	def test_sales_agents(self):
+		raise NotImplemented
+
+	def test_sales_agent_breakdown(self):
+		raise NotImplemented
+
+class PricesTestCase(FNCSTestCase):
+
+	def setUp(self):
+		super(PricesTestCase, self).setUp()
+		self.test_msisdn = '27861234567'
+		self.login()
+
+	def test_market_prices(self):
+		raise NotImplemented
+
+	def test_market_sales(self):
+		raise NotImplemented
+
+	def test_market_sale(self):
+		raise NotImplemented
+
+	def test_crop(self):
+		raise NotImplemented
+
+	def test_crop_unit(self):
+		raise NotImplemented
+
+	def test_market_offers(self):
+		raise NotImplemented
+
+	def test_market_offer(self):
+		raise NotImplemented
+
+	def test_offer(self):
+		raise NotImplemented
+
+	def test_offer_unit(self):
+		raise NotImplemented
+
+	def test_market_new_offer(self):
+		raise NotImplemented
+
+	def test_market_register_offer(self):
+		raise NotImplemented
+

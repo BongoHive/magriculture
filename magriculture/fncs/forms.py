@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.forms.widgets import HiddenInput, Textarea, CheckboxSelectMultiple
+from magriculture.fncs import errors
 from magriculture.fncs.models.props import (Crop, Transaction, Message,
                                             GroupMessage, Note, Offer,
                                             CropReceipt)
@@ -21,6 +22,12 @@ class TransactionForm(forms.ModelForm):
                     widget=SplitSelectDateTimeWidget(attrs={
                         'class':'date-form'
                     }))
+
+    def clean_crop_receipt(self):
+        data = self.cleaned_data
+        if data['crop_receipt'].remaining_inventory() < data['amount']:
+            raise forms.ValidationError("Not enough inventory")
+        return self.data
 
     class Meta:
         model = Transaction
