@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.test.client import Client
+from django.utils.unittest import skip
 from django.core.urlresolvers import reverse
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import FarmerGroup, Farmer
@@ -162,11 +163,13 @@ class FarmersTestCase(FNCSTestCase):
 		response = self.client.get(self.farmer_url('profile'))
 		self.assertContains(response, self.farmer.actor.name)
 
+	@skip("not implemented yet")
 	def test_farmer_crops(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_farmer_edit(self):
-		raise NotImplemented
+		pass
 
 class AgentTestCase(FNCSTestCase):
 
@@ -180,14 +183,17 @@ class AgentTestCase(FNCSTestCase):
 		self.assertContains(response, 'Crop sale history')
 		self.assertContains(response, 'Agent sale history')
 
+	@skip("not implemented yet")
 	def test_sales_crops(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_sales_agents(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_sales_agent_breakdown(self):
-		raise NotImplemented
+		pass
 
 class PricesTestCase(FNCSTestCase):
 
@@ -196,36 +202,47 @@ class PricesTestCase(FNCSTestCase):
 		self.test_msisdn = '27861234567'
 		self.login()
 
+	@skip("not implemented yet")
 	def test_market_prices(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_market_sales(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_market_sale(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_crop(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_crop_unit(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_market_offers(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_market_offer(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_offer(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_offer_unit(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_market_new_offer(self):
-		raise NotImplemented
+		pass
 
+	@skip("not implemented yet")
 	def test_market_register_offer(self):
-		raise NotImplemented
+		pass
 
