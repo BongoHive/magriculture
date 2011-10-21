@@ -2,9 +2,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, render, redirect
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
+from django.forms.widgets import HiddenInput
 from datetime import datetime
 import urllib
 
@@ -50,8 +51,7 @@ def farmer_new(request):
             farmer = Farmer.create(msisdn, name, surname, farmergroup)
             for market in markets:
                 farmer.operates_at(market, agent)
-            messages.add_message(request, messages.INFO,
-                "Farmer Created")
+            messages.success(request, "Farmer Created")
             return HttpResponseRedirect(reverse("fncs:farmer_crops", kwargs={
                 'farmer_pk': farmer.pk
             }))
@@ -120,7 +120,7 @@ def farmer_new_sale_detail(request, farmer_pk):
                 price = form.cleaned_data['price']
                 amount = form.cleaned_data['amount']
                 agent.register_sale(crop_receipt, price, amount)
-                messages.add_message(request, messages.INFO,
+                messages.success(request,
                     "New sale registered and %s will be notified via SMS" % (
                         farmer.actor.name,))
                 return redirect_to_farmer
@@ -160,14 +160,13 @@ def farmer_new_message(request, farmer_pk):
     if request.POST:
 
         if 'cancel' in request.POST:
-            messages.add_message(request, messages.INFO,
-                'Message cancelled')
+            messages.success(request, 'Message cancelled')
             return redirect_to_farmer
 
         form = forms.MessageForm(request.POST)
         if form.is_valid():
             agent.send_message_to_farmer(farmer, form.cleaned_data['content'])
-            messages.add_message(request, messages.INFO,
+            messages.success(request,
                 'The message has been sent to %s via SMS' % farmer.actor.name)
             return redirect_to_farmer
     else:
@@ -205,8 +204,7 @@ def farmer_new_note(request, farmer_pk):
         form = forms.NoteForm(request.POST)
         if form.is_valid():
             agent.write_note(farmer, form.cleaned_data['content'])
-            messages.add_message(request, messages.INFO,
-                'Note has been saved')
+            messages.success(request, 'Note has been saved')
             return redirect_to_farmer_notes
     else:
         form = forms.NoteForm()
@@ -237,8 +235,7 @@ def group_message_new(request):
     farmergroups = FarmerGroup.objects.all()
     if request.POST:
         if 'cancel' in request.POST:
-            messages.add_message(request, messages.INFO,
-                'Message Cancelled')
+            messages.success(request, 'Message Cancelled')
             return HttpResponseRedirect(reverse('fncs:messages'))
         else:
             return HttpResponseRedirect('%s?%s' % (
@@ -262,15 +259,14 @@ def group_message_write(request):
     if request.POST:
 
         if 'cancel' in request.POST:
-            messages.add_message(request, messages.INFO,
-                'The message has been cancelled')
+            messages.success(request, 'The message has been cancelled')
             return HttpResponseRedirect(reverse('fncs:messages'))
 
         form = forms.GroupMessageForm(request.POST)
         if form.is_valid():
             content = form.cleaned_data['content']
             agent.send_message_to_farmergroups(farmergroups, content)
-            messages.add_message(request, messages.INFO,
+            messages.success(request,
                 'The message has been sent to all group members via SMS')
             return HttpResponseRedirect(reverse('fncs:messages'))
     else:
@@ -316,9 +312,7 @@ def farmer_crops(request, farmer_pk):
         if form.is_valid():
             selected_crops = form.cleaned_data['crops']
             farmer.grows_crops_exclusively(selected_crops)
-            messages.add_message(request, messages.INFO,
-                'Crops have been updated'
-            )
+            messages.success(request, 'Crops have been updated')
             return HttpResponseRedirect(reverse('fncs:farmer', kwargs={
                 'farmer_pk': farmer_pk
             }))
@@ -347,8 +341,7 @@ def farmer_edit(request, farmer_pk):
             farmer.operates_at_markets_exclusively(form.cleaned_data['markets'])
             farmer.farmergroup = form.cleaned_data['farmergroup']
             farmer.save()
-            messages.add_message(request, messages.INFO,
-                "Farmer Profile has been updated")
+            messages.success(request,"Farmer Profile has been updated")
             return HttpResponseRedirect(reverse('fncs:farmer_crops', kwargs={
                 'farmer_pk': farmer.pk
             }))
@@ -408,8 +401,9 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
     unit = get_object_or_404(CropUnit, pk=unit_pk)
-    transactions = Transaction.objects.filter(unit=unit, crop=crop,
-                                                market=market)
+    transactions = Transaction.objects.filter(
+        crop_receipt__unit=unit, crop_receipt__crop=crop,
+            crop_receipt__market=market)
     paginator = Paginator(transactions, 5)
     page = paginator.page(request.GET.get('p', 1))
 
@@ -505,8 +499,7 @@ def market_register_offer(request, market_pk):
             market = form.cleaned_data['market']
             marketmonitor.register_offer(market, crop, unit, price_floor,
                                             price_ceiling)
-            messages.add_message(request, messages.INFO, 'Opening price has '
-                'been registered')
+            messages.success(request, 'Opening price has been registered')
             return HttpResponseRedirect(reverse('fncs:market_new_offer'))
     else:
         form = forms.OfferForm(initial={
@@ -517,6 +510,126 @@ def market_register_offer(request, market_pk):
         'form': form,
         'market': market
     }, context_instance=RequestContext(request))
+
+@login_required
+def inventory(request):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    paginator = Paginator(agent.cropreceipts_available(), 5)
+    page = paginator.page(request.GET.get('p', 1))
+    return render(request, 'inventory.html', {
+        'agent': agent,
+        'paginator': paginator,
+        'page': page,
+    })
+
+@login_required
+def inventory_sale(request):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    farmer_pk = request.GET.get('farmer')
+    if farmer_pk:
+        farmer = get_object_or_404(Farmer, pk=farmer_pk)
+        form = forms.CropReceiptSaleStep1Form(initial={
+            'farmer': farmer
+        })
+        form.fields['farmer'].widget = HiddenInput()
+    else:
+        form = forms.CropReceiptSaleStep1Form()
+    form.fields['crop'].queryset = agent.crops_available()
+    form.fields['farmer'].queryset = agent.farmer_set.all()
+    return render(request, 'inventory_sale.html', {
+        'agent': agent,
+        'form': form,
+    })
+
+@login_required
+def inventory_sale_details(request):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    crop = get_object_or_404(Crop, pk=request.REQUEST.get('crop'))
+    farmer = get_object_or_404(Farmer, pk=request.REQUEST.get('farmer'))
+    crop_receipts = agent.cropreceipts_available_for(farmer).filter(crop=crop)
+    if not crop_receipts.exists():
+        messages.error(request,
+            "You don't have any %s to sell for %s" % (crop, farmer))
+        return redirect(reverse('fncs:inventory_sale'))
+    if request.POST:
+        form = forms.CropReceiptSaleStep2Form(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            price = form.cleaned_data['price']
+            crop_receipt = form.cleaned_data['crop_receipt']
+            remaining_inventory = crop_receipt.remaining_inventory()
+            if remaining_inventory < amount:
+                messages.error(request,
+                    "Selling beyond inventory, you only have %s left" % (
+                        crop_receipt,))
+            else:
+                agent.register_sale(crop_receipt, amount, price)
+                messages.success(request, "Sale registered succesfully")
+                return redirect(reverse('fncs:inventory_sale'))
+    else:
+        form = forms.CropReceiptSaleStep2Form(initial={
+            'agent': agent,
+            'crop': crop,
+            'farmer': farmer,
+        })
+    form.fields['crop_receipt'].queryset = crop_receipts
+    return render(request, 'inventory_sale_details.html', {
+        'agent': agent,
+        'crop': crop,
+        'farmer': farmer,
+        'form': form,
+    })
+
+@login_required
+def inventory_intake(request):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    form = forms.CropReceiptStep1Form(initial={
+        'agent': agent,
+    })
+    form.fields['market'].queryset = agent.markets.all()
+    return render(request, 'inventory_intake.html', {
+        'form': form,
+    })
+
+@login_required
+def inventory_intake_details(request):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    market = get_object_or_404(Market, pk=request.REQUEST.get('market'))
+    crop = get_object_or_404(Crop, pk=request.REQUEST.get('crop'))
+    if request.POST:
+        form = forms.CropReceiptStep2Form(request.POST)
+        if form.is_valid():
+            market = form.cleaned_data['market']
+            farmer = form.cleaned_data['farmer']
+            amount = form.cleaned_data['amount']
+            crop_unit = form.cleaned_data['crop_unit']
+            crop = form.cleaned_data['crop']
+            quality = form.cleaned_data['quality']
+            receipt = agent.take_in_crop(market, farmer, amount,
+                                            crop_unit, crop, quality)
+            messages.success(request,'%s has been added to your inventory' % str(receipt))
+            return redirect(reverse('fncs:inventory'))
+
+    else:
+        form = forms.CropReceiptStep2Form(initial={
+            'agent': agent,
+            'crop': crop,
+            'market': market,
+        })
+
+    form.fields['crop_unit'].queryset = crop.units.all()
+    form.fields['farmer'].queryset = market.farmer_set.all()
+    return render(request, 'inventory_intake_details.html', {
+        'agent': agent,
+        'form': form,
+        'crop': crop,
+        'market': market,
+    })
 
 def todo(request):
     """Anything that resolves to here still needs to be completed"""

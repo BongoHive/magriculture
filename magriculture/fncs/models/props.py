@@ -89,7 +89,9 @@ class CropReceipt(models.Model):
         return self.amount - sold_inventory
 
     def __unicode__(self):  # pragma: no cover
-        return u"%s of %s from %s" % (self.unit, self.crop, self.created_at.date())
+        return u"%s %s %s of %s from %s" % (self.remaining_inventory(),
+            self.get_quality_display(), self.unit, self.crop,
+            self.created_at.strftime('%d %b'),)
 
 
 class DirectSale(models.Model):

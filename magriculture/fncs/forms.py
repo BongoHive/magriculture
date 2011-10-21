@@ -1,12 +1,15 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.utils.safestring import mark_safe
+from django.core.urlresolvers import reverse
 from django.forms.widgets import HiddenInput, Textarea, CheckboxSelectMultiple
 from magriculture.fncs import errors
 from magriculture.fncs.models.props import (Crop, Transaction, Message,
                                             GroupMessage, Note, Offer,
-                                            CropReceipt)
+                                            CropReceipt, CROP_QUALITY_CHOICES,
+                                            CropUnit)
 from magriculture.fncs.models.geo import Market
-from magriculture.fncs.models.actors import Actor, FarmerGroup
+from magriculture.fncs.models.actors import (Actor, FarmerGroup, Farmer)
 from magriculture.fncs.widgets import SplitSelectDateTimeWidget
 
 class SelectCropForm(forms.Form):
@@ -41,10 +44,6 @@ class OfferForm(forms.ModelForm):
     crop = forms.ModelChoiceField(queryset=Crop.objects.all())
     market = forms.ModelChoiceField(queryset=Market.objects.all(),
                                         widget=HiddenInput())
-    # created_at = forms.DateTimeField(label='Date', required=True,
-    #                 widget=SplitSelectDateTimeWidget(attrs={
-    #                     'class':'date-form'
-    #                 }))
 
     class Meta:
         model = Offer
@@ -96,3 +95,48 @@ class NoteForm(forms.ModelForm):
         exclude = [
             'owner', 'about_actor'
         ]
+
+class CropReceiptStep1Form(forms.Form):
+    crop = forms.ModelChoiceField(queryset=Crop.objects.all(), required=True,
+        empty_label=None, label='Which crop?')
+    market = forms.ModelChoiceField(queryset=Market.objects.all(), required=True,
+        empty_label=None, label='Which market?')
+
+class CropReceiptStep2Form(forms.Form):
+    crop = forms.ModelChoiceField(queryset=Crop.objects.all(), required=True,
+        widget=HiddenInput())
+    market = forms.ModelChoiceField(queryset=Market.objects.all(), required=True,
+        widget=HiddenInput())
+    farmer = forms.ModelChoiceField(queryset=Farmer.objects.all(), required=True,
+        empty_label=None, label='Which farmer?')
+    crop_unit = forms.ModelChoiceField(queryset=CropUnit.objects.all(), required=True,
+        empty_label=None, label='Which unit?')
+    amount = forms.FloatField(required=True, min_value=0.1, label='How many units?')
+    quality = forms.ChoiceField(choices=CROP_QUALITY_CHOICES, required=True,
+        label='What quality is the crop?')
+
+class CropReceiptForm(forms.ModelForm):
+    class Meta:
+        model = CropReceipt
+        exclude = [
+            'agent',
+            'created_at',
+            'reconciled',
+        ]
+
+class CropReceiptSaleStep1Form(forms.Form):
+    crop = forms.ModelChoiceField(queryset=Crop.objects.all(), required=True,
+        empty_label=None, label='Which crop?')
+    farmer = forms.ModelChoiceField(queryset=Farmer.objects.all(), required=True,
+        empty_label=None, label='Which farmer?')
+
+
+class CropReceiptSaleStep2Form(forms.Form):
+    crop = forms.ModelChoiceField(queryset=Crop.objects.all(), required=True,
+        widget=HiddenInput())
+    farmer = forms.ModelChoiceField(queryset=Farmer.objects.all(), required=True,
+        widget=HiddenInput())
+    crop_receipt = forms.ModelChoiceField(queryset=CropReceipt.objects.all(),
+        required=True, empty_label=None, label='Sell from which crop intake?')
+    amount = forms.FloatField(required=True, min_value=0.1, label='How many?')
+    price = forms.FloatField(required=True, min_value=0.1, label='At what price?')

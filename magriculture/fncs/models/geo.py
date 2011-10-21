@@ -1,5 +1,5 @@
 from django.db import models
-from magriculture.fncs.models.props import Crop
+from magriculture.fncs.models.props import Crop, Transaction
 
 class Province(models.Model):
     """
@@ -140,7 +140,15 @@ class Market(models.Model):
         """
         List of :class:`magriculture.fncs.models.props.Crop` available in this market
         """
-        return Crop.objects.filter(cropreceipt__market=self)
+        return Crop.objects.filter(cropreceipt__market=self).distinct()
+
+    def transactions(self):
+        """
+        Return a list of transactions that took place at this market
+
+        :returns: :class:`magriculture.fncs.models.props.Transaction`
+        """
+        return Transaction.objects.filter(crop_receipt__market=self)
 
     class Meta:
         ordering = ['name']

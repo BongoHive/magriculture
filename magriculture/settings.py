@@ -7,7 +7,7 @@ def abspath(*args):
     return os.path.join(PROJECT_ROOT, *args)
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = True
 
 ADMINS = (
     ('Foundation Dev', 'dev@praekeltfoundation.org'),
@@ -130,6 +130,8 @@ INSTALLED_APPS = (
     'south',
     'django_nose',
     'gunicorn',
+    'sentry',
+    'raven.contrib.django',
 )
 
 # A sample logging configuration. The only tangible logging

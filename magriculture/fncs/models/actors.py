@@ -384,7 +384,7 @@ class Agent(models.Model):
         return self.cropreceipt_set.filter(farmer=farmer,
             market=market).exists()
 
-    def take_in_crop(self, market, farmer, amount, unit, crop):
+    def take_in_crop(self, market, farmer, amount, unit, crop, **kwargs):
         """
         Add to the agent's crop inventory
 
@@ -416,7 +416,8 @@ class Agent(models.Model):
         farmer.markets.add(market)
         farmer.crops.add(crop)
         return self.cropreceipt_set.create(market=market, farmer=farmer,
-            amount=amount, unit=unit, crop=crop, created_at=datetime.now())
+            amount=amount, unit=unit, crop=crop, created_at=datetime.now(),
+            **kwargs)
 
     def cropreceipts_available_for(self, farmer):
         """
@@ -426,6 +427,22 @@ class Agent(models.Model):
         :param farmer: a :class:`Farmer`
         """
         return self.cropreceipt_set.filter(farmer=farmer, reconciled=False)
+
+    def cropreceipts_available(self):
+        """
+        Return a list of crop receipts that this agent is in his
+        posession of
+
+        :returns: list of :class:`CropReceipt`
+        """
+        return self.cropreceipt_set.filter(reconciled=False).order_by('-created_at')
+
+    def crops_available(self):
+        """
+        :returns: list of :class:`Crop`
+        """
+        return Crop.objects.filter(cropreceipt__agent=self,
+            cropreceipt__reconciled=False).distinct()
 
     def register_sale(self, crop_receipt, amount, price):
         """
