@@ -5,6 +5,7 @@ Installation
 
   $ virtualenv --no-site-packages ve
   $ source ve/bin/activate
+  (ve)$ cd magriculture
   (ve)$ pip install -r config/requirements.pip
   (ve)$ ./manage.py syncdb --noinput
   (ve)$ ./manage.py migrate
