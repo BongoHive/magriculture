@@ -279,10 +279,16 @@ class PricesTestCase(FNCSTestCase):
 		for crop in crops:
 			self.assertContains(response, crop.name)
 
-
-	@skip("not implemented yet")
 	def test_crop(self):
-		pass
+		receipt = self.take_in(10, 'boxes', 'apples')
+		transaction = utils.sell(receipt, 10, 10)
+		response = self.client.get(reverse('fncs:crop', kwargs={
+			'market_pk': self.market.pk,
+			'crop_pk': receipt.crop.pk,
+		}))
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Average price 10.00 ZMK')
+		self.assertContains(response, 'apples sold in boxes')
 
 	@skip("not implemented yet")
 	def test_crop_unit(self):
