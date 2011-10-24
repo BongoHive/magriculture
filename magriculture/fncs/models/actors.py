@@ -384,6 +384,16 @@ class Agent(models.Model):
         return self.cropreceipt_set.filter(farmer=farmer,
             market=market).exists()
 
+    def transactions(self):
+        """
+        Returns the transactions completed by this agent
+
+        :returns: list
+        :rtype: magriculture.fncs.models.props.Transaction
+
+        """
+        return Transaction.objects.filter(crop_receipt__agent=self)
+
     def take_in_crop(self, market, farmer, amount, unit, crop, **kwargs):
         """
         Add to the agent's crop inventory

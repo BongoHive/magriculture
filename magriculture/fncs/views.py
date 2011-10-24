@@ -285,7 +285,7 @@ def sales(request):
 @login_required
 def sales_crops(request):
     agent = request.user.get_profile().as_agent()
-    paginator = Paginator(agent.transaction_set.all(), 5)
+    paginator = Paginator(agent.transactions(), 5)
     page = paginator.page(request.GET.get('p', 1))
     return render_to_response('sales_crops.html', {
         'sales': sales,

@@ -3,7 +3,8 @@ from django.test.client import Client
 from django.utils.unittest import skip
 from django.core.urlresolvers import reverse
 from magriculture.fncs.tests import utils
-from magriculture.fncs.models.actors import FarmerGroup, Farmer
+from magriculture.fncs.models.actors import FarmerGroup, Farmer, MarketMonitor
+from magriculture.fncs.models.geo import Market
 from datetime import datetime
 
 
@@ -30,6 +31,12 @@ class FNCSTestCase(TestCase):
 		self.farmers = list(create_random_farmers(10, self.agent, self.market))
 		self.farmer = self.farmers[0]
 		self.farmergroup = self.farmer.farmergroup
+
+	def farmer_url(self, *args, **kwargs):
+		return utils.farmer_url(self.farmer.pk, *args, **kwargs)
+
+	def take_in(self, *args):
+		return utils.take_in(self.market, self.agent, self.farmer, *args)
 
 	def login(self):
 		self.client.login(username=self.msisdn, password=self.pin)
@@ -74,12 +81,6 @@ class FarmersTestCase(FNCSTestCase):
 		super(FarmersTestCase, self).setUp()
 		self.test_msisdn = '27861234567'
 		self.login()
-
-	def farmer_url(self, *args, **kwargs):
-		return utils.farmer_url(self.farmer.pk, *args, **kwargs)
-
-	def take_in(self, *args):
-		return utils.take_in(self.market, self.agent, self.farmer, *args)
 
 	def test_farmer_listing(self):
 		response = self.client.get(reverse('fncs:farmers'))
@@ -163,13 +164,49 @@ class FarmersTestCase(FNCSTestCase):
 		response = self.client.get(self.farmer_url('profile'))
 		self.assertContains(response, self.farmer.actor.name)
 
-	@skip("not implemented yet")
 	def test_farmer_crops(self):
-		pass
+		random_crops = [utils.create_crop(n) for n in
+							['tomatoe', 'potato', 'carrot']]
+		receipt1 = self.take_in(10, 'boxes', 'apple')
+		receipt2 = self.take_in(20, 'kilos', 'cabbage')
+		response = self.client.get(self.farmer_url('crops'))
+		self.assertContains(response, receipt1.crop.name)
+		self.assertContains(response, receipt2.crop.name)
+		response = self.client.post(self.farmer_url('crops'), {
+			'crops': [crop.pk for crop in random_crops]
+		}, follow=True)
+		# this should be a mass override
+		for crop in random_crops:
+			self.assertContains(response, crop.name)
+		# previous selection should have been cleared
+		self.assertNotContains(response, receipt1.crop.name)
+		self.assertNotContains(response, receipt2.crop.name)
+		self.assertRedirects(response, self.farmer_url('sales'))
 
-	@skip("not implemented yet")
+
 	def test_farmer_edit(self):
-		pass
+		farmer_url = self.farmer_url('edit')
+		response = self.client.get(farmer_url)
+		user = self.farmer.actor.user
+		self.assertContains(response, user.first_name)
+		self.assertContains(response, user.last_name)
+		self.assertContains(response, user.username)
+		response = self.client.post(farmer_url, {
+			'name': 'n',
+			'surname': 'sn',
+			'msisdn': '1',
+			'farmergroup': self.farmergroup.pk,
+			'markets': [self.market.pk],
+		})
+		self.assertRedirects(response, self.farmer_url('crops'))
+		farmer = Farmer.objects.get(pk=self.farmer.pk)
+		user = farmer.actor.user
+		self.assertEqual(user.first_name, 'n')
+		self.assertEqual(user.last_name, 'sn')
+		self.assertEqual(user.username, '1')
+		self.assertEqual([market.pk for market in farmer.markets.all()],
+			[market.pk for market in Market.objects.filter(pk=self.market.pk)])
+
 
 class AgentTestCase(FNCSTestCase):
 
@@ -183,17 +220,24 @@ class AgentTestCase(FNCSTestCase):
 		self.assertContains(response, 'Crop sale history')
 		self.assertContains(response, 'Agent sale history')
 
-	@skip("not implemented yet")
 	def test_sales_crops(self):
-		pass
+		response = self.client.get(reverse('fncs:sales_crops'))
+		self.assertContains(response, 'No sales')
+		# make a sale
+		receipt = self.take_in(10, 'boxes', 'tomato')
+		sale = utils.sell(receipt, 10, 10)
+		response = self.client.get(reverse('fncs:sales_crops'))
+		self.assertContains(response, str(receipt.crop))
 
-	@skip("not implemented yet")
 	def test_sales_agents(self):
-		pass
+		# This view doesn't do much yet
+		response = self.client.get(reverse('fncs:sales_agents'))
+		self.assertEqual(response.status_code, 200)
 
-	@skip("not implemented yet")
 	def test_sales_agent_breakdown(self):
-		pass
+		# This view doesn't do much yet
+		response = self.client.get(reverse('fncs:sales_agent_breakdown'))
+		self.assertEqual(response.status_code, 200)
 
 class PricesTestCase(FNCSTestCase):
 
@@ -202,17 +246,39 @@ class PricesTestCase(FNCSTestCase):
 		self.test_msisdn = '27861234567'
 		self.login()
 
-	@skip("not implemented yet")
 	def test_market_prices(self):
-		pass
+		response = self.client.get(reverse('fncs:market_prices'))
+		self.assertEqual(response.status_code, 200)
+		# not available for agents
+		self.assertNotContains(response, 'Provide opening price')
+		# test availability for market monitors
+		actor = self.agent.actor
+		market_monitor = MarketMonitor.objects.create(actor=actor)
+		response = self.client.get(reverse('fncs:market_prices'))
+		self.assertEqual(actor.as_marketmonitor(), market_monitor)
+		self.assertContains(response, 'Provide opening price')
 
-	@skip("not implemented yet")
 	def test_market_sales(self):
-		pass
+		response = self.client.get(reverse('fncs:market_sales'))
+		self.assertContains(response, 'No transactions')
+		receipt = self.take_in(10,'boxes','oranges')
+		transactions = utils.sell(receipt, 10, 10)
+		response = self.client.get(reverse('fncs:market_sales'))
+		self.assertContains(response, self.market.name)
 
-	@skip("not implemented yet")
 	def test_market_sale(self):
-		pass
+		response = self.client.get(reverse('fncs:market_sale', kwargs={
+			'market_pk': self.market.pk
+		}))
+		self.assertContains(response, 'No sales recorded yet')
+		receipt = self.take_in(10, 'boxes', 'tomato')
+		response = self.client.get(reverse('fncs:market_sale', kwargs={
+			'market_pk': self.market.pk
+		}))
+		crops = self.market.crops()
+		for crop in crops:
+			self.assertContains(response, crop.name)
+
 
 	@skip("not implemented yet")
 	def test_crop(self):
