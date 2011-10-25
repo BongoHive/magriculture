@@ -89,6 +89,7 @@ class TestCropPriceWorker(unittest.TestCase):
         api_url = "http://%s:%s/" % (addr.host, addr.port)
         self.worker = get_stubbed_worker(CropPriceWorker, {
             'transport_name': 'test',
+            'worker_name': 'test_crop_prices',
             'api_url': api_url})
         yield self.worker.startWorker()
 
