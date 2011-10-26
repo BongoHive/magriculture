@@ -30,57 +30,82 @@ class FncsApi(object):
                              unit_id=unit_id, limit=limit)
 
 
+class Farmer(object):
+    def __init__(self, user_id, farmer_name):
+        self.user_id = user_id
+        self.farmer_name = farmer_name
+        self.crops = []
+        self.markets = []
+
+    @classmethod
+    @inlineCallbacks
+    def from_user_id(cls, user_id, api):
+        data = yield api.get_farmer(user_id)
+        farmer = cls(user_id, data["farmer_name"])
+        farmer.crops.extend(data["crops"])
+        farmer.markets.extend(data["markets"])
+        returnValue(farmer)
+
+    def serialize(self):
+        data = {
+            "user_id": self.user_id,
+            "farmer_name": self.farmer_name,
+            "crops": self.crops,
+            "markets": self.markets,
+            }
+        return json.dumps(data)
+
+    @classmethod
+    def unserialize(cls, json_str):
+        data = json.loads(json_str)
+        farmer = cls(data["user_id"], data["farmer_name"])
+        farmer.crops.extend(data["crops"])
+        farmer.markets.extend(data["markets"])
+        return farmer
+
+
 class CropPriceModel(object):
     """A simple state model of the interaction with a farmer
     viewing crop prices.
 
-    :type session: dict or None
-    :param session:
-        Dictionary containing session state or None (default)
-        indicating that this is a new session.
+    :type state: str
+    :param state:
+        One of the model state constants.
+    :type user_id: str
+    :param user_id:
+        Unique id associated with the user.
+    :type farmer_name:
     """
     # states of the model
     SELECT_CROP, SELECT_MARKETS, SHOW_PRICES = STATES = (
         "select_crop", "select_market", "show_prices")
     START = SELECT_CROP
 
-    def __init__(self, state, user_id, farmer_name, crops, markets):
+    def __init__(self, state, farmer):
         assert state in self.STATES
         self.state = state
-        self.user_id = user_id
-        self.farmer_name = farmer_name
-        self.crops = crops
-        self.markets = markets
+        self.farmer = farmer
 
     @classmethod
     @inlineCallbacks
     def from_user_id(cls, user_id, api):
-        farmer_data = yield api.get_farmer(user_id)
-        farmer_name = farmer_data["name"]
-        crops = farmer_data["crops"]
-        markets = farmer_data["markets"]
-        model = cls(cls.START, user_id, farmer_name, crops, markets)
+        farmer = yield Farmer.from_user_id(user_id, api)
+        model = cls(cls.START, farmer)
         returnValue(model)
+
+    def serialize(self):
+        model_data = {
+            "state": self.state,
+            "farmer": self.farmer.serialize(),
+            }
+        return json.dumps(model_data)
 
     @classmethod
     def unserialize(cls, data):
         model_data = json.loads(data)
         state = model_data["state"]
-        user_id = model_data["user_id"]
-        farmer_name = model_data["farmer_name"]
-        crops = model_data["crops"]
-        markets = model_data["markets"]
-        return cls(state, user_id, farmer_name, crops, markets)
-
-    def serialize(self):
-        model_data = {
-            "state": self.state,
-            "user_id": self.user_id,
-            "farmer_name": self.farmer_name,
-            "crops": self.crops,
-            "markets": self.markets,
-            }
-        return json.dumps(model_data)
+        farmer = Farmer.unserialize(model_data["farmer"])
+        return cls(state, farmer)
 
     def get_choice(self, text, min_choice, max_choice):
         try:
