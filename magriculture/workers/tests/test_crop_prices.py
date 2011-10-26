@@ -23,6 +23,7 @@ FARMERS = {
     }
 
 PRICES = {
+    ("market1", "crop1", "unit1"): [1.2, 1.1, 1.5],
     }
 
 
@@ -86,7 +87,33 @@ class DummyFncsApiResource(Resource):
 
 
 class TestFncsApi(unittest.TestCase):
-    pass
+    @inlineCallbacks
+    def setUp(self):
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
+        self.server = yield reactor.listenTCP(0, site_factory)
+        addr = self.server.getHost()
+        self.api = FncsApi("http://%s:%s/" % (addr.host, addr.port))
+
+    @inlineCallbacks
+    def tearDown(self):
+        yield self.server.loseConnection()
+
+    @inlineCallbacks
+    def test_get_farmer(self):
+        data = yield self.api.get_farmer("+27885557777")
+        self.assertEqual(data, {
+            "farmer_name": "Farmer Bob",
+            "crops": [],
+            "markets": [],
+            })
+
+    @inlineCallbacks
+    def test_get_price_history(self):
+        data = yield self.api.get_price_history("market1", "crop1", "unit1",
+                                                5)
+        self.assertEqual(data, {
+            "prices": PRICES[("market1", "crop1", "unit1")],
+            })
 
 
 class TestFarmer(unittest.TestCase):
