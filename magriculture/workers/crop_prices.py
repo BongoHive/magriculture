@@ -27,9 +27,9 @@ class FncsApi(object):
     def get_farmer(self, user_id):
         return self.get_page("farmer", msisdn=user_id)
 
-    def get_price_history(self, market_id, crop_id, unit_id, limit):
+    def get_price_history(self, market_id, crop_id, limit):
         return self.get_page("price_history", market=market_id, crop=crop_id,
-                             unit=unit_id, limit=limit)
+                             limit=limit)
 
 
 class Farmer(object):

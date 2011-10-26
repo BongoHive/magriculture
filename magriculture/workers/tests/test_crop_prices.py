@@ -23,7 +23,14 @@ FARMERS = {
     }
 
 PRICES = {
-    ("market1", "crop1", "unit1"): [1.2, 1.1, 1.5],
+    ("market1", "crop1", "unit1"): {
+        "unit_name": "boxes",
+        "prices": [1.2, 1.1, 1.5],
+        },
+    ("market1", "crop1", "unit2"): {
+        "unit_name": "crates",
+        "prices": [1.6, 1.7, 1.8],
+        },
     }
 
 
@@ -73,10 +80,15 @@ class DummyPriceHistoryResource(DummyResourceBase):
     def get_data(self, request):
         market_id = request.args["market"][0]
         crop_id = request.args["crop"][0]
-        unit_id = request.args["unit"][0]
         limit = int(request.args.get("limit", [10])[0])
-        prices = self.prices[(market_id, crop_id, unit_id)]
-        return {"prices": prices[:limit]}
+        price_data = {}
+        for (market_id, crop_id, unit_id), value in self.prices.items():
+            if market_id == market_id and crop_id == crop_id:
+                price_data[unit_id] = {
+                    "unit_name": value["unit_name"],
+                    "prices": value["prices"][:limit],
+                    }
+        return price_data
 
 
 class DummyFncsApiResource(Resource):
@@ -89,6 +101,7 @@ class DummyFncsApiResource(Resource):
 class TestFncsApi(unittest.TestCase):
     @inlineCallbacks
     def setUp(self):
+
         site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
         self.server = yield reactor.listenTCP(0, site_factory)
         addr = self.server.getHost()
@@ -109,9 +122,16 @@ class TestFncsApi(unittest.TestCase):
 
     @inlineCallbacks
     def test_get_price_history(self):
-        data = yield self.api.get_price_history("market1", "crop1", "unit1", 5)
+        data = yield self.api.get_price_history("market1", "crop1", 2)
         self.assertEqual(data, {
-            "prices": PRICES[("market1", "crop1", "unit1")],
+            "unit1": {
+                "unit_name": "boxes",
+                "prices": PRICES[("market1", "crop1", "unit1")]["prices"][:2],
+                },
+            "unit2": {
+                "unit_name": "crates",
+                "prices": PRICES[("market1", "crop1", "unit2")]["prices"][:2],
+                },
             })
 
 
