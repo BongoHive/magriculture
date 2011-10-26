@@ -109,7 +109,7 @@ class TestFncsApi(unittest.TestCase):
 
     @inlineCallbacks
     def test_get_price_history(self):
-        data = yield self.api.get_price_history("market1", "crop1", "unit1",
+        data = yield self.api.get_price_history("market1", "crop1", "unit1", 5)
         self.assertEqual(data, {
             "prices": PRICES[("market1", "crop1", "unit1")],
             })
