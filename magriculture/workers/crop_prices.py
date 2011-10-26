@@ -73,10 +73,9 @@ class CropPriceModel(object):
     :type state: str
     :param state:
         One of the model state constants.
-    :type user_id: str
-    :param user_id:
-        Unique id associated with the user.
-    :type farmer_name:
+    :type farmer: Farmer
+    :param farmer:
+        Details of the farmer interacting with the model.
     """
     # states of the model
     SELECT_CROP, SELECT_MARKETS, SHOW_PRICES = STATES = (
