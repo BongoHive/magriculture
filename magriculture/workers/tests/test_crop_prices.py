@@ -159,8 +159,43 @@ class TestFarmer(unittest.TestCase):
             yield server.loseConnection()
 
 
-class TestCropModel(unittest.TestCase):
-    pass
+class TestCropPriceModel(unittest.TestCase):
+    def test_serialize(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        model = CropPriceModel(CropPriceModel.START, farmer)
+        data = json.loads(model.serialize())
+        self.assertEqual(data, {
+            "state": CropPriceModel.START,
+            "farmer": farmer.serialize(),
+            })
+
+    def test_unserialize(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        data = json.dumps({
+            "state": CropPriceModel.SELECT_CROP,
+            "farmer": farmer.serialize(),
+            })
+        model = CropPriceModel.unserialize(data)
+        self.assertEqual(model.state, CropPriceModel.SELECT_CROP)
+        self.assertEqual(model.farmer.user_id, "fakeid1")
+        self.assertEqual(model.farmer.farmer_name, "Farmer Bob")
+
+    @inlineCallbacks
+    def test_from_user_id(self):
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
+        server = yield reactor.listenTCP(0, site_factory)
+        try:
+            addr = server.getHost()
+            api_url = "http://%s:%s/" % (addr.host, addr.port)
+            api = FncsApi(api_url)
+            model = yield CropPriceModel.from_user_id("+27885557777", api)
+            self.assertEqual(model.state, CropPriceModel.START)
+            self.assertEqual(model.farmer.user_id, "+27885557777")
+            self.assertEqual(model.farmer.farmer_name, "Farmer Bob")
+            self.assertEqual(model.farmer.crops, [])
+            self.assertEqual(model.farmer.markets, [])
+        finally:
+            yield server.loseConnection()
 
 
 class TestCropPriceWorker(unittest.TestCase):
