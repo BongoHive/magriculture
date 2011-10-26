@@ -182,11 +182,13 @@ class TestFarmer(unittest.TestCase):
 class TestCropPriceModel(unittest.TestCase):
     def test_serialize(self):
         farmer = Farmer("fakeid1", "Farmer Bob")
-        model = CropPriceModel(CropPriceModel.START, farmer)
+        model = CropPriceModel(CropPriceModel.START, farmer, 1, None)
         data = json.loads(model.serialize())
         self.assertEqual(data, {
             "state": CropPriceModel.START,
             "farmer": farmer.serialize(),
+            "selected_crop": 1,
+            "selected_market": None,
             })
 
     def test_unserialize(self):
@@ -194,9 +196,13 @@ class TestCropPriceModel(unittest.TestCase):
         data = json.dumps({
             "state": CropPriceModel.SELECT_CROP,
             "farmer": farmer.serialize(),
+            "selected_crop": 1,
+            "selected_market": 2,
             })
         model = CropPriceModel.unserialize(data)
         self.assertEqual(model.state, CropPriceModel.SELECT_CROP)
+        self.assertEqual(model.selected_crop, 1)
+        self.assertEqual(model.selected_market, 2)
         self.assertEqual(model.farmer.user_id, "fakeid1")
         self.assertEqual(model.farmer.farmer_name, "Farmer Bob")
 
@@ -210,6 +216,8 @@ class TestCropPriceModel(unittest.TestCase):
             api = FncsApi(api_url)
             model = yield CropPriceModel.from_user_id("+27885557777", api)
             self.assertEqual(model.state, CropPriceModel.START)
+            self.assertEqual(model.selected_crop, None)
+            self.assertEqual(model.selected_market, None)
             self.assertEqual(model.farmer.user_id, "+27885557777")
             self.assertEqual(model.farmer.farmer_name, "Farmer Bob")
             self.assertEqual(model.farmer.crops, [])

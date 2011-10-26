@@ -76,16 +76,25 @@ class CropPriceModel(object):
     :type farmer: Farmer
     :param farmer:
         Details of the farmer interacting with the model.
+    :type selected_crop: int
+    :param selected_crop:
+        The item from farmer.crops selected by the user.
+    :type selected_market: int
+    :param selected_market:
+        The item from farmer.markets selected by the user.
     """
     # states of the model
     SELECT_CROP, SELECT_MARKETS, SHOW_PRICES = STATES = (
         "select_crop", "select_market", "show_prices")
     START = SELECT_CROP
 
-    def __init__(self, state, farmer):
+    def __init__(self, state, farmer, selected_crop=None,
+                 selected_market=None):
         assert state in self.STATES
         self.state = state
         self.farmer = farmer
+        self.selected_crop = selected_crop
+        self.selected_market = selected_market
 
     @classmethod
     @inlineCallbacks
@@ -98,15 +107,18 @@ class CropPriceModel(object):
         model_data = {
             "state": self.state,
             "farmer": self.farmer.serialize(),
+            "selected_crop": self.selected_crop,
+            "selected_market": self.selected_market,
             }
         return json.dumps(model_data)
 
     @classmethod
     def unserialize(cls, data):
         model_data = json.loads(data)
-        state = model_data["state"]
         farmer = Farmer.unserialize(model_data["farmer"])
-        return cls(state, farmer)
+        return cls(model_data["state"], farmer,
+                   model_data["selected_crop"],
+                   model_data["selected_market"])
 
     def get_choice(self, text, min_choice, max_choice):
         try:
@@ -118,35 +130,48 @@ class CropPriceModel(object):
         return choice
 
     def handle_select_crop(self, text):
-        choice = self.get_choice(text, 1, len(self.crops))
+        choice = self.get_choice(text, 1, len(self.farmer.crops))
         if choice is None:
-            return "Please select a crop."
+            return "Please enter the number of the crop."
         self.selected_crop = choice
         self.state = self.SELECT_MARKET
 
-    def display_select_crop(self):
-        lines = [
-            "Hi %s" % self.farmer_name,
-            "Select crop to view prices for:",
-            ]
+    def display_select_crop(self, err):
+        template = (
+            "Hi %(farmer_name)s.\n"
+            "%(err)s"
+            "Select a crop:\n"
+            "%s(crops)s")
+        crop_lines = []
         for i, (_id, crop_name) in enumerate(self.crops):
-            lines.append("%d. %s" % (i, crop_name))
-        return "\n".join(lines)
+            crop_lines.append("%d. %s" % (i, crop_name))
+        crops = "\n".join(crop_lines)
+        return template % {
+            "farmer_name": self.farmer.farmer_name,
+            "err": err + "\n" if err is not None else "",
+            "crops": crops,
+            }
 
     def handle_select_market(self, text):
-        choice = self.get_choice(text, 1, len(self.markets))
+        choice = self.get_choice(text, 1, len(self.farmer.markets))
         if choice is None:
-            return "Please select a market."
+            return "Please enter the number of a market."
         self.selected_market = choice
         self.state = self.SHOW_PRICE
 
-    def display_select_market(self):
-        lines = [
-            "Select market to view prices for:",
-            ]
+    def display_select_market(self, err):
+        template = (
+            "%(err)s"
+            "Select a market:\n"
+            "%s(markets)s")
+        market_lines = []
         for i, (_id, market_name) in enumerate(self.markets):
-            lines.append("%d. %s" % (i, market_name))
-        return "\n".join(lines)
+            market_lines.append("%d. %s" % (i, market_name))
+        markets = "\n".join(market_lines)
+        return template % {
+            "err": err + "\n" if err is not None else "",
+            "markets": markets,
+            }
 
     def handle_show_price(self, text):
         choice = self.get_choice(text, 1, 2)
@@ -154,7 +179,7 @@ class CropPriceModel(object):
             return "Invalid selection."
         self.state = self.START if choice == 1 else self.END
 
-    def display_show_price(self):
+    def display_show_price(self, err):
         crop_id, crop_name = self.crops[self.selected_crop]
         market_id, market_name = self.markets[self.selected_market]
         return "TODO: show price for crop %s, market %s" % (
@@ -164,11 +189,9 @@ class CropPriceModel(object):
         """Consume an input from the user and updated the model state.
         """
         handler = getattr(self, "handle_%s" % self.state)
-        err, new_state = handler(text)
-        if new_state is not None:
-            self.state = new_state
+        err = handler(text)
         display = getattr(self, "display_%s" % self.state)
-        return display(), self.state != self.END
+        return display(err), self.state != self.END
 
 
 class CropPriceWorker(ApplicationWorker):
