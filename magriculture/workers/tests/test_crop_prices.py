@@ -8,7 +8,22 @@ from twisted.web.resource import Resource
 from twisted.web.server import Site
 from twisted.web import http
 from vumi.tests.utils import get_stubbed_worker
-from magriculture.workers.crop_prices import CropPriceWorker
+from magriculture.workers.crop_prices import (Farmer, CropPriceModel,
+                                              CropPriceWorker, FncsApi)
+
+
+# Test data for farmers and prices
+
+FARMERS = {
+    '+27885557777': {
+        "farmer_name": "Farmer Bob",
+        "crops": [],
+        "markets": [],
+        },
+    }
+
+PRICES = {
+    }
 
 
 class DummyResourceBase(Resource):
@@ -70,20 +85,64 @@ class DummyFncsApiResource(Resource):
         self.putChild('price_history', DummyPriceHistoryResource(prices))
 
 
+class TestFncsApi(unittest.TestCase):
+    pass
+
+
+class TestFarmer(unittest.TestCase):
+
+    def test_serialize(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        farmer.crops.append(("cropid1", "Peas"))
+        farmer.markets.append(("marketid1", "Small Town Market"))
+        data = json.loads(farmer.serialize())
+        self.assertEqual(data, {
+            "user_id": "fakeid1",
+            "farmer_name": "Farmer Bob",
+            "crops": [["cropid1", "Peas"]],
+            "markets": [["marketid1", "Small Town Market"]],
+            })
+
+    def test_unserialize(self):
+        data = json.dumps({
+            "user_id": "fakeid1",
+            "farmer_name": "Farmer Bob",
+            "crops": [["cropid1", "Peas"]],
+            "markets": [["marketid1", "Small Town Market"]],
+            })
+        farmer = Farmer.unserialize(data)
+        self.assertEqual(farmer.user_id, "fakeid1")
+        self.assertEqual(farmer.farmer_name, "Farmer Bob")
+        self.assertEqual(farmer.crops, [["cropid1", "Peas"]])
+        self.assertEqual(farmer.markets, [["marketid1", "Small Town Market"]])
+
+    @inlineCallbacks
+    def test_from_user_id(self):
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
+        server = yield reactor.listenTCP(0, site_factory)
+        try:
+            addr = server.getHost()
+            api_url = "http://%s:%s/" % (addr.host, addr.port)
+            api = FncsApi(api_url)
+            farmer = yield Farmer.from_user_id("+27885557777", api)
+            self.assertEqual(farmer.user_id, "+27885557777")
+            self.assertEqual(farmer.farmer_name, "Farmer Bob")
+            self.assertEqual(farmer.crops, [])
+            self.assertEqual(farmer.markets, [])
+        finally:
+            yield server.loseConnection()
+
+
+class TestCropModel(unittest.TestCase):
+    pass
+
+
 class TestCropPriceWorker(unittest.TestCase):
-
-    FARMERS = {
-        '+27885557777': {
-            }
-        }
-
-    PRICES = {
-        }
 
     @inlineCallbacks
     def setUp(self):
         self.transport_name = 'test_transport'
-        site_factory = Site(DummyFncsApiResource(self.FARMERS, self.PRICES))
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
         self.server = yield reactor.listenTCP(0, site_factory)
         addr = self.server.getHost()
         api_url = "http://%s:%s/" % (addr.host, addr.port)

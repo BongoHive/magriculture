@@ -17,10 +17,12 @@ class FncsApi(object):
         self.api_url = api_url
 
     def get_page(self, route, **params):
-        url = '%s/%s?%s' (self.api_url, route, urlencode(params))
-        return http_request(url, '', {
+        url = '%s%s?%s' % (self.api_url, route, urlencode(params))
+        d = http_request(url, '', {
             'User-Agent': 'mAgriculture HTTP Request',
             }, method='GET')
+        d.addCallback(json.loads)
+        return d
 
     def get_farmer(self, user_id):
         return self.get_page("farmer", msisdn=user_id)
