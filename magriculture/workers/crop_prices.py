@@ -237,6 +237,22 @@ class CropPriceModel(object):
 
 
 class CropPriceWorker(ApplicationWorker):
+    """A worker that presents a USSD menu allowing farmers to
+    view recent crop prices.
+
+    Configuration parameters:
+
+    :type transport_name: str
+    :param transport_name:
+        Name of the transport (or dispatcher) to receive messages from and
+        send message to.
+    :type worker_name: str
+    :param worker_name:
+        Name of the worker. Used as the redis key prefix.
+    :type api_url: str
+    :param api_url:
+        The URL of the FNCS HTTP API.
+    """
 
     MAX_SESSION_LENGTH = 3 * 60
 
