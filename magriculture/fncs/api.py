@@ -11,8 +11,8 @@ from magriculture.fncs.models.geo import Market
 def get_farmer(request):
     farmer_pk = request.GET.get('msisdn')
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
-    crops = [(crop.pk, crop.name) for crop in farmer.crops]
-    markets = [(crop.pk, market.name) for market in farmer.markets]
+    crops = [(crop.pk, crop.name) for crop in farmer.crops.all()]
+    markets = [(market.pk, market.name) for market in farmer.markets.all()]
     farmer_data = {
         "farmer_name": farmer.actor.name,
         "crops": crops,
@@ -28,7 +28,7 @@ def get_price_history(request):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
     prices = {}
-    for unit in crop.units:
+    for unit in crop.units.all():
         unit_prices = Transaction.price_history_for(market, crop, unit)[:limit]
         unit_prices = list(unit_prices)
         if unit_prices:
