@@ -42,7 +42,7 @@ urlpatterns = patterns('',
     url(r'^inventory/intake/$', views.inventory_intake, name='inventory_intake'),
     url(r'^inventory/intake/details/$', views.inventory_intake_details, name='inventory_intake_details'),
     url(r'^todo/.*', views.todo, name='todo'),
-    url(r'^api/v1/farmer', api.get_farmer, name='get_farmer'),
-    url(r'^api/v1/price_history', api.get_price_history, name='get_price_history'),
+    url(r'^api/v1/farmer', api.get_farmer, name='api_get_farmer'),
+    url(r'^api/v1/price_history', api.get_price_history, name='api_get_price_history'),
 )
 
