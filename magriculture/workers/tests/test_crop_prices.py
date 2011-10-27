@@ -3,11 +3,12 @@
 import json
 from twisted.trial import unittest
 from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.web.resource import Resource
 from twisted.web.server import Site
 from twisted.web import http
-from vumi.tests.utils import get_stubbed_worker
+from vumi.tests.utils import get_stubbed_worker, FakeRedis
+from vumi.message import TransportUserMessage
 from magriculture.workers.crop_prices import (Farmer, CropPriceModel,
                                               CropPriceWorker, FncsApi)
 
@@ -17,8 +18,14 @@ from magriculture.workers.crop_prices import (Farmer, CropPriceModel,
 FARMERS = {
     '+27885557777': {
         "farmer_name": "Farmer Bob",
-        "crops": [],
-        "markets": [],
+        "crops": [
+            ["crop1", "Peas"],
+            ["crop2", "Carrots"],
+            ],
+        "markets": [
+            ["market1", "Kitwe"],
+            ["market2", "Ndola"],
+            ],
         },
     }
 
@@ -113,11 +120,12 @@ class TestFncsApi(unittest.TestCase):
 
     @inlineCallbacks
     def test_get_farmer(self):
-        data = yield self.api.get_farmer("+27885557777")
+        farmer_id = "+27885557777"
+        data = yield self.api.get_farmer(farmer_id)
         self.assertEqual(data, {
-            "farmer_name": "Farmer Bob",
-            "crops": [],
-            "markets": [],
+            "farmer_name": FARMERS[farmer_id]["farmer_name"],
+            "crops": FARMERS[farmer_id]["crops"],
+            "markets": FARMERS[farmer_id]["markets"],
             })
 
     @inlineCallbacks
@@ -170,11 +178,12 @@ class TestFarmer(unittest.TestCase):
             addr = server.getHost()
             api_url = "http://%s:%s/" % (addr.host, addr.port)
             api = FncsApi(api_url)
-            farmer = yield Farmer.from_user_id("+27885557777", api)
+            farmer_id = "+27885557777"
+            farmer = yield Farmer.from_user_id(farmer_id, api)
             self.assertEqual(farmer.user_id, "+27885557777")
             self.assertEqual(farmer.farmer_name, "Farmer Bob")
-            self.assertEqual(farmer.crops, [])
-            self.assertEqual(farmer.markets, [])
+            self.assertEqual(farmer.crops, FARMERS[farmer_id]["crops"])
+            self.assertEqual(farmer.markets, FARMERS[farmer_id]["markets"])
         finally:
             yield server.loseConnection()
 
@@ -219,14 +228,16 @@ class TestCropPriceModel(unittest.TestCase):
 
     @inlineCallbacks
     def test_from_user_id(self):
-        model = yield CropPriceModel.from_user_id("+27885557777", self.api)
+        farmer_id = "+27885557777"
+        model = yield CropPriceModel.from_user_id(farmer_id, self.api)
         self.assertEqual(model.state, CropPriceModel.START)
         self.assertEqual(model.selected_crop, None)
         self.assertEqual(model.selected_market, None)
-        self.assertEqual(model.farmer.user_id, "+27885557777")
-        self.assertEqual(model.farmer.farmer_name, "Farmer Bob")
-        self.assertEqual(model.farmer.crops, [])
-        self.assertEqual(model.farmer.markets, [])
+        self.assertEqual(model.farmer.user_id, farmer_id)
+        self.assertEqual(model.farmer.farmer_name,
+                         FARMERS[farmer_id]["farmer_name"])
+        self.assertEqual(model.farmer.crops, FARMERS[farmer_id]["crops"])
+        self.assertEqual(model.farmer.markets, FARMERS[farmer_id]["markets"])
 
     @inlineCallbacks
     def test_process_event(self):
@@ -271,15 +282,64 @@ class TestCropPriceWorker(unittest.TestCase):
         addr = self.server.getHost()
         api_url = "http://%s:%s/" % (addr.host, addr.port)
         self.worker = get_stubbed_worker(CropPriceWorker, {
-            'transport_name': 'test',
+            'transport_name': self.transport_name,
             'worker_name': 'test_crop_prices',
             'api_url': api_url})
+        self.broker = self.worker._amqp_client.broker
         yield self.worker.startWorker()
+        self.fake_redis = FakeRedis()
+        self.worker.session_manager.r_server = self.fake_redis
 
     @inlineCallbacks
     def tearDown(self):
+        self.fake_redis.teardown()
         yield self.worker.stopWorker()
         yield self.server.loseConnection()
 
-    def test_new_session(self):
-        pass
+    # TODO: factor this out into a common application worker testing base class
+    @inlineCallbacks
+    def send(self, content, session_event=None):
+        from_addr = list(FARMERS.keys())[0]
+        msg = TransportUserMessage(content=content,
+                                   session_event=session_event,
+                                   from_addr=from_addr, to_addr='+5678',
+                                   transport_name=self.transport_name,
+                                   transport_type='fake',
+                                   transport_metadata={})
+        self.broker.publish_message('vumi', '%s.inbound' % self.transport_name,
+                                    msg)
+        yield self.broker.kick_delivery()
+
+    # TODO: factor this out into a common application worker testing base class
+    @inlineCallbacks
+    def recv(self, n=0):
+        msgs = yield self.broker.wait_messages('vumi', '%s.outbound'
+                                                % self.transport_name, n)
+
+        def reply_code(msg):
+            if msg['session_event'] == TransportUserMessage.SESSION_CLOSE:
+                return 'end'
+            return 'reply'
+
+        returnValue([(reply_code(msg), msg['content']) for msg in msgs])
+
+    @inlineCallbacks
+    def test_session_new(self):
+        yield self.send(None, TransportUserMessage.SESSION_NEW)
+        [reply] = yield self.recv(1)
+        self.assertEqual(reply[0], "reply")
+        self.assertTrue(reply[1].startswith("Hi Farmer Bob"))
+
+    @inlineCallbacks
+    def test_session_resume(self):
+        yield self.send(None, TransportUserMessage.SESSION_NEW)
+        yield self.send("1")
+        [_start, reply] = yield self.recv(1)
+        self.assertEqual(reply[0], "reply")
+        self.assertTrue(reply[1].startswith("Select a market:"))
+
+    @inlineCallbacks
+    def test_session_close(self):
+        yield self.send(None, TransportUserMessage.SESSION_CLOSE)
+        replies = yield self.recv()
+        self.assertEqual(replies, [])
