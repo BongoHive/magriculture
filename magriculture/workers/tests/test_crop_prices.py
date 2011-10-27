@@ -75,10 +75,12 @@ class DummyFarmerResource(DummyResourceBase):
 class DummyPriceHistoryResource(DummyResourceBase):
     """Dummy implementation of the /price_history/ HTTP api.
 
-    /v1/price_history?market=<id>&crop=<id>&unit=<id>&limit=<id> maps
+    /v1/price_history?market=<id>&crop=<id>&limit=<id> maps
     to JSON with:
 
-      * prices: list of floats
+      * <unit_id>: dictionary containing:
+        * 'unit_name': name of the unit
+        * 'prices': list of float prices for this unit
     """
     def __init__(self, prices):
         Resource.__init__(self)
