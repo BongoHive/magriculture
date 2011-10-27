@@ -180,6 +180,17 @@ class TestFarmer(unittest.TestCase):
 
 
 class TestCropPriceModel(unittest.TestCase):
+    @inlineCallbacks
+    def setUp(self):
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
+        self.server = yield reactor.listenTCP(0, site_factory)
+        addr = self.server.getHost()
+        self.api = FncsApi("http://%s:%s/" % (addr.host, addr.port))
+
+    @inlineCallbacks
+    def tearDown(self):
+        yield self.server.loseConnection()
+
     def test_serialize(self):
         farmer = Farmer("fakeid1", "Farmer Bob")
         model = CropPriceModel(CropPriceModel.START, farmer, 1, None)
@@ -208,22 +219,45 @@ class TestCropPriceModel(unittest.TestCase):
 
     @inlineCallbacks
     def test_from_user_id(self):
-        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
-        server = yield reactor.listenTCP(0, site_factory)
-        try:
-            addr = server.getHost()
-            api_url = "http://%s:%s/" % (addr.host, addr.port)
-            api = FncsApi(api_url)
-            model = yield CropPriceModel.from_user_id("+27885557777", api)
-            self.assertEqual(model.state, CropPriceModel.START)
-            self.assertEqual(model.selected_crop, None)
-            self.assertEqual(model.selected_market, None)
-            self.assertEqual(model.farmer.user_id, "+27885557777")
-            self.assertEqual(model.farmer.farmer_name, "Farmer Bob")
-            self.assertEqual(model.farmer.crops, [])
-            self.assertEqual(model.farmer.markets, [])
-        finally:
-            yield server.loseConnection()
+        model = yield CropPriceModel.from_user_id("+27885557777", self.api)
+        self.assertEqual(model.state, CropPriceModel.START)
+        self.assertEqual(model.selected_crop, None)
+        self.assertEqual(model.selected_market, None)
+        self.assertEqual(model.farmer.user_id, "+27885557777")
+        self.assertEqual(model.farmer.farmer_name, "Farmer Bob")
+        self.assertEqual(model.farmer.crops, [])
+        self.assertEqual(model.farmer.markets, [])
+
+    @inlineCallbacks
+    def test_process_event(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        farmer.add_crop("crop1", "Peas")
+        farmer.add_market("market1", "Kitwe")
+        model = CropPriceModel(CropPriceModel.START, farmer, 1, None)
+
+        text, continue_session = yield model.process_event(None, self.api)
+        self.assertEqual(text, "Hi Farmer Bob.\nSelect a crop:\n1. Peas")
+        self.assertTrue(continue_session)
+
+        text, continue_session = yield model.process_event("1", self.api)
+        self.assertEqual(text, "Select a market:\n1. Kitwe")
+        self.assertTrue(continue_session)
+        self.assertEqual(model.selected_crop, 0)
+
+        text, continue_session = yield model.process_event("1", self.api)
+        self.assertEqual(text,
+                         "Prices of Peas in Kitwe:\n"
+                         "Sold as boxes:\n"
+                         "  1.20\n  1.10\n  1.50\n"
+                         "Sold as crates:\n"
+                         "  1.60\n  1.70\n  1.80"
+                         "Enter 1 for next market, 2 for previous market.\n"
+                         "Enter 3 to exit.")
+        self.assertTrue(continue_session)
+        self.assertEqual(model.selected_market, 0)
+
+        text, continue_session = yield model.process_event("3", self.api)
+        self.assertFalse(continue_session)
 
 
 class TestCropPriceWorker(unittest.TestCase):

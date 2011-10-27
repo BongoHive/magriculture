@@ -39,6 +39,12 @@ class Farmer(object):
         self.crops = []
         self.markets = []
 
+    def add_crop(self, crop_id, crop_name):
+        self.crops.append((crop_id, crop_name))
+
+    def add_market(self, market_id, market_name):
+        self.markets.append((market_id, market_name))
+
     @classmethod
     @inlineCallbacks
     def from_user_id(cls, user_id, api):
@@ -84,8 +90,8 @@ class CropPriceModel(object):
         The item from farmer.markets selected by the user.
     """
     # states of the model
-    SELECT_CROP, SELECT_MARKETS, SHOW_PRICES = STATES = (
-        "select_crop", "select_market", "show_prices")
+    SELECT_CROP, SELECT_MARKET, SHOW_PRICES, END = STATES = (
+        "select_crop", "select_market", "show_prices", "end")
     START = SELECT_CROP
 
     def __init__(self, state, farmer, selected_crop=None,
@@ -133,18 +139,18 @@ class CropPriceModel(object):
         choice = self.get_choice(text, 1, len(self.farmer.crops))
         if choice is None:
             return "Please enter the number of the crop."
-        self.selected_crop = choice
+        self.selected_crop = choice - 1
         self.state = self.SELECT_MARKET
 
-    def display_select_crop(self, err):
+    def display_select_crop(self, err, _api):
         template = (
             "Hi %(farmer_name)s.\n"
             "%(err)s"
             "Select a crop:\n"
-            "%s(crops)s")
+            "%(crops)s")
         crop_lines = []
-        for i, (_id, crop_name) in enumerate(self.crops):
-            crop_lines.append("%d. %s" % (i, crop_name))
+        for i, (_id, crop_name) in enumerate(self.farmer.crops):
+            crop_lines.append("%d. %s" % (i + 1, crop_name))
         crops = "\n".join(crop_lines)
         return template % {
             "farmer_name": self.farmer.farmer_name,
@@ -156,42 +162,78 @@ class CropPriceModel(object):
         choice = self.get_choice(text, 1, len(self.farmer.markets))
         if choice is None:
             return "Please enter the number of a market."
-        self.selected_market = choice
-        self.state = self.SHOW_PRICE
+        self.selected_market = choice - 1
+        self.state = self.SHOW_PRICES
 
-    def display_select_market(self, err):
+    def display_select_market(self, err, _api):
         template = (
             "%(err)s"
             "Select a market:\n"
-            "%s(markets)s")
+            "%(markets)s")
         market_lines = []
-        for i, (_id, market_name) in enumerate(self.markets):
-            market_lines.append("%d. %s" % (i, market_name))
+        for i, (_id, market_name) in enumerate(self.farmer.markets):
+            market_lines.append("%d. %s" % (i + 1, market_name))
         markets = "\n".join(market_lines)
         return template % {
             "err": err + "\n" if err is not None else "",
             "markets": markets,
             }
 
-    def handle_show_price(self, text):
-        choice = self.get_choice(text, 1, 2)
+    def handle_show_prices(self, text):
+        choice = self.get_choice(text, 1, 3)
         if choice is None:
             return "Invalid selection."
-        self.state = self.START if choice == 1 else self.END
+        if choice == 1:
+            self.selected_market -= 1
+            if self.selected_market < 0:
+                self.selected_market = len(self.farmer.markets) - 1
+        elif choice == 2:
+            self.selected_market += 1
+            if self.selected_market >= len(self.farmer.markets):
+                self.selected_market = 0
+        elif choice == 3:
+            self.state = self.END
 
-    def display_show_price(self, err):
-        crop_id, crop_name = self.crops[self.selected_crop]
-        market_id, market_name = self.markets[self.selected_market]
-        return "TODO: show price for crop %s, market %s" % (
-            crop_name, market_name)
+    @inlineCallbacks
+    def display_show_prices(self, err, api):
+        crop_id, crop_name = self.farmer.crops[self.selected_crop]
+        market_id, market_name = self.farmer.markets[self.selected_market]
+        prices = yield api.get_price_history(market_id, crop_id, limit=5)
+        template = (
+            "Prices of %(crop)s in %(market)s:\n"
+            "%(err)s"
+            "%(price_text)s"
+            "Enter 1 for next market, 2 for previous market.\n"
+            "Enter 3 to exit.")
+        price_lines = []
+        for unit_id in sorted(prices.keys()):
+            unit_info = prices[unit_id]
+            price_lines.append("Sold as %s:" % unit_info["unit_name"])
+            for price in unit_info["prices"]:
+                price_lines.append("  %.2f" % price)
+        price_text = "\n".join(price_lines)
+        returnValue(template % {
+                "crop": crop_name,
+                "market": market_name,
+                "err": err + "\n" if err is not None else "",
+                "price_text": price_text,
+                })
 
-    def process_event(self, text):
+    def display_end(self, err, api):
+        return "Goodbye!"
+
+    @inlineCallbacks
+    def process_event(self, text, api):
         """Consume an input from the user and updated the model state.
         """
         handler = getattr(self, "handle_%s" % self.state)
-        err = handler(text)
+        if text is not None:
+            err = handler(text)
+        else:
+            err = None
         display = getattr(self, "display_%s" % self.state)
-        return display(err), self.state != self.END
+        result_text = yield display(err, api)
+        returnValue((result_text, self.state != self.END))
 
 
 class CropPriceWorker(ApplicationWorker):
@@ -213,6 +255,7 @@ class CropPriceWorker(ApplicationWorker):
         yield self.session_manager.stop()
         yield super(CropPriceWorker, self).stopWorker()
 
+    @inlineCallbacks
     def consume_user_message(self, msg):
         user_id = msg.user()
         session = self.session_manager.load_session(user_id)
@@ -220,9 +263,10 @@ class CropPriceWorker(ApplicationWorker):
             model = CropPriceModel.unserialize(session["model_data"])
         else:
             session = self.session_manager.create_session(user_id)
-            model = CropPriceModel.from_user_id(user_id)
+            model = yield CropPriceModel.from_user_id(user_id, self.api)
 
-        reply, continue_session = model.event(msg['content'])
+        reply, continue_session = yield model.process_event(msg['content'],
+                                                            self.api)
         session["model_data"] = model.serialize()
 
         if continue_session:
@@ -231,3 +275,7 @@ class CropPriceWorker(ApplicationWorker):
             self.session_manager.clear_session(user_id)
 
         self.reply_to(msg, reply, continue_session)
+
+    def close_session(self, msg):
+        user_id = msg.user()
+        self.session_manager.clear_session(user_id)
