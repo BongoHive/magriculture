@@ -247,6 +247,7 @@ class CropPriceWorker(ApplicationWorker):
                 get_deploy_int(self._amqp_client.vhost),
                 self.worker_name,
                 max_session_length=self.MAX_SESSION_LENGTH)
+        self.api = FncsApi(self.config['api_url'])
 
         yield super(CropPriceWorker, self).startWorker()
 
