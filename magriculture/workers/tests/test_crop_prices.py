@@ -257,6 +257,7 @@ class TestCropPriceModel(unittest.TestCase):
         self.assertEqual(model.selected_market, 0)
 
         text, continue_session = yield model.process_event("3", self.api)
+        self.assertEqual(text, "Goodbye!")
         self.assertFalse(continue_session)
 
 
