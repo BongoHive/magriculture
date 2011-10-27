@@ -611,7 +611,7 @@ def inventory_intake_details(request):
             crop = form.cleaned_data['crop']
             quality = form.cleaned_data['quality']
             receipt = agent.take_in_crop(market, farmer, amount,
-                                            crop_unit, crop, quality)
+                                            crop_unit, crop, quality=quality)
             messages.success(request,'%s has been added to your inventory' % str(receipt))
             return redirect(reverse('fncs:inventory'))
 
