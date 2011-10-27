@@ -13,15 +13,15 @@
         <div class="h2">Sale Information</div>
 
         <div class="list">
-            <div class="item"><label>Farmer:</label> {{transaction.farmer}}</div>
-            <div class="item"><label>Agent:</label> {{transaction.agent}}</div>
-            <div class="item"><label>Crop:</label> {{transaction.crop}}</div>
+            <div class="item"><label>Farmer:</label> {{transaction.crop_receipt.farmer}}</div>
+            <div class="item"><label>Agent:</label> {{transaction.crop_receipt.agent}}</div>
+            <div class="item"><label>Crop:</label> {{transaction.crop_receipt.crop}}</div>
             <div class="item"><label>Quantity:</label> {{transaction.amount|floatformat}} {{transaction.unit}}</div>
             <div class="item"><label>Unit Price:</label> ZK {{transaction.price|floatformat}}</div>
             <div class="item"><label>Total Price:</label> ZK {{transaction.total|floatformat}}</div>
             <div class="pagination">
                 <a class="del" href="{% url fncs:todo %}cancel-sale">[x] Cancel Sale</a> | 
-                <a href="{% url fncs:farmer_sales farmer_pk=transaction.farmer.pk %}">More Sales &raquo;</a>
+                <a href="{% url fncs:farmer_sales farmer_pk=transaction.crop_receipt.farmer.pk %}">More Sales &raquo;</a>
             </div>
         </div>
 

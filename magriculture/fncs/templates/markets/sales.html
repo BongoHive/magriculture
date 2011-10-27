@@ -4,8 +4,8 @@
     <div class="content">
 
         <div class="breadcrumb">
-            <a href="{% url fncs:home %}">Home</a> &gt; 
-            <a href="{% url fncs:market_prices %}">Market Prices</a> &gt; 
+            <a href="{% url fncs:home %}">Home</a> &gt;
+            <a href="{% url fncs:market_prices %}">Market Prices</a> &gt;
             Crop Sales
         </div>
 
@@ -14,7 +14,11 @@
             <div class="item">
                 <span class="heading"><a href="{% url fncs:market_sale market_pk=market.pk %}">{{market}}</a></span><br/>
                 <span class="text">{{market.district}}</span><br/>
-                <span class="subtitle">Last transaction at {{market.transaction_set.latest.created_at|date:"j b Y, g:iA"|upper}}</span>
+                {% if market.transactions.exists %}
+                <span class="subtitle">Last transaction at {{market.transactions.latest.created_at|date:"j b Y, g:iA"|upper}}</span>
+                {% else %}
+                <span class="subtitle">No transactions have taken place yet.</span>
+                {% endif %}
             </div>
             {% empty %}
             <div class="item">
@@ -29,5 +33,5 @@
         <div class="h2">Menu</div>
         {% include "includes/menu.html" %}
     </div> <!-- /.content -->
-    
+
 {% endblock %}

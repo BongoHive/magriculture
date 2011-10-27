@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; {{crop|title}} Intake At {{market|title}}</div>
+
+    <div class="h2">{{crop|title}} Intake At {{market|title}}</div>
+
+    <form class="standard" method="POST" action="{% url fncs:inventory_intake_details %}">
+        {% if form.errors %}
+            <div class="error">Please see error below.</div>
+        {% endif %}
+        {{form}}
+        <input type="submit" name="submit" class="submit" value="Take in Crop &raquo;" />
+        {% csrf_token %}
+    </form>
+
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->{% endblock %}
