@@ -234,7 +234,7 @@ def group_messages(request):
 def group_message_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
-    farmergroups = FarmerGroup.objects.filter(farmer__in=agent.farmers.all())
+    farmergroups = FarmerGroup.objects..distinct().filter(farmer__in=agent.farmers.all())
     if request.POST:
         if 'cancel' in request.POST:
             messages.success(request, 'Message Cancelled')
