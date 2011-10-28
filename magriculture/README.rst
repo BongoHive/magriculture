@@ -13,6 +13,7 @@ Installation
   (ve)$ ./manage.py fncs_make_agent --username=<name of your super user>
   (ve)$ ./manage.py fncs_make_marketmonitor --username=<name of your super user>
   (ve)$ ./manage.py fncs_create_sample_farmers
+  (ve)$ ./manage.py fncs_create_random_inventory
   (ve)$ ./manage.py fncs_create_sample_transactions
   (ve)$ ./manage.py fncs_create_random_notes
   (ve)$ ./manage.py fncs_create_random_messages

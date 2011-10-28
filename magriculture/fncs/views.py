@@ -232,7 +232,9 @@ def group_messages(request):
 
 @login_required
 def group_message_new(request):
-    farmergroups = FarmerGroup.objects.all()
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    farmergroups = FarmerGroup.objects.filter(farmer__in=agent.farmers.all())
     if request.POST:
         if 'cancel' in request.POST:
             messages.success(request, 'Message Cancelled')
