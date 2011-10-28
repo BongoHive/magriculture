@@ -28,7 +28,7 @@ class ApiTestCase(FNCSTestCase):
     def test_get_farmer(self):
         farmer = self.farmers[0]
         response = self.client.get(reverse('fncs:api_get_farmer'), {
-            'msisdn': farmer.pk,
+            'msisdn': farmer.actor.user.username,
             })
         self.assertEqual(response.status_code, 200)
         farmer_data = json.loads(response.content)

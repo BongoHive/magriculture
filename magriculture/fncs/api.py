@@ -9,8 +9,8 @@ from magriculture.fncs.models.geo import Market
 
 
 def get_farmer(request):
-    farmer_pk = request.GET.get('msisdn')
-    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    msisdn = request.GET.get('msisdn')
+    farmer = get_object_or_404(Farmer, actor__user__username=msisdn)
     crops = [(crop.pk, crop.name) for crop in farmer.crops.all()]
     markets = [(market.pk, market.name) for market in farmer.markets.all()]
     farmer_data = {
