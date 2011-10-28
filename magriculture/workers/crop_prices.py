@@ -277,10 +277,11 @@ class CropPriceWorker(ApplicationWorker):
     def consume_user_message(self, msg):
         user_id = msg.user()
         session = self.session_manager.load_session(user_id)
-        if session:
+        if not session:
+            session = self.session_manager.create_session(user_id)
+        if "model_data" in session:
             model = CropPriceModel.unserialize(session["model_data"])
         else:
-            session = self.session_manager.create_session(user_id)
             try:
                 model = yield CropPriceModel.from_user_id(user_id, self.api)
             except Exception, e:
