@@ -68,7 +68,7 @@ class DummyFarmerResource(DummyResourceBase):
         self.farmers = farmers
 
     def get_data(self, request):
-        msisdn = request.args["msisdn"][0]
+        msisdn = "+" + request.args["msisdn"][0]
         return self.farmers[msisdn]
 
 
@@ -263,7 +263,7 @@ class TestCropPriceModel(unittest.TestCase):
                          "Sold as boxes:\n"
                          "  1.20\n  1.10\n  1.50\n"
                          "Sold as crates:\n"
-                         "  1.60\n  1.70\n  1.80"
+                         "  1.60\n  1.70\n  1.80\n"
                          "Enter 1 for next market, 2 for previous market.\n"
                          "Enter 3 to exit.")
         self.assertTrue(continue_session)

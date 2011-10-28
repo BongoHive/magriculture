@@ -204,7 +204,7 @@ class CropPriceModel(object):
         template = (
             "Prices of %(crop)s in %(market)s:\n"
             "%(err)s"
-            "%(price_text)s"
+            "%(price_text)s\n"
             "Enter 1 for next market, 2 for previous market.\n"
             "Enter 3 to exit.")
         price_lines = []
