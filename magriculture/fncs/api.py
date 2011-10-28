@@ -2,7 +2,7 @@
 
 import json
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from magriculture.fncs.models.actors import Farmer
 from magriculture.fncs.models.props import Transaction, Crop
 from magriculture.fncs.models.geo import Market
@@ -10,7 +10,9 @@ from magriculture.fncs.models.geo import Market
 
 def get_farmer(request):
     msisdn = request.GET.get('msisdn')
-    farmer = get_object_or_404(Farmer, actor__user__username=msisdn)
+    # Something's wrong with our db, we've got multiple
+    # farmers for the same actor.
+    farmer = get_list_or_404(Farmer, actor__user__username=msisdn)[0]
     crops = [(crop.pk, crop.name) for crop in farmer.crops.all()]
     markets = [(market.pk, market.name) for market in farmer.markets.all()]
     farmer_data = {
