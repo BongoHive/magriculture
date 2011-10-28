@@ -40,6 +40,16 @@ PRICES = {
         },
     }
 
+HIGHEST_MARKETS = {
+    "crop1": [
+        ("market1", "Kitwe"),
+        ("market2", "Ndola"),
+        ],
+    "crop2": [
+        ("market2", "Ndola"),
+        ],
+    }
+
 
 class DummyResourceBase(Resource):
     """Base class for dummy resources."""
@@ -59,8 +69,8 @@ class DummyFarmerResource(DummyResourceBase):
     /v1/farmer?msisdn=<MSISDN> maps to JSON with:
 
       * name: farmer's name
-      * crops: list of crops of interest
-      * markets: list of markets of interest
+      * crops: list of [crop_id, crop_name] pairs
+      * markets: list of [market_id, market_name] pairs
     """
 
     def __init__(self, farmers):
@@ -100,18 +110,38 @@ class DummyPriceHistoryResource(DummyResourceBase):
         return price_data
 
 
+class DummyHighestMarketsResource(DummyResourceBase):
+    """Dummy implementation of the /highest_markets/ HTTP api.
+
+    /v1/highest_markets?crop=<id>&limit=<id> maps to JSON with:
+
+      * a list of [market_id, market_name] pairs
+    """
+    def __init__(self, highest_markets):
+        Resource.__init__(self)
+        self.highest_markets = highest_markets
+
+    def get_data(self, request):
+        crop_id = request.args["crop"][0]
+        limit = int(request.args.get("limit", [10])[0])
+        return self.highest_markets[crop_id][:limit]
+
+
 class DummyFncsApiResource(Resource):
-    def __init__(self, farmers, prices):
+    def __init__(self, farmers, prices, highest_markets):
         Resource.__init__(self)
         self.putChild('farmer', DummyFarmerResource(farmers))
         self.putChild('price_history', DummyPriceHistoryResource(prices))
+        self.putChild('highest_markets',
+                      DummyHighestMarketsResource(highest_markets))
 
 
 class TestFncsApi(unittest.TestCase):
     @inlineCallbacks
     def setUp(self):
 
-        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES,
+                                                 HIGHEST_MARKETS))
         self.server = yield reactor.listenTCP(0, site_factory)
         addr = self.server.getHost()
         self.api = FncsApi("http://%s:%s/" % (addr.host, addr.port))
@@ -174,7 +204,8 @@ class TestFarmer(unittest.TestCase):
 
     @inlineCallbacks
     def test_from_user_id(self):
-        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES,
+                                                 HIGHEST_MARKETS))
         server = yield reactor.listenTCP(0, site_factory)
         try:
             addr = server.getHost()
@@ -193,7 +224,8 @@ class TestFarmer(unittest.TestCase):
 class TestCropPriceModel(unittest.TestCase):
     @inlineCallbacks
     def setUp(self):
-        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES,
+                                                 HIGHEST_MARKETS))
         self.server = yield reactor.listenTCP(0, site_factory)
         addr = self.server.getHost()
         self.api = FncsApi("http://%s:%s/" % (addr.host, addr.port))
@@ -211,6 +243,7 @@ class TestCropPriceModel(unittest.TestCase):
             "farmer": farmer.serialize(),
             "selected_crop": 1,
             "selected_market": None,
+            "markets": None,
             })
 
     def test_unserialize(self):
@@ -220,11 +253,13 @@ class TestCropPriceModel(unittest.TestCase):
             "farmer": farmer.serialize(),
             "selected_crop": 1,
             "selected_market": 2,
+            "markets": [["market1", "Kitwe"]],
             })
         model = CropPriceModel.unserialize(data)
         self.assertEqual(model.state, CropPriceModel.SELECT_CROP)
         self.assertEqual(model.selected_crop, 1)
         self.assertEqual(model.selected_market, 2)
+        self.assertEqual(model.markets, [["market1", "Kitwe"]])
         self.assertEqual(model.farmer.user_id, "fakeid1")
         self.assertEqual(model.farmer.farmer_name, "Farmer Bob")
 
@@ -253,9 +288,17 @@ class TestCropPriceModel(unittest.TestCase):
         self.assertTrue(continue_session)
 
         text, continue_session = yield model.process_event("1", self.api)
-        self.assertEqual(text, "Select a market:\n1. Kitwe")
+        self.assertEqual(text,
+                         "Select which markets to view:\n"
+                         "1. Highest markets for Peas\n"
+                         "2. My markets\n")
         self.assertTrue(continue_session)
         self.assertEqual(model.selected_crop, 0)
+
+        text, continue_session = yield model.process_event("2", self.api)
+        self.assertEqual(text, "Select a market:\n1. Kitwe")
+        self.assertTrue(continue_session)
+        self.assertEqual(model.markets, [("market1", "Kitwe")])
 
         text, continue_session = yield model.process_event("1", self.api)
         self.assertEqual(text,
@@ -277,7 +320,8 @@ class TestCropPriceWorker(unittest.TestCase):
     @inlineCallbacks
     def setUp(self):
         self.transport_name = 'test_transport'
-        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES))
+        site_factory = Site(DummyFncsApiResource(FARMERS, PRICES,
+                                                 HIGHEST_MARKETS))
         self.server = yield reactor.listenTCP(0, site_factory)
         addr = self.server.getHost()
         api_url = "http://%s:%s/" % (addr.host, addr.port)
@@ -337,7 +381,7 @@ class TestCropPriceWorker(unittest.TestCase):
         yield self.send("1")
         [_start, reply] = yield self.recv(1)
         self.assertEqual(reply[0], "reply")
-        self.assertTrue(reply[1].startswith("Select a market:"))
+        self.assertTrue(reply[1].startswith("Select which markets to view:"))
 
     @inlineCallbacks
     def test_session_close(self):
