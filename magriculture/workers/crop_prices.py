@@ -210,9 +210,13 @@ class CropPriceModel(object):
         price_lines = []
         for unit_id in sorted(prices.keys()):
             unit_info = prices[unit_id]
-            price_lines.append("Sold as %s:" % unit_info["unit_name"])
-            for price in unit_info["prices"]:
-                price_lines.append("  %.2f" % price)
+            unit_prices = unit_info["prices"]
+            if unit_prices:
+                avg_text = "%.2f" % (sum(unit_prices) / len(unit_prices))
+            else:
+                avg_text = "-"
+            price_lines.append("  %s: %s" % (unit_info["unit_name"],
+                                           avg_text))
         price_text = "\n".join(price_lines)
         returnValue(template % {
                 "crop": crop_name,

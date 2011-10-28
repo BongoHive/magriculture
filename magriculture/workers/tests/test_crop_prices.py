@@ -260,10 +260,8 @@ class TestCropPriceModel(unittest.TestCase):
         text, continue_session = yield model.process_event("1", self.api)
         self.assertEqual(text,
                          "Prices of Peas in Kitwe:\n"
-                         "Sold as boxes:\n"
-                         "  1.20\n  1.10\n  1.50\n"
-                         "Sold as crates:\n"
-                         "  1.60\n  1.70\n  1.80\n"
+                         "  boxes: 1.27\n"
+                         "  crates: 1.70\n"
                          "Enter 1 for next market, 2 for previous market.\n"
                          "Enter 3 to exit.")
         self.assertTrue(continue_session)
