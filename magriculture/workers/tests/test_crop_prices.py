@@ -300,8 +300,9 @@ class TestCropPriceWorker(unittest.TestCase):
 
     # TODO: factor this out into a common application worker testing base class
     @inlineCallbacks
-    def send(self, content, session_event=None):
-        from_addr = list(FARMERS.keys())[0]
+    def send(self, content, session_event=None, from_addr=None):
+        if from_addr is None:
+            from_addr = list(FARMERS.keys())[0]
         msg = TransportUserMessage(content=content,
                                    session_event=session_event,
                                    from_addr=from_addr, to_addr='+5678',
@@ -345,3 +346,12 @@ class TestCropPriceWorker(unittest.TestCase):
         yield self.send(None, TransportUserMessage.SESSION_CLOSE)
         replies = yield self.recv()
         self.assertEqual(replies, [])
+
+    @inlineCallbacks
+    def test_unknown_user_id(self):
+        yield self.send(None, TransportUserMessage.SESSION_NEW,
+                        from_addr="123")
+        [reply] = yield self.recv(1)
+        self.assertEqual(reply[0], "end")
+        self.assertEqual(reply[1], "You are not registered.")
+        [v_error, k_error] = self.flushLoggedErrors(ValueError, KeyError)

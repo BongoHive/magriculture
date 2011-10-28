@@ -6,6 +6,7 @@
 import json
 from urllib import urlencode
 from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.python import log
 from vumi.application import ApplicationWorker, SessionManager
 from vumi.utils import get_deploy_int, http_request
 
@@ -280,7 +281,12 @@ class CropPriceWorker(ApplicationWorker):
             model = CropPriceModel.unserialize(session["model_data"])
         else:
             session = self.session_manager.create_session(user_id)
-            model = yield CropPriceModel.from_user_id(user_id, self.api)
+            try:
+                model = yield CropPriceModel.from_user_id(user_id, self.api)
+            except Exception, e:
+                log.err(e)
+                self.reply_to(msg, "You are not registered.", False)
+                return
 
         reply, continue_session = yield model.process_event(msg['content'],
                                                             self.api)
