@@ -19,6 +19,7 @@ class FncsApi(object):
 
     def get_page(self, route, **params):
         url = '%s%s?%s' % (self.api_url, route, urlencode(params))
+        log.msg("Fetching url %r" % url)
         d = http_request(url, '', {
             'User-Agent': 'mAgriculture HTTP Request',
             }, method='GET')
@@ -26,7 +27,7 @@ class FncsApi(object):
         return d
 
     def get_farmer(self, user_id):
-        return self.get_page("farmer", msisdn=user_id)
+        return self.get_page("farmer", msisdn=user_id.lstrip('+'))
 
     def get_price_history(self, market_id, crop_id, limit):
         return self.get_page("price_history", market=market_id, crop=crop_id,
