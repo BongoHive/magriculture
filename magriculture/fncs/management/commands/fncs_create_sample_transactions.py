@@ -29,4 +29,4 @@ class Command(BaseCommand):
                 price = random.randint(200,400)
                 amount = random.randint(10,50)
                 receipt = agent.take_in_crop(market, farmer, amount, unit, crop)
-                agent.register_sale(receipt, price, amount)
+                agent.register_sale(receipt, amount, price)
