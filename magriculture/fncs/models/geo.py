@@ -150,6 +150,26 @@ class Market(models.Model):
         """
         return Transaction.objects.filter(crop_receipt__market=self)
 
+    @classmethod
+    def highest_markets_for(cls, crop, window_size=5):
+        """
+        Return a list of markets ordered by most recent price of
+        the given crop at each market.
+
+        :param crop: :class:`magriculture.fncs.models.props.Crop`
+        :param windows_size: int (how many samples to average the price over)
+        :returns: :class:`magriculture.fncs.models.geo.Market`
+        """
+        markets = Market.objects.all()
+        avg_prices = {}
+        for market in markets:
+            prices = Transaction.objects.filter(crop_receipt__market=market,
+                                                crop_receipt__crop=crop
+                                                ).order_by('created_at')
+            prices = prices.values_list('price', flat=True)[:window_size]
+            avg_prices[market.pk] = sum(prices) / float(window_size)
+        return sorted(markets, key=lambda market: avg_prices[market.pk])
+
     class Meta:
         ordering = ['name']
         get_latest_by = 'pk'
