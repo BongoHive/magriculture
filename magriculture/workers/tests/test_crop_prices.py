@@ -281,7 +281,7 @@ class TestCropPriceModel(unittest.TestCase):
         farmer = Farmer("fakeid1", "Farmer Bob")
         farmer.add_crop("crop1", "Peas")
         farmer.add_market("market1", "Kitwe")
-        model = CropPriceModel(CropPriceModel.START, farmer, 1, None)
+        model = CropPriceModel(CropPriceModel.START, farmer)
 
         text, continue_session = yield model.process_event(None, self.api)
         self.assertEqual(text, "Hi Farmer Bob.\nSelect a crop:\n1. Peas")
@@ -313,6 +313,30 @@ class TestCropPriceModel(unittest.TestCase):
         text, continue_session = yield model.process_event("3", self.api)
         self.assertEqual(text, "Goodbye!")
         self.assertFalse(continue_session)
+
+    @inlineCallbacks
+    def test_highest_markets(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        farmer.add_crop("crop1", "Peas")
+        model = CropPriceModel(CropPriceModel.SELECT_MARKET_LIST, farmer,
+                               selected_crop=0)
+
+        text, continue_session = yield model.process_event("1", self.api)
+        self.assertEqual(text,
+                         "Select a market:\n1. Kitwe\n2. Ndola")
+        self.assertTrue(continue_session)
+        self.assertEqual(model.markets, [["market1", "Kitwe"],
+                                         ["market2", "Ndola"]])
+
+        text, continue_session = yield model.process_event("2", self.api)
+        self.assertEqual(text,
+                         "Prices of Peas in Ndola:\n"
+                         "  boxes: 1.27\n"
+                         "  crates: 1.70\n"
+                         "Enter 1 for next market, 2 for previous market.\n"
+                         "Enter 3 to exit.")
+        self.assertTrue(continue_session)
+        self.assertEqual(model.selected_market, 1)
 
 
 class TestCropPriceWorker(unittest.TestCase):
