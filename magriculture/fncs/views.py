@@ -538,7 +538,6 @@ def inventory_sale(request):
         form.fields['farmer'].widget = HiddenInput()
     else:
         form = forms.CropReceiptSaleStep1Form()
-    form.fields['crop'].queryset = agent.crops_available()
     form.fields['farmer'].queryset = agent.farmer_set.all()
     return render(request, 'inventory_sale.html', {
         'agent': agent,
@@ -549,12 +548,11 @@ def inventory_sale(request):
 def inventory_sale_details(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
-    crop = get_object_or_404(Crop, pk=request.REQUEST.get('crop'))
     farmer = get_object_or_404(Farmer, pk=request.REQUEST.get('farmer'))
-    crop_receipts = agent.cropreceipts_available_for(farmer).filter(crop=crop)
+    crop_receipts = agent.cropreceipts_available_for(farmer)
     if not crop_receipts.exists():
         messages.error(request,
-            "You don't have any %s to sell for %s" % (crop, farmer))
+            "You don't have any inventory to sell for %s" % (farmer,))
         return redirect(reverse('fncs:inventory_sale'))
     if request.POST:
         form = forms.CropReceiptSaleStep2Form(request.POST)
@@ -570,17 +568,15 @@ def inventory_sale_details(request):
             else:
                 agent.register_sale(crop_receipt, amount, price)
                 messages.success(request, "Sale registered succesfully")
-                return redirect(reverse('fncs:inventory_sale'))
+                return redirect(reverse('fncs:inventory'))
     else:
         form = forms.CropReceiptSaleStep2Form(initial={
             'agent': agent,
-            'crop': crop,
             'farmer': farmer,
         })
     form.fields['crop_receipt'].queryset = crop_receipts
     return render(request, 'inventory_sale_details.html', {
         'agent': agent,
-        'crop': crop,
         'farmer': farmer,
         'form': form,
     })
@@ -614,7 +610,7 @@ def inventory_intake_details(request):
             quality = form.cleaned_data['quality']
             receipt = agent.take_in_crop(market, farmer, amount,
                                             crop_unit, crop, quality=quality)
-            messages.success(request,'%s has been added to your inventory' % str(receipt))
+            messages.success(request,u'%s has been added to your inventory' % receipt)
             return redirect(reverse('fncs:inventory'))
 
     else:

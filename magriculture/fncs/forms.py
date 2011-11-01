@@ -112,8 +112,8 @@ class CropReceiptStep2Form(forms.Form):
     crop_unit = forms.ModelChoiceField(queryset=CropUnit.objects.all(), required=True,
         empty_label=None, label='Which unit?')
     amount = forms.FloatField(required=True, min_value=0.1, label='How many units?')
-    quality = forms.ChoiceField(choices=CROP_QUALITY_CHOICES, required=True,
-        label='What quality is the crop?')
+    quality = forms.TypedChoiceField(choices=CROP_QUALITY_CHOICES, required=True,
+        label='What quality is the crop?', coerce=int)
 
 class CropReceiptForm(forms.ModelForm):
     class Meta:
@@ -125,15 +125,11 @@ class CropReceiptForm(forms.ModelForm):
         ]
 
 class CropReceiptSaleStep1Form(forms.Form):
-    crop = forms.ModelChoiceField(queryset=Crop.objects.all(), required=True,
-        empty_label=None, label='Which crop?')
     farmer = forms.ModelChoiceField(queryset=Farmer.objects.all(), required=True,
         empty_label=None, label='Which farmer?')
 
 
 class CropReceiptSaleStep2Form(forms.Form):
-    crop = forms.ModelChoiceField(queryset=Crop.objects.all(), required=True,
-        widget=HiddenInput())
     farmer = forms.ModelChoiceField(queryset=Farmer.objects.all(), required=True,
         widget=HiddenInput())
     crop_receipt = forms.ModelChoiceField(queryset=CropReceipt.objects.all(),
