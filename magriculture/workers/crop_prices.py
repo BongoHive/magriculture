@@ -6,6 +6,7 @@
 import json
 from urllib import urlencode
 from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.python import log
 from vumi.application import ApplicationWorker, SessionManager
 from vumi.utils import get_deploy_int, http_request
 
@@ -18,6 +19,7 @@ class FncsApi(object):
 
     def get_page(self, route, **params):
         url = '%s%s?%s' % (self.api_url, route, urlencode(params))
+        log.msg("Fetching url %r" % url)
         d = http_request(url, '', {
             'User-Agent': 'mAgriculture HTTP Request',
             }, method='GET')
@@ -25,11 +27,14 @@ class FncsApi(object):
         return d
 
     def get_farmer(self, user_id):
-        return self.get_page("farmer", msisdn=user_id)
+        return self.get_page("farmer", msisdn=user_id.lstrip('+'))
 
     def get_price_history(self, market_id, crop_id, limit):
         return self.get_page("price_history", market=market_id, crop=crop_id,
                              limit=limit)
+
+    def get_highest_markets(self, crop_id, limit):
+        return self.get_page("highest_markets", crop=crop_id, limit=limit)
 
 
 class Farmer(object):
@@ -90,17 +95,29 @@ class CropPriceModel(object):
         The item from farmer.markets selected by the user.
     """
     # states of the model
-    SELECT_CROP, SELECT_MARKET, SHOW_PRICES, END = STATES = (
-        "select_crop", "select_market", "show_prices", "end")
+    SELECT_CROP = "select_crop"
+    SELECT_MARKET_LIST = "select_market_list"
+    SELECT_MARKET = "select_market"
+    SHOW_PRICES = "show_prices"
+    END = "end"
+    STATES = (
+        SELECT_CROP, SELECT_MARKET_LIST, SELECT_MARKET, SHOW_PRICES, END,
+        )
     START = SELECT_CROP
 
+    # market lists
+    HIGHEST_MARKETS = "highest_markets"
+    MY_MARKETS = "my_markets"
+    MARKET_LISTS = (HIGHEST_MARKETS, MY_MARKETS)
+
     def __init__(self, state, farmer, selected_crop=None,
-                 selected_market=None):
+                 selected_market=None, markets=None):
         assert state in self.STATES
         self.state = state
         self.farmer = farmer
         self.selected_crop = selected_crop
         self.selected_market = selected_market
+        self.markets = markets
 
     @classmethod
     @inlineCallbacks
@@ -115,6 +132,7 @@ class CropPriceModel(object):
             "farmer": self.farmer.serialize(),
             "selected_crop": self.selected_crop,
             "selected_market": self.selected_market,
+            "markets": self.markets,
             }
         return json.dumps(model_data)
 
@@ -124,7 +142,8 @@ class CropPriceModel(object):
         farmer = Farmer.unserialize(model_data["farmer"])
         return cls(model_data["state"], farmer,
                    model_data["selected_crop"],
-                   model_data["selected_market"])
+                   model_data["selected_market"],
+                   model_data["markets"])
 
     def get_choice(self, text, min_choice, max_choice):
         try:
@@ -135,12 +154,12 @@ class CropPriceModel(object):
             choice = None
         return choice
 
-    def handle_select_crop(self, text):
+    def handle_select_crop(self, text, _api):
         choice = self.get_choice(text, 1, len(self.farmer.crops))
         if choice is None:
             return "Please enter the number of the crop."
         self.selected_crop = choice - 1
-        self.state = self.SELECT_MARKET
+        self.state = self.SELECT_MARKET_LIST
 
     def display_select_crop(self, err, _api):
         template = (
@@ -158,20 +177,44 @@ class CropPriceModel(object):
             "crops": crops,
             }
 
-    def handle_select_market(self, text):
-        choice = self.get_choice(text, 1, len(self.farmer.markets))
+    @inlineCallbacks
+    def handle_select_market_list(self, text, api):
+        choice = self.get_choice(text, 1, 2)
+        if choice is None:
+            returnValue("Please select a list of markets.")
+        if choice == 1:
+            crop_id = self.farmer.crops[self.selected_crop][0]
+            self.markets = yield api.get_highest_markets(crop_id, 5)
+        else:
+            self.markets = self.farmer.markets
+        self.state = self.SELECT_MARKET
+
+    def display_select_market_list(self, err, _api):
+        template = (
+            "%(err)s"
+            "Select which markets to view:\n"
+            "1. Highest markets for %(crop)s\n"
+            "2. My markets\n"
+            )
+        return template % {
+            "err": err + "\n" if err is not None else "",
+            "crop": self.farmer.crops[self.selected_crop][1],
+            }
+
+    def handle_select_market(self, text, _api):
+        choice = self.get_choice(text, 1, len(self.markets))
         if choice is None:
             return "Please enter the number of a market."
         self.selected_market = choice - 1
         self.state = self.SHOW_PRICES
 
-    def display_select_market(self, err, _api):
+    def display_select_market(self, err, api):
         template = (
             "%(err)s"
             "Select a market:\n"
             "%(markets)s")
         market_lines = []
-        for i, (_id, market_name) in enumerate(self.farmer.markets):
+        for i, (_id, market_name) in enumerate(self.markets):
             market_lines.append("%d. %s" % (i + 1, market_name))
         markets = "\n".join(market_lines)
         return template % {
@@ -179,17 +222,17 @@ class CropPriceModel(object):
             "markets": markets,
             }
 
-    def handle_show_prices(self, text):
+    def handle_show_prices(self, text, _api):
         choice = self.get_choice(text, 1, 3)
         if choice is None:
             return "Invalid selection."
         if choice == 1:
             self.selected_market -= 1
             if self.selected_market < 0:
-                self.selected_market = len(self.farmer.markets) - 1
+                self.selected_market = len(self.markets) - 1
         elif choice == 2:
             self.selected_market += 1
-            if self.selected_market >= len(self.farmer.markets):
+            if self.selected_market >= len(self.markets):
                 self.selected_market = 0
         elif choice == 3:
             self.state = self.END
@@ -197,26 +240,33 @@ class CropPriceModel(object):
     @inlineCallbacks
     def display_show_prices(self, err, api):
         crop_id, crop_name = self.farmer.crops[self.selected_crop]
-        market_id, market_name = self.farmer.markets[self.selected_market]
+        market_id, market_name = self.markets[self.selected_market]
         prices = yield api.get_price_history(market_id, crop_id, limit=5)
+        next_prev = ("Enter 1 for next market, 2 for previous market.\n"
+                     if len(self.markets) > 1 else "")
         template = (
             "Prices of %(crop)s in %(market)s:\n"
             "%(err)s"
-            "%(price_text)s"
-            "Enter 1 for next market, 2 for previous market.\n"
+            "%(price_text)s\n"
+            "%(next_prev)s"
             "Enter 3 to exit.")
         price_lines = []
         for unit_id in sorted(prices.keys()):
             unit_info = prices[unit_id]
-            price_lines.append("Sold as %s:" % unit_info["unit_name"])
-            for price in unit_info["prices"]:
-                price_lines.append("  %.2f" % price)
+            unit_prices = unit_info["prices"]
+            if unit_prices:
+                avg_text = "%.2f" % (sum(unit_prices) / len(unit_prices))
+            else:
+                avg_text = "-"
+            price_lines.append("  %s: %s" % (unit_info["unit_name"],
+                                           avg_text))
         price_text = "\n".join(price_lines)
         returnValue(template % {
                 "crop": crop_name,
                 "market": market_name,
                 "err": err + "\n" if err is not None else "",
                 "price_text": price_text,
+                "next_prev": next_prev,
                 })
 
     def display_end(self, err, api):
@@ -228,7 +278,7 @@ class CropPriceModel(object):
         """
         handler = getattr(self, "handle_%s" % self.state)
         if text is not None:
-            err = handler(text)
+            err = yield handler(text, api)
         else:
             err = None
         display = getattr(self, "display_%s" % self.state)
@@ -276,11 +326,17 @@ class CropPriceWorker(ApplicationWorker):
     def consume_user_message(self, msg):
         user_id = msg.user()
         session = self.session_manager.load_session(user_id)
-        if session:
+        if not session:
+            session = self.session_manager.create_session(user_id)
+        if "model_data" in session:
             model = CropPriceModel.unserialize(session["model_data"])
         else:
-            session = self.session_manager.create_session(user_id)
-            model = yield CropPriceModel.from_user_id(user_id, self.api)
+            try:
+                model = yield CropPriceModel.from_user_id(user_id, self.api)
+            except Exception, e:
+                log.err(e)
+                self.reply_to(msg, "You are not registered.", False)
+                return
 
         reply, continue_session = yield model.process_event(msg['content'],
                                                             self.api)

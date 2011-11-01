@@ -39,3 +39,12 @@ def get_price_history(request):
                 "prices": unit_prices,
                 }
     return HttpResponse(json.dumps(prices))
+
+
+def get_highest_markets(request):
+    crop_pk = request.GET.get('crop')
+    limit = int(request.GET.get('limit', '10'))
+    crop = get_object_or_404(Crop, pk=crop_pk)
+    highest_markets = [(market.pk, market.name) for market
+                       in Market.highest_markets_for(crop)[:limit]]
+    return HttpResponse(json.dumps(highest_markets))
