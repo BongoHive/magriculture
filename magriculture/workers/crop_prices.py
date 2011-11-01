@@ -242,11 +242,13 @@ class CropPriceModel(object):
         crop_id, crop_name = self.farmer.crops[self.selected_crop]
         market_id, market_name = self.markets[self.selected_market]
         prices = yield api.get_price_history(market_id, crop_id, limit=5)
+        next_prev = ("Enter 1 for next market, 2 for previous market.\n"
+                     if len(self.markets) > 1 else "")
         template = (
             "Prices of %(crop)s in %(market)s:\n"
             "%(err)s"
             "%(price_text)s\n"
-            "Enter 1 for next market, 2 for previous market.\n"
+            "%(next_prev)s"
             "Enter 3 to exit.")
         price_lines = []
         for unit_id in sorted(prices.keys()):
@@ -264,6 +266,7 @@ class CropPriceModel(object):
                 "market": market_name,
                 "err": err + "\n" if err is not None else "",
                 "price_text": price_text,
+                "next_prev": next_prev,
                 })
 
     def display_end(self, err, api):

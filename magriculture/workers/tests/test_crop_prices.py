@@ -305,7 +305,6 @@ class TestCropPriceModel(unittest.TestCase):
                          "Prices of Peas in Kitwe:\n"
                          "  boxes: 1.27\n"
                          "  crates: 1.70\n"
-                         "Enter 1 for next market, 2 for previous market.\n"
                          "Enter 3 to exit.")
         self.assertTrue(continue_session)
         self.assertEqual(model.selected_market, 0)
