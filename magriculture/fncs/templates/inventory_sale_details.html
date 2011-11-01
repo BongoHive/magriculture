@@ -5,7 +5,7 @@
 
     <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Register Sale</div>
 
-    <div class="h2">Register Sale of {{crop}} for {{farmer}}</div>
+    <div class="h2">Register Sale for {{farmer}}</div>
     {% include "includes/messages.html" %}
 
     <form class="standard" method="POST" action="{% url fncs:inventory_sale_details %}">
