@@ -3,5 +3,7 @@ transport_names:
   - integrat
 exposed_names:
   - ussd_crop_prices
+  - ussd_wikipedia
 toaddr_mappings:
   ussd_crop_prices: "^.*\\*1#$"
+  ussd_wikipedia: "^.*\\*2#$"
