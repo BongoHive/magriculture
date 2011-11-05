@@ -3,9 +3,9 @@
 {% block content %}
 <div class="content">
 
-    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Crop Inventory</div>
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Crops</div>
     <div class="menu">
-        <div class="item"><a href="{% url fncs:inventory_intake %}"><img src="{{ STATIC_URL }}images/icon-write.gif" alt="Inventory Intake" width="16" height="16" />+ Add to Inventory &raquo;</a></div>
+        <div class="item"><a href="{% url fncs:inventory_intake %}"><img src="{{ STATIC_URL }}images/icon-write.gif" alt="Crop Intake" width="16" height="16" />+ Crop Intake &raquo;</a></div>
     </div>
 
     <div class="list">
@@ -18,7 +18,7 @@
             </div>
         {% empty %}
             <div class="item">
-                <span class="text">You don't have any inventory yet</span><br/>
+                <span class="text">You don't have any crops yet</span><br/>
             </div>
         {% endfor %}
         {% include "includes/pagination.html" %}
