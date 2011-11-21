@@ -47,3 +47,8 @@ urlpatterns = patterns('',
     url(r'^api/v1/highest_markets', api.get_highest_markets, name='api_get_highest_markets'),
 )
 
+# for HAProxy
+urlpatterns += patterns('',
+    url(r'^health/$', views.health, name='health'),
+)
+

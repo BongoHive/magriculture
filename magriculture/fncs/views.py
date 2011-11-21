@@ -635,3 +635,5 @@ def todo(request):
 
     }, context_instance=RequestContext(request))
 
+def health(request):
+    return HttpResponse('')
