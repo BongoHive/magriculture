@@ -1,5 +1,0 @@
-web_path: /api/v1/sms/integrat/request.xml
-web_port: 7779
-url: http://xhg-1.higate.co.za:8888/hg_request # Integrat URL
-username: C5Test01HTTP  # Integrat username
-password: praek123  # Integrat password

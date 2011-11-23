@@ -1,10 +1,7 @@
 router_class: vumi.dispatchers.base.ToAddrRouter
 transport_names:
-  - integrat
   - infobip
 exposed_names:
   - ussd_crop_prices
-  - ussd_wikipedia
 toaddr_mappings:
   ussd_crop_prices: "^.*\\*1#$"
-  ussd_wikipedia: "^.*\\*2#$"
