@@ -1,2 +1,2 @@
 web_path: /api/v1/ussd/infobip/
-web_port: 7778
+web_port: 4031
