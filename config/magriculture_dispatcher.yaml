@@ -4,4 +4,4 @@ transport_names:
 exposed_names:
   - ussd_crop_prices
 toaddr_mappings:
-  ussd_crop_prices: "^.*\\*1#$"
+  ussd_crop_prices: "^.*$"
