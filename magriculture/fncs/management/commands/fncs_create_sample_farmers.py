@@ -35,7 +35,7 @@ class Command(BaseCommand):
             agent = utils.create_agent(msisdn=str(agent_msisdn),
                         name=utils.random_name(),
                         surname=utils.random_surname())
-            self.generate_farmers(msisdns)
+            self.generate_farmers(msisdns, agent)
 
     def generate_farmers(self, msisdns, agent):
         for msisdn in msisdns:
