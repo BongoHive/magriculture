@@ -9,22 +9,29 @@ class Command(BaseCommand):
         make_option('--total', dest='total', type='int', default=500,
                         help='How many farmers to create'),
         make_option('--agent', dest='agent', type='str', default=None,
-                        help='Generate farmers for a specific agent')
+                        help='Generate farmers for a specific agent'),
+        make_option('--farmer', dest='farmer', type='str', default=None,
+                        help='Generate sample data for a specific farmer'
+                             ' (misisdn)'),
     )
+
     def handle(self, *args, **options):
         total = options['total']
         username = options['agent']
+        farmer = options['farmer']
+        if farmer:
+            msisdns = [farmer]
+        else:
+            msisdns = [str(2776123456 + i) for i in range(total)]
         if username:
             actor = Actor.objects.get(user__username=username)
             agent = actor.as_agent()
-            self.generate_farmers(total, agent)
+            self.generate_farmers(msisdns, agent)
         else:
-            self.generate_farmers(total)
+            self.generate_farmers(msisdns)
 
-    def generate_farmers(self, total, agent=None):
-        for i in range(total):
-            msisdn = 2776123456 + i
-
+    def generate_farmers(self, msisdns, agent=None):
+        for msisdn in msisdns:
             # create a district
             district = utils.random_district()
             farmergroup_name = "%s Farmer Group" % (district.name,)
