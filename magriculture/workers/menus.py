@@ -1,3 +1,5 @@
+# -*- test-case-name: magriculture.workers.tests.test_lactation -*-
+
 import json
 import re
 
@@ -5,9 +7,10 @@ from twisted.python import log
 from twisted.python.log import logging
 from twisted.internet.defer import inlineCallbacks, returnValue
 
+from vumi.application import ApplicationWorker
 from vumi.workers.session.worker import SessionConsumer, SessionPublisher, SessionWorker
 from vumi.message import Message
-from vumi.webapp.api import utils
+#from vumi.webapp.api import utils
 import vumi.options
 
 
@@ -293,3 +296,36 @@ class MMMobileMenuWorker(SessionWorker):
     def stopWorker(self):
         log.msg("Stopping the MenuWorker")
 
+
+class LactationWorker(ApplicationWorker):
+    """A worker that presents a USSD menu allowing farmers to
+    record cows milk production.
+
+    Configuration parameters:
+
+    :type transport_name: str
+    :param transport_name:
+        Name of the transport (or dispatcher) to receive messages from and
+        send message to.
+    :type worker_name: str
+    :param worker_name:
+        Name of the worker. Used as the redis key prefix.
+    """
+
+    MAX_SESSION_LENGTH = 3 * 60
+
+    @inlineCallbacks
+    def startWorker(self):
+        self.worker_name = self.config['worker_name']
+        yield super(LactationWorker, self).startWorker()
+
+    @inlineCallbacks
+    def stopWorker(self):
+        yield self.session_manager.stop()
+        yield super(LactationWorker, self).stopWorker()
+
+    @inlineCallbacks
+    def consume_user_message(self, msg):
+        user_id = msg.user()
+        self.reply_to(msg, "TEST", False)
+        return
