@@ -312,7 +312,7 @@ class LactationWorker(ApplicationWorker):
         Name of the worker. Used as the redis key prefix.
     """
 
-    MAX_SESSION_LENGTH = 3 * 60
+    MAX_SESSION_LENGTH = 5 * 60
 
     @inlineCallbacks
     def startWorker(self):
@@ -326,5 +326,6 @@ class LactationWorker(ApplicationWorker):
     @inlineCallbacks
     def consume_user_message(self, msg):
         user_id = msg.user()
+        #print user_id
         self.reply_to(msg, "TEST", False)
         yield None
