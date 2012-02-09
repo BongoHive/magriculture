@@ -11,7 +11,7 @@ import urllib
 
 from magriculture.fncs.models.actors import Farmer, FarmerGroup, Agent
 from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
-                                            CropUnit, Offer, CropReceipt)
+                                            CropUnit, Offer, CropReceipt, DirectSale)
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs import forms
 
@@ -610,8 +610,14 @@ def inventory_intake_details(request):
             quality = form.cleaned_data['quality']
             receipt = agent.take_in_crop(market, farmer, amount,
                                             crop_unit, crop, quality=quality)
-            messages.success(request,u'%s has been added to your inventory' % receipt)
-            return redirect(reverse('fncs:inventory'))
+            if 'direct_sale' in request.POST:
+                messages.success(request, u'%s has been added to your inventory' % receipt)
+                return redirect(reverse('fncs:inventory_direct_sale', kwargs={
+                    'receipt_pk': receipt.pk,
+                }))
+            else:
+                messages.success(request,u'%s has been added to your inventory' % receipt)
+                return redirect(reverse('fncs:inventory'))
 
     else:
         form = forms.CropReceiptStep2Form(initial={
@@ -627,6 +633,33 @@ def inventory_intake_details(request):
         'form': form,
         'crop': crop,
         'market': market,
+    })
+
+@login_required
+def inventory_direct_sale(request, receipt_pk):
+    actor = request.user.get_profile()
+    agent = actor.as_agent()
+    crop_receipt = get_object_or_404(CropReceipt, pk=receipt_pk)
+    if request.POST:
+        form = forms.DirectSaleForm(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            price = form.cleaned_data['price']
+            transaction = agent.register_sale(crop_receipt, amount, price)
+            direct_sale = DirectSale.objects.create(transaction=transaction)
+            messages.success(request, u'%s have been captured as a direct sale' % (
+                amount,
+            ))
+            return redirect(reverse('fncs:inventory'))
+    else:
+        form = forms.DirectSaleForm(initial={
+            'crop_receipt': crop_receipt,
+            'amount': crop_receipt.amount,
+        })
+    return render(request, 'inventory_direct_sale.html', {
+        'agent': agent,
+        'form': form,
+        'crop_receipt': crop_receipt,
     })
 
 def todo(request):

@@ -16,6 +16,19 @@ class SelectCropForm(forms.Form):
     crop_receipt = forms.ModelChoiceField(label='Which crop?', required=True,
         empty_label=None, queryset=CropReceipt.objects.all())
 
+class DirectSaleForm(forms.Form):
+    amount = forms.FloatField(required=True, min_value=0.1, label='How many?')
+    price = forms.FloatField(required=True, min_value=0.1, label='At what price?')
+    crop_receipt = forms.ModelChoiceField(label='Which crop?', required=True,
+        empty_label=None, queryset=CropReceipt.objects.all(), widget=HiddenInput())
+
+    def clean_crop_receipt(self):
+        data = self.cleaned_data
+        if data['crop_receipt'].remaining_inventory() < data['amount']:
+            raise forms.ValidationError("Not enough inventory")
+        return self.data
+
+
 class TransactionForm(forms.ModelForm):
     crop_receipt = forms.ModelChoiceField(queryset=CropReceipt.objects.all(),
                     widget=HiddenInput())

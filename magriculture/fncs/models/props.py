@@ -98,10 +98,12 @@ class DirectSale(models.Model):
     """
     A direct sale is when an agent buys crops directly from a farmer.
 
-    :note: this hasn't been implemented yet, might be implemented as a sale
-            from the agent to himself.
     """
-    pass
+    transaction = models.ForeignKey('fncs.Transaction')
+    created_at = models.DateTimeField(blank=False, auto_now_add=True)
+
+    class Meta:
+        app_label = 'fncs'
 
 class Transaction(models.Model):
     """
