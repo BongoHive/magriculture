@@ -3,11 +3,11 @@ from magriculture.fncs.models.geo import District, Market
 
 class Command(ImportCommand):
     help = "Import markets from an excel file"
-    
+
     def handle_row(self, row):
         try:
             district = District.objects.get(name=row['District'])
-            market, _ = Market.objects.get_or_create(name=row['MarketName'], 
+            market, _ = Market.objects.get_or_create(name=row['MarketName'],
                 district=district)
             market.volume = row['MarketVolume'].split(' ')[0].lower()
             market.save()

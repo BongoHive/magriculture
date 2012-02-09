@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 from magriculture.fncs import views
+from magriculture.fncs import api
 
 urlpatterns = patterns('',
     url(r'^$', views.home, name='home'),
@@ -17,8 +18,6 @@ urlpatterns = patterns('',
     url(r'^farmers/(?P<farmer_pk>\d+)/messages/new/$', views.farmer_new_message, name='farmer_new_message'),
     url(r'^farmers/(?P<farmer_pk>\d+)/notes/$', views.farmer_notes, name='farmer_notes'),
     url(r'^farmers/(?P<farmer_pk>\d+)/notes/new/$', views.farmer_new_note, name='farmer_new_note'),
-    url(r'^farmers/add/$', views.farmer_add, name='farmer_add'),
-    url(r'^farmers/add/$', views.farmer_add, name='farmer_add'),
     url(r'^messages/$', views.group_messages, name='messages'),
     url(r'^messages/new/$', views.group_message_new, name='group_message_new'),
     url(r'^messages/write/$', views.group_message_write, name='group_message_write'),
@@ -37,6 +36,19 @@ urlpatterns = patterns('',
     url(r'^market-prices/sales/(?P<market_pk>\d+)/$', views.market_sale, name='market_sale'),
     url(r'^market-prices/sales/(?P<market_pk>\d+)/crops/(?P<crop_pk>\d+)/$', views.crop, name='crop'),
     url(r'^market-prices/sales/(?P<market_pk>\d+)/crops/(?P<crop_pk>\d+)/unit/(?P<unit_pk>\d+)/$', views.crop_unit, name='crop_unit'),
+    url(r'^inventory/$', views.inventory, name='inventory'),
+    url(r'^inventory/sale/$', views.inventory_sale, name='inventory_sale'),
+    url(r'^inventory/sale/details/$', views.inventory_sale_details, name='inventory_sale_details'),
+    url(r'^inventory/intake/$', views.inventory_intake, name='inventory_intake'),
+    url(r'^inventory/intake/details/$', views.inventory_intake_details, name='inventory_intake_details'),
     url(r'^todo/.*', views.todo, name='todo'),
+    url(r'^api/v1/farmer', api.get_farmer, name='api_get_farmer'),
+    url(r'^api/v1/price_history', api.get_price_history, name='api_get_price_history'),
+    url(r'^api/v1/highest_markets', api.get_highest_markets, name='api_get_highest_markets'),
+)
+
+# for HAProxy
+urlpatterns += patterns('',
+    url(r'^health/$', views.health, name='health'),
 )
 

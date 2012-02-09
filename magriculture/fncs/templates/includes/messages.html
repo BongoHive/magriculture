@@ -1,5 +1,5 @@
 {% if messages %}
-    <div class="success">
-        {{messages|safeseq|join:"<br/>"}}
-    </div>
+	{% for message in messages %}
+		<div class="{{message.tags}}">{{message}}</div>
+	{% endfor %}
 {% endif %}

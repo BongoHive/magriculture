@@ -14,6 +14,10 @@
                     <span class="area">{{farmer.districts.all|join:", "}}</span><br />
                     <span class="subtitle">{{farmer.crops.all|join:", "}}</span>
                 </div>
+            {% empty %}
+                <div class="item">
+                    <span>No farmers match '{{q}}'</span>
+                </div>
             {% endfor %}
             {% if page.has_other_pages %}
                 <div class="pagination">

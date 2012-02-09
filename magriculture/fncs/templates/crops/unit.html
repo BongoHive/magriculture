@@ -16,7 +16,7 @@
         <div class="list">
             {% for transaction in page.object_list %}
             <div class="item">
-                <span class="heading">{{transaction.farmer.actor.name}}</span><br/>
+                <span class="heading">{{transaction.crop_receipt.farmer.actor.name}}</span><br/>
                 <span class="text">{{transaction}} at ZMK {{transaction.price|floatformat:2}} each, ZMK {{transaction.total|floatformat:2}} total</span><br/>
                 <span class="subtitle">{{transaction.created_at|date:"j b Y, g:iA"|upper}}</span>
             </div>

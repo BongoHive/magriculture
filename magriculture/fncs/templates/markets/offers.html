@@ -14,7 +14,11 @@
             <div class="item">
                 <span class="heading"><a href="{% url fncs:market_offer market_pk=market.pk %}">{{market}}</a></span><br/>
                 <span class="text">{{market.district}}</span><br/>
-                <span class="subtitle">Last transaction at {{market.transaction_set.latest.created_at|date:"j b Y, g:iA"|upper}}</span>
+                {% if market.transactions.exists %}
+                <span class="subtitle">Last transaction at {{market.transactions.latest.created_at|date:"j b Y, g:iA"|upper}}</span>
+                {% else %}
+                <span class="subtitle">No transactions have taken place yet.</span>
+                {% endif %}
             </div>
             {% empty %}
             <div class="item">
