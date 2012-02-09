@@ -321,11 +321,10 @@ class LactationWorker(ApplicationWorker):
 
     @inlineCallbacks
     def stopWorker(self):
-        yield self.session_manager.stop()
         yield super(LactationWorker, self).stopWorker()
 
     @inlineCallbacks
     def consume_user_message(self, msg):
         user_id = msg.user()
         self.reply_to(msg, "TEST", False)
-        return
+        yield None

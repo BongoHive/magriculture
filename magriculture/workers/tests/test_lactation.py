@@ -24,7 +24,6 @@ class TestLactationWorker(unittest.TestCase):
     def tearDown(self):
         self.fake_redis.teardown()
         yield self.worker.stopWorker()
-        yield self.server.loseConnection()
 
     # TODO: factor this out into a common application worker testing base class
     @inlineCallbacks
@@ -59,6 +58,6 @@ class TestLactationWorker(unittest.TestCase):
     def test_session_new(self):
         yield self.send(None, TransportUserMessage.SESSION_NEW)
         [reply] = yield self.recv(1)
-        self.assertEqual(reply[0], "reply")
-        self.assertTrue(reply[1].startswith("WOOT"))
+        self.assertEqual(reply[0], "end")
+        self.assertEqual(reply[1], "TEST")
 
