@@ -9,7 +9,7 @@ from django.forms.widgets import HiddenInput
 from datetime import datetime
 import urllib
 
-from magriculture.fncs.models.actors import Farmer, FarmerGroup
+from magriculture.fncs.models.actors import Farmer, FarmerGroup, Agent
 from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
                                             CropUnit, Offer, CropReceipt)
 from magriculture.fncs.models.geo import Market
@@ -637,3 +637,36 @@ def todo(request):
 
 def health(request):
     return HttpResponse('')
+
+def agents(request):
+    agents = Agent.objects.all()
+    q = request.GET.get('q','')
+    if q:
+        agents = agents.filter(actor__name__icontains=q)
+    paginator = Paginator(agents, 5)
+    page = paginator.page(request.GET.get('p', 1))
+    return render(request, 'agents/index.html', {
+        'page': page,
+        'q': q,
+    })
+
+def agent(request, agent_pk):
+    agent = get_object_or_404(Agent, pk=agent_pk)
+    actor = agent.actor
+    user = actor.user
+    form = forms.AgentForm(initial={
+        'name': user.first_name,
+        'surname': user.last_name,
+        'msisdn': user.username,
+        'farmers': agent.farmers.all(),
+        'markets': agent.markets.all(),
+    })
+    return render(request, 'agents/edit.html', {
+        'agent': agent,
+        'form': form,
+    })
+
+def agent_new(request):
+    return render(request, 'agents/new.html', {
+        'form': forms.AgentForm(),
+    })

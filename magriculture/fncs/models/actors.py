@@ -79,6 +79,19 @@ class Actor(models.Model):
         if farmers.exists():
             return farmers[0]
 
+    def as_extensionofficer(self):
+        """
+        Get the :class:`ExtensionOfficer` for this actor, raises an
+        :class:`magriculture.fncs.errors.ActorException` if there is more
+        than one :class:`ExtensionOfficer` available.
+        Returns `None` if no farmer exists.
+        """
+        extensionofficers = self.extensionofficer_set.all()
+        if extensionofficers.count() > 1:
+            raise ActorException, "More than one extensionofficer for an actor"
+        if extensionofficers.exists():
+            return extensionofficers[0]
+
     def send_message(self, recipient, message, group):
         """
         Send a message to an other actor.

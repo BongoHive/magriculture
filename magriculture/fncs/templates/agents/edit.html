@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:agents %}">Agents</a></div>
+
+    <div class="h2">Edit Agent</div>
+
+    <form class="standard" method="post" action="{% url fncs:agent agent_pk=agent.pk %}">
+        {% if form.errors %}
+            <div class="error">Please see error below.</div>
+        {% endif %}
+        {{form}}
+        <input type="submit" name="submit" class="submit" value="Save &raquo;" />
+        {% csrf_token %}
+    </form>
+
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->{% endblock %}

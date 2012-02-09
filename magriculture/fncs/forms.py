@@ -56,6 +56,17 @@ class OfferForm(forms.ModelForm):
         ]
 
 
+class AgentForm(forms.Form):
+    name = forms.CharField(label='Name', required=True)
+    surname = forms.CharField(label='Surname', required=True)
+    msisdn = forms.CharField(label='Mobile Number', required=True)
+    farmers = forms.ModelChoiceField(label='Farmers', required=True,
+        empty_label=None, queryset=Farmer.objects.all()[:10])
+    markets = forms.ModelMultipleChoiceField(label='Markets', required=True,
+        queryset=Market.objects.all()[:10])
+
+
+
 class FarmerForm(forms.Form):
     name = forms.CharField(label='Name', required=True)
     surname = forms.CharField(label='Surname', required=True)

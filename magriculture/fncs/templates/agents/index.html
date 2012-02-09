@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; Agents</div>
+    <div class="menu">
+        <div class="item"><a href="{% url fncs:agent_new %}"><img src="{{ STATIC_URL }}images/icon-profile.gif" alt="Agents" width="16" height="16" />+ Add new Agent &raquo;</a></div>
+    </div>
+    
+    <div class="content">
+        <div class="list">
+            {% for agent in page.object_list %}
+                <div class="item">
+                    <a href="{% url fncs:agent agent_pk=agent.pk %}">{{agent.actor.name}}</a> 
+                    <span class="area">{{agent.districts.all|join:", "}}</span><br />
+                    <span class="subtitle">{{agent.crops.all|join:", "}}</span>
+                </div>
+            {% empty %}
+                <div class="item">
+                    <span>No agents match '{{q}}'</span>
+                </div>
+            {% endfor %}
+            {% if page.has_other_pages %}
+                <div class="pagination">
+                    {% if page.has_previous %}
+                        <a href="?p={{page.previous_page_number}}&amp;qu={{q}}">&laquo; Prev</a>
+                    {% endif %}
+                    
+                    {% if page.has_previous and page.has_next %}
+                        |
+                    {% endif %}
+                    
+                    {% if page.has_next %}
+                        <a href="?p={{page.next_page_number}}&amp;q={{q}}">Next &raquo;</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        
+		<div class="h2">Search for Agents</div>
+		<form class="search" method="get" action="{% url fncs:agents %}">
+		    <input type="text" name="q" value="{{q}}"/> 
+		    <input type="submit" class="submit" value="Go &raquo;" name="submit" />
+		</form>
+    
+        <div class="h2">Menu</div>
+        {% include "includes/menu.html" %}
+    </div> <!-- /.content -->
+{% endblock %}
