@@ -477,7 +477,8 @@ class LactationWorker(SessionApplicationWorker):
                         continue_session = True
                     response += sess.get_decision_tree().finish() or ''
                     if sess.get_decision_tree().is_completed():
-                        self.post_result(sess.get_decision_tree().get_data())
+                        self.post_result(json.dumps(
+                            sess.get_decision_tree().get_data()))
                         sess.delete()
                 sess.save()
         except Exception, e:
