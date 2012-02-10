@@ -467,8 +467,8 @@ class LactationWorker(SessionApplicationWorker):
 
     @inlineCallbacks
     def consume_user_message(self, msg):
-        print dir(msg)
-        print msg
+        #print dir(msg)
+        #print msg
         try:
             response = ''
             continue_session = False
