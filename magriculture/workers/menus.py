@@ -354,9 +354,80 @@ class LactationWorker(SessionApplicationWorker):
 
     MAX_SESSION_LENGTH = 5 * 60
 
+    test_yaml = '''
+    __data__:
+        url: 173.45.90.19/dis-uat/api/getFarmerDetails
+        username: admin
+        password: Admin1234
+        params:
+            - telNo
+        json: >
+
+    __start__:
+        display:
+            english: "Hello."
+        next: farmers
+
+    farmers:
+        question:
+            english: "Hi. There are multiple farmers with this phone number. Who are you?"
+        options: name
+        next: cows
+
+    cows:
+        question:
+            english: "For which cow would you like to submit a milk collection?"
+        options: name
+        next: quantityMilked
+
+    quantityMilked:
+        question:
+            english: "How much milk was collected?"
+        validate: integer
+        next: quantitySold
+
+    quantitySold:
+        question:
+            english: "How much milk did you sell?"
+        validate: integer
+        next: milkTimestamp
+
+    milkTimestamp:
+        question:
+            english: "When was this collection done?"
+        options:
+              - display:
+                    english: "Today"
+                default: today
+                next: __finish__
+              - display:
+                    english: "Yesterday"
+                default: yesterday
+                next: __finish__
+              - display:
+                    english: "An earlier day"
+                next:
+                    question:
+                        english: "Which day was it [dd/mm/yyyy]?"
+                    validate: date
+                    next: __finish__
+
+    __finish__:
+        display:
+            english: "Thank you! Your milk collection was registered successfully."
+
+    __post__:
+        url: 173.45.90.19/dis-uat/api/addMilkCollections
+        username: admin
+        password: Admin1234
+        params:
+            - result
+    '''
+
     @inlineCallbacks
     def startWorker(self):
         self.worker_name = self.config['worker_name']
+        self.yaml_template = None
         yield super(LactationWorker, self).startWorker()
 
     @inlineCallbacks
@@ -365,6 +436,11 @@ class LactationWorker(SessionApplicationWorker):
 
     @inlineCallbacks
     def consume_user_message(self, msg):
+        try:
+            if not self.yaml_template:
+                self.set_yaml_template(self.test_yaml)
+        except Exception, e:
+            print e
         user_id = msg.user()
         self.reply_to(msg, "TEST", False)
         yield None
