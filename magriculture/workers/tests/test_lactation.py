@@ -60,7 +60,30 @@ class TestLactationWorker(unittest.TestCase):
         [reply] = yield self.recv(1)
         self.assertEqual(reply[0], "reply")
         self.assertEqual(reply[1], "For which cow would you like to submit a "
-                                    +"milk collection?\n1. dairy\n2. dell")
+                                    + "milk collection?\n1. dairy\n2. dell")
+
+    @inlineCallbacks
+    def test_session_complete_menu_traversal(self):
+        yield self.send(None, TransportUserMessage.SESSION_NEW)
+        yield self.send("1", TransportUserMessage.SESSION_RESUME)
+        yield self.send("14", TransportUserMessage.SESSION_RESUME)
+        yield self.send("10", TransportUserMessage.SESSION_RESUME)
+        yield self.send("2", TransportUserMessage.SESSION_RESUME)
+        replys = yield self.recv(1)
+        self.assertEqual(len(replys), 5)
+        self.assertEqual(replys[0][0], "reply")
+        self.assertEqual(replys[0][1], "For which cow would you like to submit"
+                                    + " a milk collection?\n1. dairy\n2. dell")
+        self.assertEqual(replys[1][0], "reply")
+        self.assertEqual(replys[1][1], "How much milk was collected?")
+        self.assertEqual(replys[2][0], "reply")
+        self.assertEqual(replys[2][1], "How much milk did you sell?")
+        self.assertEqual(replys[3][0], "reply")
+        self.assertEqual(replys[3][1], "When was this collection done?"
+                            + "\n1. Today\n2. Yesterday\n3. An earlier day")
+        self.assertEqual(replys[4][0], "end")
+        self.assertEqual(replys[4][1], "Thank you! Your milk collection was"
+                                    + " registered successfully.")
 
     @inlineCallbacks
     def test_session_continue_non_existant(self):
@@ -68,5 +91,5 @@ class TestLactationWorker(unittest.TestCase):
         [reply] = yield self.recv(1)
         self.assertEqual(reply[0], "reply")
         self.assertEqual(reply[1], "For which cow would you like to submit a "
-                                    +"milk collection?\n1. dairy\n2. dell")
+                                    + "milk collection?\n1. dairy\n2. dell")
         # TODO this should not pass
