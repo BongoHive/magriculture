@@ -332,12 +332,12 @@ class SessionApplicationWorker(ApplicationWorker):
         decision_tree = TraversedDecisionTree()
         yaml_template = self.yaml_template
         decision_tree.load_yaml_template(yaml_template)
-        #self.set_data_url(decision_tree.get_data_source())
-        #self.set_post_url(decision_tree.get_post_source())
-        #if self.data_url.get('url'):
-            #raise ValueError("This is broken. Sorry. :-(")
-        #else:
-            #decision_tree.load_dummy_data()
+        self.set_data_url(decision_tree.get_data_source())
+        self.set_post_url(decision_tree.get_post_source())
+        if self.data_url.get('url'):
+            raise ValueError("This is broken. Sorry. :-(")
+        else:
+            decision_tree.load_dummy_data()
         return decision_tree
 
 
@@ -360,12 +360,12 @@ class LactationWorker(SessionApplicationWorker):
 
     test_yaml = '''
     __data__:
-        url: 173.45.90.19/dis-uat/api/getFarmerDetails
-        username: admin
-        password: Admin1234
+        url:
+        username:
+        password:
         params:
             - telNo
-        json: >
+        json: '{"farmers":[{"name":"David","cows":[{"name":"dairy","quantityMilked":0,"milkTimestamp":0,"cowRegId":"reg1","quantitySold":0},{"name":"dell","quantityMilked":0,"milkTimestamp":0,"cowRegId":"reg2","quantitySold":0}],"timestamp":"1309852944","farmerRegId":"frm1"}],"msisdn":"456789"}'
 
     __start__:
         display:
@@ -461,6 +461,7 @@ class LactationWorker(SessionApplicationWorker):
                         sess.delete()
                         ussd['OPERATION'] = 'END'
                 sess.save()
+                print response
         except Exception, e:
             print e
         user_id = msg.user()
