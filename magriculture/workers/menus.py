@@ -310,7 +310,14 @@ class SessionApplicationWorker(ApplicationWorker):
     def set_post_url(self, post_source):
         self.post_url = post_source
 
-    def retrive_json_data(self):
+    def post_result(self, result):
+        # TODO need actual post but
+        # just need this to override in testing for now
+        #print self.post_url
+        #print result
+        pass
+
+    def call_for_json(self):
         # TODO need actual retrieval but
         # just need this to override in testing for now
         return '{}'
@@ -340,7 +347,7 @@ class SessionApplicationWorker(ApplicationWorker):
         self.set_data_url(decision_tree.get_data_source())
         self.set_post_url(decision_tree.get_post_source())
         if self.data_url.get('url'):
-            json_string = self.retrive_json_data()
+            json_string = self.call_for_json()
             decision_tree.load_json_data(json_string)
         else:
             decision_tree.load_dummy_data()
@@ -461,8 +468,6 @@ class LactationWorker(SessionApplicationWorker):
                     # TODO check this corresponds to session_event = new
                     sess.get_decision_tree().start()
                     response += sess.get_decision_tree().question()
-                    #sess.get_decision_tree().answer('1')
-                    #response += sess.get_decision_tree().question()
                     continue_session = True
                 else:
                     # TODO check this corresponds to session_event = resume
@@ -472,6 +477,7 @@ class LactationWorker(SessionApplicationWorker):
                         continue_session = True
                     response += sess.get_decision_tree().finish() or ''
                     if sess.get_decision_tree().is_completed():
+                        self.post_result(sess.get_decision_tree().get_data())
                         sess.delete()
                 sess.save()
         except Exception, e:

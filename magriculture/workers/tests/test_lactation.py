@@ -9,7 +9,11 @@ from magriculture.workers.menus import LactationWorker
 
 class TestLactationWorker(unittest.TestCase):
 
-    def _retrive_json_data(_self):
+    def _post_result(_self, result):
+        #print result
+        pass
+
+    def _call_for_json(_self):
         return '''{
                     "farmers": [
                         {
@@ -45,7 +49,8 @@ class TestLactationWorker(unittest.TestCase):
             'worker_name': 'test_lactation',
             })
         self.broker = self.worker._amqp_client.broker
-        self.worker.retrive_json_data = self._retrive_json_data
+        self.worker.call_for_json = self._call_for_json
+        self.worker.post_result = self._post_result
         yield self.worker.startWorker()
         self.fake_redis = FakeRedis()
 
