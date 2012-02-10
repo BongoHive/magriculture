@@ -8,8 +8,10 @@ from twisted.python.log import logging
 from twisted.internet.defer import inlineCallbacks, returnValue
 
 from vumi.application import ApplicationWorker
+from vumi.session import getVumiSession, delVumiSession, TraversedDecisionTree
 from vumi.workers.session.worker import SessionConsumer, SessionPublisher, SessionWorker
 from vumi.message import Message
+from vumi.tests.utils import FakeRedis
 #from vumi.webapp.api import utils
 import vumi.options
 
@@ -315,8 +317,10 @@ class SessionApplicationWorker(ApplicationWorker):
         #dictionary = message.get('short_message')
 
     def get_session(self, MSISDN):
+        #sess = getVumiSession(self.r_server,
+                              #self.routing_key + '.' + MSISDN)
         sess = getVumiSession(self.r_server,
-                              self.routing_key + '.' + MSISDN)
+                self.transport_name + '.' + MSISDN)
         if not sess.get_decision_tree():
             sess.set_decision_tree(self.setup_new_decision_tree(MSISDN))
         return sess
@@ -328,12 +332,12 @@ class SessionApplicationWorker(ApplicationWorker):
         decision_tree = TraversedDecisionTree()
         yaml_template = self.yaml_template
         decision_tree.load_yaml_template(yaml_template)
-        self.set_data_url(decision_tree.get_data_source())
-        self.set_post_url(decision_tree.get_post_source())
-        if self.data_url.get('url'):
-            raise ValueError("This is broken. Sorry. :-(")
-        else:
-            decision_tree.load_dummy_data()
+        #self.set_data_url(decision_tree.get_data_source())
+        #self.set_post_url(decision_tree.get_post_source())
+        #if self.data_url.get('url'):
+            #raise ValueError("This is broken. Sorry. :-(")
+        #else:
+            #decision_tree.load_dummy_data()
         return decision_tree
 
 
@@ -427,7 +431,8 @@ class LactationWorker(SessionApplicationWorker):
     @inlineCallbacks
     def startWorker(self):
         self.worker_name = self.config['worker_name']
-        self.yaml_template = None
+        self.set_yaml_template(self.test_yaml)
+        self.r_server = FakeRedis()
         yield super(LactationWorker, self).startWorker()
 
     @inlineCallbacks
@@ -436,9 +441,26 @@ class LactationWorker(SessionApplicationWorker):
 
     @inlineCallbacks
     def consume_user_message(self, msg):
+        print msg.payload
         try:
-            if not self.yaml_template:
-                self.set_yaml_template(self.test_yaml)
+            response = ''
+            if True:
+                if not self.yaml_template:
+                    self.set_yaml_template(self.test_yaml)
+                sess = self.get_session(msg.user())
+                if not sess.get_decision_tree().is_started():
+                    sess.get_decision_tree().start()
+                    response += sess.get_decision_tree().question()
+                else:
+                    sess.get_decision_tree().answer(ussd['MESSAGE'])
+                    if not sess.get_decision_tree().is_completed():
+                        response += sess.get_decision_tree().question()
+                        ussd['OPERATION'] = 'INV'
+                    response += sess.get_decision_tree().finish() or ''
+                    if sess.get_decision_tree().is_completed():
+                        sess.delete()
+                        ussd['OPERATION'] = 'END'
+                sess.save()
         except Exception, e:
             print e
         user_id = msg.user()
