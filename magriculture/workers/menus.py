@@ -456,7 +456,8 @@ class LactationWorker(SessionApplicationWorker):
     @inlineCallbacks
     def startWorker(self):
         self.worker_name = self.config['worker_name']
-        self.set_yaml_template(self.test_yaml)
+        #self.set_yaml_template(self.test_yaml)
+        self.yaml_template = None
         self.r_server = FakeRedis()
         yield super(LactationWorker, self).startWorker()
 
@@ -466,6 +467,8 @@ class LactationWorker(SessionApplicationWorker):
 
     @inlineCallbacks
     def consume_user_message(self, msg):
+        print dir(msg)
+        print msg
         try:
             response = ''
             continue_session = False
@@ -474,12 +477,14 @@ class LactationWorker(SessionApplicationWorker):
                     self.set_yaml_template(self.test_yaml)
                 sess = self.get_session(msg.user())
                 if not sess.get_decision_tree().is_started():
+                    # TODO check this corresponds to session_event = new
                     sess.get_decision_tree().start()
                     response += sess.get_decision_tree().question()
                     #sess.get_decision_tree().answer('1')
                     #response += sess.get_decision_tree().question()
                     continue_session = True
                 else:
+                    # TODO check this corresponds to session_event = resume
                     sess.get_decision_tree().answer(msg.payload['content'])
                     if not sess.get_decision_tree().is_completed():
                         response += sess.get_decision_tree().question()

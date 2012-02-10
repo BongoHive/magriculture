@@ -61,3 +61,12 @@ class TestLactationWorker(unittest.TestCase):
         self.assertEqual(reply[0], "reply")
         self.assertEqual(reply[1], "For which cow would you like to submit a "
                                     +"milk collection?\n1. dairy\n2. dell")
+
+    @inlineCallbacks
+    def test_session_continue_non_existant(self):
+        yield self.send("1", TransportUserMessage.SESSION_RESUME)
+        [reply] = yield self.recv(1)
+        self.assertEqual(reply[0], "reply")
+        self.assertEqual(reply[1], "For which cow would you like to submit a "
+                                    +"milk collection?\n1. dairy\n2. dell")
+        # TODO this should not pass
