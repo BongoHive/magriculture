@@ -310,6 +310,11 @@ class SessionApplicationWorker(ApplicationWorker):
     def set_post_url(self, post_source):
         self.post_url = post_source
 
+    def retrive_json_data(self):
+        # TODO need actual retrieval but
+        # just need this to override in testing for now
+        return '{}'
+
     def consume_message(self, message):
         # TODO: Eep! This code is broken!
         log.msg("session message %s consumed by %s" % (
@@ -335,7 +340,8 @@ class SessionApplicationWorker(ApplicationWorker):
         self.set_data_url(decision_tree.get_data_source())
         self.set_post_url(decision_tree.get_post_source())
         if self.data_url.get('url'):
-            raise ValueError("This is broken. Sorry. :-(")
+            json_string = self.retrive_json_data()
+            decision_tree.load_json_data(json_string)
         else:
             decision_tree.load_dummy_data()
         return decision_tree
@@ -360,37 +366,12 @@ class LactationWorker(SessionApplicationWorker):
 
     test_yaml = '''
     __data__:
-        url:
-        username:
-        password:
+        url: 173.45.90.19/dis-uat/api/getFarmerDetails
+        username: admin
+        password: Admin1234
         params:
             - telNo
-        json: '{
-                    "farmers": [
-                        {
-                            "name":"David",
-                            "cows": [
-                                {
-                                    "name":"dairy",
-                                    "quantityMilked":0,
-                                    "milkTimestamp":0,
-                                    "cowRegId":"reg1",
-                                    "quantitySold":0
-                                },
-                                {
-                                    "name":"dell",
-                                    "quantityMilked":0,
-                                    "milkTimestamp":0,
-                                    "cowRegId":"reg2",
-                                    "quantitySold":0
-                                }
-                            ],
-                            "timestamp":"1309852944",
-                            "farmerRegId":"frm1"
-                        }
-                    ],
-                    "msisdn": "456789"
-                }'
+        json: "{}"
 
     __start__:
         display:

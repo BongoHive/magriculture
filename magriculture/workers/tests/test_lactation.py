@@ -9,6 +9,34 @@ from magriculture.workers.menus import LactationWorker
 
 class TestLactationWorker(unittest.TestCase):
 
+    def _retrive_json_data(_self):
+        return '''{
+                    "farmers": [
+                        {
+                            "name":"David",
+                            "cows": [
+                                {
+                                    "name":"dairy",
+                                    "quantityMilked": 0,
+                                    "milkTimestamp": 0,
+                                    "cowRegId": "reg1",
+                                    "quantitySold": 0
+                                },
+                                {
+                                    "name": "dell",
+                                    "quantityMilked": 0,
+                                    "milkTimestamp": 0,
+                                    "cowRegId": "reg2",
+                                    "quantitySold": 0
+                                }
+                            ],
+                            "timestamp": "1309852944",
+                            "farmerRegId": "frm1"
+                        }
+                    ],
+                    "msisdn": "456789"
+                }'''
+
     @inlineCallbacks
     def setUp(self):
         self.transport_name = 'test_transport'
@@ -17,6 +45,7 @@ class TestLactationWorker(unittest.TestCase):
             'worker_name': 'test_lactation',
             })
         self.broker = self.worker._amqp_client.broker
+        self.worker.retrive_json_data = self._retrive_json_data
         yield self.worker.startWorker()
         self.fake_redis = FakeRedis()
 
