@@ -365,7 +365,32 @@ class LactationWorker(SessionApplicationWorker):
         password:
         params:
             - telNo
-        json: '{"farmers":[{"name":"David","cows":[{"name":"dairy","quantityMilked":0,"milkTimestamp":0,"cowRegId":"reg1","quantitySold":0},{"name":"dell","quantityMilked":0,"milkTimestamp":0,"cowRegId":"reg2","quantitySold":0}],"timestamp":"1309852944","farmerRegId":"frm1"}],"msisdn":"456789"}'
+        json: '{
+                    "farmers": [
+                        {
+                            "name":"David",
+                            "cows": [
+                                {
+                                    "name":"dairy",
+                                    "quantityMilked":0,
+                                    "milkTimestamp":0,
+                                    "cowRegId":"reg1",
+                                    "quantitySold":0
+                                },
+                                {
+                                    "name":"dell",
+                                    "quantityMilked":0,
+                                    "milkTimestamp":0,
+                                    "cowRegId":"reg2",
+                                    "quantitySold":0
+                                }
+                            ],
+                            "timestamp":"1309852944",
+                            "farmerRegId":"frm1"
+                        }
+                    ],
+                    "msisdn": "456789"
+                }'
 
     __start__:
         display:
@@ -441,9 +466,9 @@ class LactationWorker(SessionApplicationWorker):
 
     @inlineCallbacks
     def consume_user_message(self, msg):
-        print msg.payload
         try:
             response = ''
+            continue_session = False
             if True:
                 if not self.yaml_template:
                     self.set_yaml_template(self.test_yaml)
@@ -451,19 +476,20 @@ class LactationWorker(SessionApplicationWorker):
                 if not sess.get_decision_tree().is_started():
                     sess.get_decision_tree().start()
                     response += sess.get_decision_tree().question()
+                    #sess.get_decision_tree().answer('1')
+                    #response += sess.get_decision_tree().question()
+                    continue_session = True
                 else:
-                    sess.get_decision_tree().answer(ussd['MESSAGE'])
+                    sess.get_decision_tree().answer(msg.payload['content'])
                     if not sess.get_decision_tree().is_completed():
                         response += sess.get_decision_tree().question()
-                        ussd['OPERATION'] = 'INV'
+                        continue_session = True
                     response += sess.get_decision_tree().finish() or ''
                     if sess.get_decision_tree().is_completed():
                         sess.delete()
-                        ussd['OPERATION'] = 'END'
                 sess.save()
-                print response
         except Exception, e:
             print e
         user_id = msg.user()
-        self.reply_to(msg, "TEST", False)
+        self.reply_to(msg, response, continue_session)
         yield None
