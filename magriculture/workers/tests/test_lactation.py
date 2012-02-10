@@ -86,6 +86,42 @@ class TestLactationWorker(unittest.TestCase):
                                     + " registered successfully.")
 
     @inlineCallbacks
+    def test_session_complete_menu_traversal_with_bad_entries(self):
+        yield self.send(None, TransportUserMessage.SESSION_NEW)
+        yield self.send("3", TransportUserMessage.SESSION_RESUME)
+        # '3' was out of range, so repeat with '1'
+        yield self.send("1", TransportUserMessage.SESSION_RESUME)
+        yield self.send("14", TransportUserMessage.SESSION_RESUME)
+        yield self.send("very little", TransportUserMessage.SESSION_RESUME)
+        # 'very litte' was not an integer so repeat with '0.5'
+        yield self.send("0.5", TransportUserMessage.SESSION_RESUME)
+        # '0.5' is of course still not an integer so repeat with '0'
+        yield self.send("0", TransportUserMessage.SESSION_RESUME)
+        yield self.send("2", TransportUserMessage.SESSION_RESUME)
+        replys = yield self.recv(1)
+        self.assertEqual(len(replys), 8)
+        self.assertEqual(replys[0][0], "reply")
+        self.assertEqual(replys[0][1], "For which cow would you like to submit"
+                                    + " a milk collection?\n1. dairy\n2. dell")
+        self.assertEqual(replys[1][0], "reply")
+        self.assertEqual(replys[1][1], "For which cow would you like to submit"
+                                    + " a milk collection?\n1. dairy\n2. dell")
+        self.assertEqual(replys[2][0], "reply")
+        self.assertEqual(replys[2][1], "How much milk was collected?")
+        self.assertEqual(replys[3][0], "reply")
+        self.assertEqual(replys[3][1], "How much milk did you sell?")
+        self.assertEqual(replys[4][0], "reply")
+        self.assertEqual(replys[4][1], "How much milk did you sell?")
+        self.assertEqual(replys[5][0], "reply")
+        self.assertEqual(replys[5][1], "How much milk did you sell?")
+        self.assertEqual(replys[6][0], "reply")
+        self.assertEqual(replys[6][1], "When was this collection done?"
+                            + "\n1. Today\n2. Yesterday\n3. An earlier day")
+        self.assertEqual(replys[7][0], "end")
+        self.assertEqual(replys[7][1], "Thank you! Your milk collection was"
+                                    + " registered successfully.")
+
+    @inlineCallbacks
     def test_session_continue_non_existant(self):
         yield self.send("1", TransportUserMessage.SESSION_RESUME)
         [reply] = yield self.recv(1)
