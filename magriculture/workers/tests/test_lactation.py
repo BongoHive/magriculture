@@ -1,5 +1,6 @@
 """Tests for magriculture.workers.crop_prices"""
 
+import re
 
 from twisted.trial import unittest
 from twisted.internet.defer import inlineCallbacks, returnValue
@@ -10,10 +11,18 @@ from magriculture.workers.menus import LactationWorker
 
 class TestLactationWorker(unittest.TestCase):
 
+    def replace_milktimestamp(self, string):
+        newstring = re.sub(r'"milkTimestamp": "\d*"',
+                            '"milkTimestamp": "0"',
+                            string)
+        return newstring
+
     def _post_result(self, result):
+        print self
         self.result_list.append(result)
 
     def _call_for_json(self):
+        print self
         return '''{
                     "farmers": [
                         {
@@ -44,13 +53,13 @@ class TestLactationWorker(unittest.TestCase):
     @inlineCallbacks
     def setUp(self):
         self.transport_name = 'test_transport'
+        LactationWorker.call_for_json = self._call_for_json
+        LactationWorker.post_result = self._post_result
         self.worker = get_stubbed_worker(LactationWorker, {
             'transport_name': self.transport_name,
             'worker_name': 'test_lactation',
             })
         self.broker = self.worker._amqp_client.broker
-        self.worker.call_for_json = self._call_for_json
-        self.worker.post_result = self._post_result
         yield self.worker.startWorker()
         self.fake_redis = FakeRedis()
         self.result_list = []
@@ -119,7 +128,8 @@ class TestLactationWorker(unittest.TestCase):
         self.assertEqual(replys[4][0], "end")
         self.assertEqual(replys[4][1], "Thank you! Your milk collection was"
                                     + " registered successfully.")
-        self.assertEqual(self.result_list[0],
+        self.assertEqual(self.replace_milktimestamp(self.result_list[0]),
+                self.replace_milktimestamp(
                 '{"msisdn": "456789", "farmers": '
                 '[{"cows": [{"quantitySold": "10", '
                 '"cowRegId": "reg1", "name": "dairy", '
@@ -128,7 +138,7 @@ class TestLactationWorker(unittest.TestCase):
                 '"milkTimestamp": 0, "quantityMilked": 0}],'
                 ' "timestamp": "1309852944", "farmerRegId": "frm1", '
                 '"name": "David"}]}'
-                )
+                ))
 
     @inlineCallbacks
     def test_session_complete_menu_traversal_with_bad_entries(self):
@@ -165,7 +175,8 @@ class TestLactationWorker(unittest.TestCase):
         self.assertEqual(replys[7][0], "end")
         self.assertEqual(replys[7][1], "Thank you! Your milk collection was"
                                     + " registered successfully.")
-        self.assertEqual(self.result_list[0],
+        self.assertEqual(self.replace_milktimestamp(self.result_list[0]),
+                self.replace_milktimestamp(
                 '{"msisdn": "456789", "farmers": '
                 '[{"cows": [{"quantitySold": "0", '
                 '"cowRegId": "reg1", "name": "dairy", '
@@ -174,7 +185,7 @@ class TestLactationWorker(unittest.TestCase):
                 '"milkTimestamp": 0, "quantityMilked": 0}],'
                 ' "timestamp": "1309852944", "farmerRegId": "frm1", '
                 '"name": "David"}]}'
-                )
+                ))
 
     @inlineCallbacks
     def test_session_continue_non_existant(self):
