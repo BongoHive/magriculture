@@ -8,21 +8,12 @@ from vumi.tests.utils import get_stubbed_worker, FakeRedis
 from vumi.message import TransportUserMessage
 from magriculture.workers.menus import LactationWorker
 
+class MockLactationWorker(LactationWorker):
 
-class TestLactationWorker(unittest.TestCase):
+    def post_result(self, result):
+        self.mock_result = result
 
-    def replace_milktimestamp(self, string):
-        newstring = re.sub(r'"milkTimestamp": "\d*"',
-                            '"milkTimestamp": "0"',
-                            string)
-        return newstring
-
-    def _post_result(self, result):
-        print self
-        self.result_list.append(result)
-
-    def _call_for_json(self):
-        print self
+    def call_for_json(self):
         return '''{
                     "farmers": [
                         {
@@ -50,19 +41,25 @@ class TestLactationWorker(unittest.TestCase):
                     "msisdn": "456789"
                 }'''
 
+
+class TestLactationWorker(unittest.TestCase):
+
+    def replace_milktimestamp(self, string):
+        newstring = re.sub(r'"milkTimestamp": "\d*"',
+                            '"milkTimestamp": "0"',
+                            string)
+        return newstring
+
     @inlineCallbacks
     def setUp(self):
         self.transport_name = 'test_transport'
-        LactationWorker.call_for_json = self._call_for_json
-        LactationWorker.post_result = self._post_result
-        self.worker = get_stubbed_worker(LactationWorker, {
+        self.worker = get_stubbed_worker(MockLactationWorker, {
             'transport_name': self.transport_name,
             'worker_name': 'test_lactation',
             })
         self.broker = self.worker._amqp_client.broker
         yield self.worker.startWorker()
         self.fake_redis = FakeRedis()
-        self.result_list = []
 
     @inlineCallbacks
     def tearDown(self):
@@ -128,7 +125,7 @@ class TestLactationWorker(unittest.TestCase):
         self.assertEqual(replys[4][0], "end")
         self.assertEqual(replys[4][1], "Thank you! Your milk collection was"
                                     + " registered successfully.")
-        self.assertEqual(self.replace_milktimestamp(self.result_list[0]),
+        self.assertEqual(self.replace_milktimestamp(self.worker.mock_result),
                 self.replace_milktimestamp(
                 '{"msisdn": "456789", "farmers": '
                 '[{"cows": [{"quantitySold": "10", '
@@ -175,7 +172,7 @@ class TestLactationWorker(unittest.TestCase):
         self.assertEqual(replys[7][0], "end")
         self.assertEqual(replys[7][1], "Thank you! Your milk collection was"
                                     + " registered successfully.")
-        self.assertEqual(self.replace_milktimestamp(self.result_list[0]),
+        self.assertEqual(self.replace_milktimestamp(self.worker.mock_result),
                 self.replace_milktimestamp(
                 '{"msisdn": "456789", "farmers": '
                 '[{"cows": [{"quantitySold": "0", '
