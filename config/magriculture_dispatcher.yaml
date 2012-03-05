@@ -1,7 +1,15 @@
 router_class: vumi.dispatchers.base.ToAddrRouter
 transport_names:
-  - infobip
+  # - infobip
+  - cellulant_ussd
+  - magriculture_dispatcher
 exposed_names:
   - ussd_crop_prices
+  - sisi_ni_amani
 toaddr_mappings:
-  ussd_crop_prices: "^.*$"
+  sisi_ni_amani: ".*\\*1#$"
+  # ussd_crop_prices: "^.*\\*8864#$"
+  ussd_crop_prices: "^.*\\*198#$"
+transport_mappings:
+  cellulant_ussd: cellulant_ussd
+  integrat_transport: magriculture_dispatcher
