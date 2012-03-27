@@ -311,8 +311,9 @@ class CropPriceWorker(ApplicationWorker):
         self.worker_name = self.config['worker_name']
         self.r_config = self.config.get('redis_config', {})
         self.redis_db = int(self.r_config.get("db", 0))
+        self.r_server = redis.Redis("localhost", db=db)
         self.session_manager = SessionManager(
-                self.redis_db,
+                self.r_server,
                 self.worker_name,
                 max_session_length=self.MAX_SESSION_LENGTH)
         self.api = FncsApi(self.config['api_url'])
