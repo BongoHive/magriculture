@@ -312,7 +312,7 @@ class CropPriceWorker(ApplicationWorker):
     def startWorker(self):
         self.worker_name = self.config['worker_name']
         self.r_config = self.config.get('redis_config', {})
-        self.r_server = redis.Redis("localhost", db=db)
+        self.r_server = redis.Redis(**self.r_config)
         self.session_manager = SessionManager(
                 self.r_server,
                 self.worker_name,
