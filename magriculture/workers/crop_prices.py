@@ -4,6 +4,8 @@
 """USSD menu allow farmers to compare crop prices."""
 
 import json
+import redis
+
 from urllib import urlencode
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.python import log
@@ -310,7 +312,6 @@ class CropPriceWorker(ApplicationWorker):
     def startWorker(self):
         self.worker_name = self.config['worker_name']
         self.r_config = self.config.get('redis_config', {})
-        self.redis_db = int(self.r_config.get("db", 0))
         self.r_server = redis.Redis("localhost", db=db)
         self.session_manager = SessionManager(
                 self.r_server,
