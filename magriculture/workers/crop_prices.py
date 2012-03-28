@@ -4,11 +4,13 @@
 """USSD menu allow farmers to compare crop prices."""
 
 import json
+import redis
+
 from urllib import urlencode
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.python import log
 from vumi.application import ApplicationWorker, SessionManager
-from vumi.utils import get_deploy_int, http_request
+from vumi.utils import http_request
 
 
 class FncsApi(object):
@@ -309,8 +311,10 @@ class CropPriceWorker(ApplicationWorker):
     @inlineCallbacks
     def startWorker(self):
         self.worker_name = self.config['worker_name']
+        self.r_config = self.config.get('redis_config', {})
+        self.r_server = redis.Redis(**self.r_config)
         self.session_manager = SessionManager(
-                get_deploy_int(self._amqp_client.vhost),
+                self.r_server,
                 self.worker_name,
                 max_session_length=self.MAX_SESSION_LENGTH)
         self.api = FncsApi(self.config['api_url'])
