@@ -49,7 +49,7 @@ class Actor(models.Model):
         """
         agents = self.agent_set.all()
         if agents.count() > 1:
-            raise errors.ActorException, 'More than one agent for an actor'
+            raise errors.ActorException('More than one agent for an actor')
         if agents.exists():
             return agents[0]
 
@@ -62,7 +62,8 @@ class Actor(models.Model):
         """
         marketmonitors = self.marketmonitor_set.all()
         if marketmonitors.count() > 1:
-            raise ActorException, 'More than one marketmonitor for an actor'
+            raise errors.ActorException('More than one marketmonitor for'
+                                        ' an actor')
         if marketmonitors.exists():
             return marketmonitors[0]
 
@@ -75,7 +76,7 @@ class Actor(models.Model):
         """
         farmers = self.farmer_set.all()
         if farmers.count() > 1:
-            raise ActorException, 'More than one farmer for an actor'
+            raise errors.ActorException('More than one farmer for an actor')
         if farmers.exists():
             return farmers[0]
 
@@ -88,7 +89,8 @@ class Actor(models.Model):
         """
         extensionofficers = self.extensionofficer_set.all()
         if extensionofficers.count() > 1:
-            raise ActorException, "More than one extensionofficer for an actor"
+            raise errors.ActorException("More than one extensionofficer"
+                                        " for an actor")
         if extensionofficers.exists():
             return extensionofficers[0]
 
