@@ -56,9 +56,23 @@ class ApiTestCase(TestCase):
         return farmer
 
     def test_get_farmer(self):
-        farmer = self.create_farmer(msisdn=27761234567)
+        farmer = self.create_farmer(msisdn="27761234567")
         response = self.client.get(reverse('fncs:api_get_farmer'), {
             'msisdn': farmer.actor.user.username,
+            })
+        self.assertEqual(response.status_code, 200)
+        farmer_data = json.loads(response.content)
+        self.assertEqual(farmer_data, {
+            "farmer_name": farmer.actor.name,
+            "crops": [[crop.pk, crop.name] for crop in farmer.crops.all()],
+            "markets": [[market.pk, market.name]
+                        for market in farmer.markets.all()],
+            })
+
+    def test_get_farmer_with_normalized_msisdn(self):
+        farmer = self.create_farmer(msisdn="061234567")
+        response = self.client.get(reverse('fncs:api_get_farmer'), {
+            'msisdn': "26061234567",  # normalized msisdn
             })
         self.assertEqual(response.status_code, 200)
         farmer_data = json.loads(response.content)

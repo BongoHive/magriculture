@@ -3,13 +3,27 @@
 import json
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
+from django.conf import settings
 from magriculture.fncs.models.actors import Farmer
 from magriculture.fncs.models.props import Transaction, Crop
 from magriculture.fncs.models.geo import Market
 
 
+def strip_in_country_codes(msisdn):
+    """Strips the country code for numbers that are considered to
+       be in-country for this deployment. Other numbers are left
+       as-is.
+       """
+    for (code, prefix) in settings.MAGRICULTURE_IN_COUNTRY_CODES:
+        if msisdn.startswith(code):
+            msisdn = prefix + msisdn[len(code):]
+            break
+    return msisdn
+
+
 def get_farmer(request):
     msisdn = request.GET.get('msisdn')
+    msisdn = strip_in_country_codes(msisdn)
     # Something's wrong with our db, we've got multiple
     # farmers for the same actor.
     farmer = get_list_or_404(Farmer, actor__user__username=msisdn)[0]
