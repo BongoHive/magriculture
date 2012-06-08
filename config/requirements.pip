@@ -1,7 +1,6 @@
-# If you package python-smpp, make it available on PyPi you can specify it 
-# in Vumi's requirements.pip file and it'll be download automatically as part
-# of Vumi's package requirements.
--e git+git://github.com/dmaclay/python-smpp.git#egg=python-smpp
 -e git+git://github.com/praekelt/vumi.git@develop#egg=vumi
-Django>=1.3
+Django==1.3
+django-nose==1.0
+nose==1.1.2
 South==0.7.3
+django-sentry
