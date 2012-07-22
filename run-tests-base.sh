@@ -12,7 +12,7 @@ vumi_tests="magriculture/workers"
 
 eval $COVERAGE_COMMAND `which trial` ${vumi_tests}
 r1=$?
-eval $COVERAGE_COMMAND `which django-admin.py` test --settings=magriculture.testsettings
+eval $COVERAGE_COMMAND PYTHONPATH=. `which django-admin.py` test --settings=magriculture.testsettings
 r2=$?
 
 exit $(($r1 + $r2))

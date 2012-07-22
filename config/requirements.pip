@@ -1,4 +1,4 @@
--e git+git://github.com/praekelt/vumi.git@develop#egg=vumi
+-e git+git://github.com/praekelt/vumi.git@vumi-0.4.0#egg=vumi
 Django==1.3
 django-nose==1.0
 nose==1.1.2
