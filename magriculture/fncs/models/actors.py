@@ -144,6 +144,8 @@ class Farmer(models.Model):
     actor = models.ForeignKey('fncs.Actor')
     farmergroup = models.ForeignKey('fncs.FarmerGroup', null=True)
     agents = models.ManyToManyField('fncs.Agent')
+    id_number = models.CharField(blank=True, null=True, max_length=255,
+        unique=True)
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
     wards = models.ManyToManyField('fncs.Ward')
@@ -252,7 +254,7 @@ class Farmer(models.Model):
         self.markets.add(*markets)
 
     @classmethod
-    def create(cls, msisdn, name, surname, farmergroup):
+    def create(cls, msisdn, name, surname, farmergroup, id_number=None):
         """
         Create a new Farmer.
 
@@ -264,6 +266,7 @@ class Farmer(models.Model):
         :type surname: str
         :param farmergroup: the group this farmer belongs so.
         :type farmergroup: magriculture.fncs.models.actors.FarmerGroup
+        :type id_number: str
         :returns: a farmer
         :rtype: magriculture.fncs.models.actors.Farmer
 
@@ -277,7 +280,7 @@ class Farmer(models.Model):
         if actor.farmer_set.exists():
             return actor.as_farmer()
 
-        farmer = cls(actor=actor, farmergroup=farmergroup)
+        farmer = cls(actor=actor, farmergroup=farmergroup, id_number=id_number)
         farmer.save()
 
         return farmer

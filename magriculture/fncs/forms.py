@@ -84,6 +84,7 @@ class FarmerForm(forms.Form):
     name = forms.CharField(label='Name', required=True)
     surname = forms.CharField(label='Surname', required=True)
     msisdn = forms.CharField(label='Mobile Number', required=True)
+    id_number = forms.CharField(label='National ID Number', required=False)
     farmergroup = forms.ModelChoiceField(label='Farmer Group', required=True,
         empty_label=None, queryset=FarmerGroup.objects.all())
     markets = forms.ModelMultipleChoiceField(label='Markets', required=True,
