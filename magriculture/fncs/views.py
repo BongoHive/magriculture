@@ -47,8 +47,10 @@ def farmer_new(request):
             name = form.cleaned_data['name']
             surname = form.cleaned_data['surname']
             farmergroup = form.cleaned_data['farmergroup']
+            id_number = form.cleaned_data['id_number']
             markets = form.cleaned_data['markets']
-            farmer = Farmer.create(msisdn, name, surname, farmergroup)
+            farmer = Farmer.create(msisdn, name, surname, farmergroup,
+                id_number=id_number)
             for market in markets:
                 farmer.operates_at(market, agent)
             messages.success(request, "Farmer Created")
@@ -342,8 +344,9 @@ def farmer_edit(request, farmer_pk):
 
             farmer.operates_at_markets_exclusively(form.cleaned_data['markets'])
             farmer.farmergroup = form.cleaned_data['farmergroup']
+            farmer.id_number = form.cleaned_data['id_number']
             farmer.save()
-            messages.success(request,"Farmer Profile has been updated")
+            messages.success(request, "Farmer Profile has been updated")
             return HttpResponseRedirect(reverse('fncs:farmer_crops', kwargs={
                 'farmer_pk': farmer.pk
             }))
@@ -354,6 +357,7 @@ def farmer_edit(request, farmer_pk):
             'msisdn': user.username,
             'farmergroup': farmer.farmergroup,
             'markets': farmer.markets.all(),
+            'id_number': farmer.id_number,
         })
     return render_to_response('farmers/edit.html', {
         'form': form,

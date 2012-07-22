@@ -1,11 +1,14 @@
+from datetime import datetime
+
 from django.test import TestCase
 from django.test.client import Client
 from django.utils.unittest import skip
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
+
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import FarmerGroup, Farmer, MarketMonitor
 from magriculture.fncs.models.geo import Market
-from datetime import datetime
 
 
 def create_farmer_for_agent(agent, market, **kwargs):
@@ -108,6 +111,33 @@ class FarmersTestCase(FNCSTestCase):
             'markets': [self.market.pk],
         })
         self.assertTrue(utils.is_farmer(self.test_msisdn))
+
+    def test_farmer_id_number(self):
+        response = self.client.post(self.farmer_url('edit'), {
+            'msisdn': self.test_msisdn,
+            'name': 'name',
+            'surname': 'surname',
+            'farmergroup': self.farmergroup.pk,
+            'markets': [self.market.pk],
+            'id_number': '123456789',
+            })
+        self.assertRedirects(response, self.farmer_url('crops'))
+        farmer = Farmer.objects.get(pk=self.farmer.pk)
+        self.assertEqual(farmer.id_number, '123456789')
+
+    def test_farmer_id_number_uniqueness(self):
+
+        # Test that we cannot create farmers with the same id number
+        farmer = utils.create_farmer(msisdn='123')
+        farmer.id_number = '123456789'
+        farmer.save()
+
+        # Test that we cannot create farmers with the same id number
+        farmer = utils.create_farmer(msisdn='456')  # different msisdn
+        farmer.id_number = '123456789'  # same id_number
+
+        self.assertRaises(IntegrityError, farmer.save)
+
 
     def test_farmer_view(self):
         response = self.client.get(self.farmer_url())
