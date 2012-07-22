@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from magriculture.fncs.models.actors import (FarmerGroup, Farmer,
-        Agent, MarketMonitor)
+        Agent, MarketMonitor, FarmerBusinessAdvisor)
 from magriculture.fncs.models.geo import (Province, RPIArea, District, Ward,
         Zone, Market)
 from magriculture.fncs.models.props import (Crop, CropUnit)
@@ -14,22 +14,24 @@ NAMES = ['Aaliyah', 'Abayomi', 'Abebe', 'Abebi', 'Abena', 'Abeo', 'Ada',
             'Ade', 'Adeben', 'Adiel', 'Amarey', 'Amari', 'Aren', 'Azibo',
             'Bobo', 'Chiamaka', 'Chibale', 'Chidi', 'Chike', 'Dakarai',
             'Davu', 'Deion', 'Dembe', 'Diallo']
-SURNAMES = ['Azikiwe','Awolowo','Bello','Balewa','Akintola','Okotie-Eboh',
-            'Nzeogwu','Onwuatuegwu','Okafor','Okereke','Okeke','Okonkwo',
-            'Okoye','Okorie','Obasanjo','Babangida','Buhari','Dimka','Okar',
-            'Diya','Odili','Ibori','Igbinedion','Alamieyeseigha','Yar\'Adua',
-            'Asari-Dokubo','Jomo-Gbomo','Anikulapo-Kuti','Iwu','Anenih',
-            'Bamgboshe','Biobaku','Tinibu','Akinjide','Akinyemi','Akiloye',
-            'Adeyemi','Adesida','Omehia','Sekibo','Amaechi','Bankole','Nnamani',
-            'Ayim','Okadigbo','Ironsi','Ojukwu','Danjuma','Effiong','Akpabio',
-            'Attah','Chukwumereije','Akunyili','Iweala','Okonjo','Ezekwesili',
-            'Achebe','Soyinka','Solarin','Gbadamosi','Olanrewaju','Magoro',
-            'Madaki','Jang','Oyinlola','Oyenusi','Onyejekwe','Onwudiwe',
-            'Jakande','Kalejaiye','Igwe','Eze','Obi','Ngige','Uba','Kalu',
-            'Orji','Ohakim','Egwu','Adesina','Adeoye','Falana','Fagbure',
-            'Jaja','Okilo','Okiro','Balogun','Alakija','Akenzua','Akerele',
-            'Ademola','Onobanjo','Aguda','Okpara','Mbanefo','Mbadinuju','Boro',
-            'Ekwensi','Gowon', 'Saro-Wiwa']
+
+SURNAMES = ['Azikiwe', 'Awolowo', 'Bello', 'Balewa', 'Akintola', 'Okotie-Eboh',
+            'Nzeogwu', 'Onwuatuegwu', 'Okafor', 'Okereke', 'Okeke', 'Okonkwo',
+            'Okoye', 'Okorie', 'Obasanjo', 'Babangida', 'Buhari', 'Dimka',
+            'Okar', 'Diya', 'Odili', 'Ibori', 'Igbinedion', 'Alamieyeseigha',
+            'Yar\'Adua', 'Asari-Dokubo', 'Jomo-Gbomo', 'Anikulapo-Kuti', 'Iwu',
+            'Anenih', 'Bamgboshe', 'Biobaku', 'Tinibu', 'Akinjide', 'Akinyemi',
+            'Akiloye', 'Adeyemi', 'Adesida', 'Omehia', 'Sekibo', 'Amaechi',
+            'Bankole', 'Nnamani', 'Ayim', 'Okadigbo', 'Ironsi', 'Ojukwu',
+            'Danjuma', 'Effiong', 'Akpabio', 'Attah', 'Chukwumereije',
+            'Akunyili', 'Iweala', 'Okonjo', 'Ezekwesili', 'Achebe', 'Soyinka',
+            'Solarin', 'Gbadamosi', 'Olanrewaju', 'Magoro', 'Madaki', 'Jang',
+            'Oyinlola', 'Oyenusi', 'Onyejekwe', 'Onwudiwe', 'Jakande',
+            'Kalejaiye', 'Igwe', 'Eze', 'Obi', 'Ngige', 'Uba', 'Kalu',
+            'Orji', 'Ohakim', 'Egwu', 'Adesina', 'Adeoye', 'Falana', 'Fagbure',
+            'Jaja', 'Okilo', 'Okiro', 'Balogun', 'Alakija', 'Akenzua',
+            'Akerele', 'Ademola', 'Onobanjo', 'Aguda', 'Okpara', 'Mbanefo',
+            'Mbadinuju', 'Boro', 'Ekwensi', 'Gowon', 'Saro-Wiwa']
 
 DISTRICT_NAMES = ['Chibombo', 'Kabwe', 'Kapiri Mposhi', 'Mkushi', 'Mumbwa',
     'Serenje', 'Chililabombwe', 'Chingola', 'Kalulushi', 'Kitwe', 'Luanshya',
@@ -171,7 +173,8 @@ def create_farmer(msisdn='27761234567', name="name", surname="surname",
             actor=user.get_profile())
     return farmer
 
-def create_agent(msisdn="27761234568", name="name", surname="surname", password=None):
+def create_agent(msisdn="27761234568", name="name", surname="surname",
+        password=None):
     user, _ = User.objects.get_or_create(username=msisdn)
     if password:
         user.set_password(password)
@@ -185,6 +188,18 @@ def create_market_monitor(name="market monitor"):
     user, _ = User.objects.get_or_create(username=name, first_name=name)
     market_monitor, _ = MarketMonitor.objects.get_or_create(actor=user.get_profile())
     return market_monitor
+
+def create_fba(msisdn='27761234568', name='name', surname='surname',
+        password=None):
+    user, _ = User.objects.get_or_create(username=msisdn)
+    if password:
+        user.set_password(password)
+    user.first_name = name
+    user.last_name = surname
+    user.save()
+    fba, _ = FarmerBusinessAdvisor.objects.get_or_create(
+                actor=user.get_profile())
+    return fba
 
 def is_farmer(msisdn):
     return Farmer.objects.filter(actor__user__username=msisdn).exists()

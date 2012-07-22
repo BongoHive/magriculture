@@ -15,7 +15,7 @@ class ActorTestCase(TestCase):
         pass
 
     def test_actor_creation(self):
-        user = User.objects.create_user('username','email@domain.com')
+        user = User.objects.create_user('username', 'email@domain.com')
         actor = user.get_profile()
         self.assertTrue(isinstance(actor, Actor))
 
@@ -140,6 +140,33 @@ class MarketMonitorTestCase(TestCase):
             delta=timedelta(seconds=2))
 
 
+class FarmerBusinessAdvisorTestCase(TestCase):
+
+    def test_fba_role(self):
+        fba = utils.create_fba()
+        self.assertEquals(fba.farmers.count(), 0)
+
+    def test_fba_farmer_registration(self):
+        fba1 = utils.create_fba(msisdn='0')
+        fba2 = utils.create_fba(msisdn='1')
+        farmer1 = utils.create_farmer(msisdn='1234', name='farmer1')
+        farmer2 = utils.create_farmer(msisdn='5678', name='farmer2')
+
+        # Each should register 1 farmer first
+        fba1.register_farmer(farmer1)
+        fba2.register_farmer(farmer2)
+        # Then the second farmer
+        fba1.register_farmer(farmer2)
+        fba2.register_farmer(farmer1)
+
+        # both should 'know' each farmer
+        farmers = set([farmer1, farmer2])
+        self.assertEqual(farmers, set(fba1.get_farmers()))
+        self.assertEqual(farmers, set(fba2.get_farmers()))
+
+        # Each should only have 1 farmer as a registered farmer
+        self.assertEqual([farmer1], list(fba1.get_registered_farmers()))
+        self.assertEqual([farmer2], list(fba2.get_registered_farmers()))
 
 class FarmerTestCase(TestCase):
 

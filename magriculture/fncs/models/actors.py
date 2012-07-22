@@ -94,6 +94,19 @@ class Actor(models.Model):
         if extensionofficers.exists():
             return extensionofficers[0]
 
+    def as_fba(self):
+        """
+        Get the :class:`FarmerBusinessAdvisor` for this actor, raises an
+        :class:`magriculture.fncs.errors.ActorException` if there is more
+        than one :class:`FarmerBusinessAdvisor` available.
+        returns `None` if no farmer exists.
+        """
+        fbas = self.fba_set.all()
+        if fbas.count() > 1:
+            raise errors.ActorException("More than one fba for an actor")
+        if fbas.exists():
+            return fbas[0]
+
     def send_message(self, recipient, message, group):
         """
         Send a message to an other actor.
@@ -131,6 +144,7 @@ class Farmer(models.Model):
     actor = models.ForeignKey('fncs.Actor')
     farmergroup = models.ForeignKey('fncs.FarmerGroup', null=True)
     agents = models.ManyToManyField('fncs.Agent')
+    fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
     wards = models.ManyToManyField('fncs.Ward')
     crops = models.ManyToManyField('fncs.Crop')
@@ -558,3 +572,45 @@ class Agent(models.Model):
     def __unicode__(self): # pragma: no cover
         return self.actor.name
 
+class FarmerBusinessAdvisor(models.Model):
+    """
+    A FarmerBusinessAdvisor is an actor that is registers farmers on the system.
+    In practice a FarmerBusinessAdvisor is somone who would most likely
+    head up a FarmerGroup
+    """
+    #: the :class:`Actor` this agent belongs to
+    actor = models.ForeignKey('fncs.Actor')
+    #: the :class:`Farmer` this agent is doing
+    #: business for
+    farmers = models.ManyToManyField('fncs.Farmer', through=
+        'fncs.FBAdvisorRelationShip')
+
+    def get_registered_farmers(self):
+        return Farmer.objects.filter(
+            fbadvisorrelationship__registered_by_actor=self.actor)
+
+    def get_farmers(self):
+        return self.farmers.all()
+
+    class Meta:
+        app_label = 'fncs'
+
+    def register_farmer(self, farmer):
+        if not FBAdvisorRelationShip.objects.filter(farmer=farmer).exists():
+            FBAdvisorRelationShip.objects.create(fba=self, farmer=farmer,
+                registered_by_actor=self.actor)
+            return True
+        else:
+            FBAdvisorRelationShip.objects.create(fba=self, farmer=farmer)
+            return True
+
+class FBAdvisorRelationShip(models.Model):
+    fba = models.ForeignKey('fncs.FarmerBusinessAdvisor')
+    farmer = models.ForeignKey('fncs.Farmer')
+    registered_by_actor = models.ForeignKey('fncs.Actor',
+        null=True, related_name='registered_by_actor')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = 'fncs'
