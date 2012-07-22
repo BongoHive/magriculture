@@ -162,5 +162,10 @@ AUTH_PROFILE_MODULE = 'fncs.Actor'
 SKIP_SOUTH_TESTS = True
 SOUTH_TESTS_MIGRATE = False
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'magriculture.fncs.auth.backends.IdentityBackend',
+    )
+
 # map of codes -> replacement prefix
 MAGRICULTURE_IN_COUNTRY_CODES = [('260', '0')]

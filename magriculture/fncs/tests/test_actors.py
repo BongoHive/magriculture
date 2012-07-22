@@ -272,7 +272,7 @@ class IdentityTestCase(ActorTestCase):
 
     def test_identity_pin_auth(self):
         farmer = utils.create_farmer()
-        identity = Identity(user=farmer.actor, msisdn='1234')
+        identity = Identity(actor=farmer.actor, msisdn='1234')
         identity.set_pin('5678')
         identity.save()
         self.assertTrue(identity.check_pin('5678'))

@@ -35,7 +35,7 @@ class Identity(models.Model):
 
     NOTE: This does not do any normalization of MSISDNs
     """
-    user = models.ForeignKey('fncs.Actor')
+    actor = models.ForeignKey('fncs.Actor')
     msisdn = models.CharField(unique=True, max_length=255)
     pin = models.CharField(max_length=255)
 
@@ -155,6 +155,12 @@ class Actor(models.Model):
         """
         return Message.objects.create(sender=self, recipient=recipient,
             content=message, group=group)
+
+    def add_identity(self, msisdn, pin):
+        identity = Identity(msisdn=msisdn, actor=self)
+        identity.set_pin(pin)
+        identity.save()
+        return identity
 
     class Meta:
         ordering = ['-name']

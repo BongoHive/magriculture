@@ -362,3 +362,16 @@ class FarmerBusinessAdvisorTestCase(FNCSTestCase):
         self.assertNotContains(response, 'inventory')
         self.assertContains(response, 'farmers')
         self.assertContains(response, 'market-prices')
+
+class IdentityAuthenticationBackendTestCase(TestCase):
+
+    def test_login_with_identity(self):
+        farmer = utils.create_farmer(msisdn='1234')
+        farmer.actor.add_identity('6789', '6789')
+        # Log in with the new identity
+        client = Client()
+        client.login(username='6789', password='6789')
+        response = client.get(reverse('fncs:home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['user'],
+            farmer.actor.user)
