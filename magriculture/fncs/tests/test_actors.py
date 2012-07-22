@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from magriculture.fncs.tests import utils
-from magriculture.fncs.models.actors import Actor, Farmer, FarmerGroup
+from magriculture.fncs.models.actors import (Actor, Farmer, FarmerGroup,
+                                            Identity)
 from magriculture.fncs.models.props import Message, GroupMessage, Note
 from datetime import datetime, timedelta
 
@@ -266,4 +267,14 @@ class FarmerTestCase(TestCase):
         self.assertNotIn(crop1, farmer.crops.all())
         self.assertIn(crop2, farmer.crops.all())
         self.assertIn(crop3, farmer.crops.all())
+
+class IdentityTestCase(ActorTestCase):
+
+    def test_identity_pin_auth(self):
+        farmer = utils.create_farmer()
+        identity = Identity(user=farmer.actor, msisdn='1234')
+        identity.set_pin('5678')
+        identity.save()
+        self.assertTrue(identity.check_pin('5678'))
+        self.assertFalse(identity.check_pin('4567'))
 

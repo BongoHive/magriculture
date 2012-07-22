@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.contrib.auth.models import check_password, get_hexdigest
 
 from magriculture.fncs import errors
 from magriculture.fncs.models.geo import District
@@ -24,6 +25,34 @@ def create_actor(sender, instance, created, **kwargs):
 
 post_save.connect(create_actor, sender=User)
 
+class Identity(models.Model):
+    """
+    An identity for an actor through which they can get access the the service.
+    This is a collection of unique msisdns and possibly a PIN. If a PIN is set
+    the combination of MSISDN & PIN is required to authenticate as an identity.
+    If only an MSISDN is known then just knowing the MSISDN is considered
+    enough.
+
+    NOTE: This does not do any normalization of MSISDNs
+    """
+    user = models.ForeignKey('fncs.Actor')
+    msisdn = models.CharField(unique=True, max_length=255)
+    pin = models.CharField(max_length=255)
+
+    class Meta:
+        app_label = 'fncs'
+
+    def set_pin(self, raw_pin):
+        # Copied over from django.contrib.auth.models.User
+        import random
+        algo = 'sha1'
+        salt = get_hexdigest(algo, str(random.random()),
+            str(random.random()))[:5]
+        hsh = get_hexdigest(algo, salt, raw_pin)
+        self.pin = '%s$%s$%s' % (algo, salt, hsh)
+
+    def check_pin(self, pin):
+        return check_password(pin, self.pin)
 
 class Actor(models.Model):
     """
