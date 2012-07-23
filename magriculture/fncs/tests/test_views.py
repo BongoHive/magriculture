@@ -28,8 +28,14 @@ class FNCSTestCase(TestCase):
         self.province = utils.create_province('test province')
         self.district = utils.create_district('test district', self.province)
         self.market = utils.create_market('test market', self.district)
-        self.agent = utils.create_agent(password='1234')
+
+        self.agent = utils.create_agent()
         self.msisdn = self.agent.actor.user.username
+
+        identity = self.agent.actor.get_identity(self.msisdn)
+        identity.set_pin(self.pin)
+        identity.save()
+
         self.login_url = '%s?next=%s' % (reverse('login'), reverse('fncs:home'))
         self.farmers = list(create_random_farmers(10, self.agent, self.market))
         self.farmer = self.farmers[0]

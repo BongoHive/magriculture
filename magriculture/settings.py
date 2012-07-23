@@ -163,8 +163,8 @@ SKIP_SOUTH_TESTS = True
 SOUTH_TESTS_MIGRATE = False
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
     'magriculture.fncs.auth.backends.IdentityBackend',
+    'django.contrib.auth.backends.ModelBackend',
     )
 
 # map of codes -> replacement prefix

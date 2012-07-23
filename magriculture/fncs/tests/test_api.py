@@ -50,7 +50,10 @@ class ApiTestCase(TestCase):
         province = utils.create_province('province')
         district = utils.create_district('district', province)
         market = utils.create_market("market", district)
-        agent = utils.create_agent(password='1234')
+        agent = utils.create_agent()
+        identity = agent.actor.get_identity(agent.actor.user.username)
+        identity.set_pin('1234')
+        identity.save()
         farmer = utils.create_farmer(msisdn=msisdn)
         farmer.operates_at(market, agent)
         return farmer

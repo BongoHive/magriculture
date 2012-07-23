@@ -174,11 +174,8 @@ def create_farmer(msisdn='27761234567', name="name", surname="surname",
     farmer.actor.add_identity(user.username)
     return farmer
 
-def create_agent(msisdn="27761234568", name="name", surname="surname",
-        password=None):
+def create_agent(msisdn="27761234568", name="name", surname="surname"):
     user, _ = User.objects.get_or_create(username=msisdn)
-    if password:
-        user.set_password(password)
     user.first_name = name
     user.last_name = surname
     user.save()
