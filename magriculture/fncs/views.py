@@ -61,8 +61,9 @@ def farmer_new(request):
 
             if matched_farmer:
                 messages.info(request, 'Farmer added.')
-                for market in markets:
-                    matched_farmer.operates_at(market, agent)
+                if agent:
+                    for market in markets:
+                        matched_farmer.operates_at(market, agent)
                 farmer_url = reverse('fncs:farmer_edit', kwargs={
                     'farmer_pk': matched_farmer.pk,
                 })
@@ -79,8 +80,9 @@ def farmer_new(request):
                 farmer = Farmer.create(msisdn1, name, surname, farmergroup,
                                         id_number=id_number)
                 farmer.actor.update_msisdns(msisdns)
-                for market in markets:
-                    farmer.operates_at(market, agent)
+                if agent:
+                    for market in markets:
+                        farmer.operates_at(market, agent)
 
                 messages.success(request, "Farmer Created")
                 return HttpResponseRedirect(reverse("fncs:farmer_crops", kwargs={
