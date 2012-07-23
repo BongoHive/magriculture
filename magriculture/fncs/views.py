@@ -43,16 +43,27 @@ def farmer_new(request):
     if request.POST:
         form = forms.FarmerForm(request.POST)
         if form.is_valid():
-            msisdn = form.cleaned_data['msisdn']
+            # msisdn = form.cleaned_data['msisdn']
+
+            msisdns = [
+                form.cleaned_data['msisdn1'],
+                form.cleaned_data['msisdn2'],
+                form.cleaned_data['msisdn3'],
+                ]
+            [msisdn1, msisdn2, msisdn3] = msisdns
+
             name = form.cleaned_data['name']
             surname = form.cleaned_data['surname']
             farmergroup = form.cleaned_data['farmergroup']
             id_number = form.cleaned_data['id_number']
             markets = form.cleaned_data['markets']
-            farmer = Farmer.create(msisdn, name, surname, farmergroup,
+            farmer = Farmer.create(msisdn1, name, surname, farmergroup,
                 id_number=id_number)
             for market in markets:
                 farmer.operates_at(market, agent)
+
+            farmer.actor.update_msisdns(msisdns)
+
             messages.success(request, "Farmer Created")
             return HttpResponseRedirect(reverse("fncs:farmer_crops", kwargs={
                 'farmer_pk': farmer.pk
@@ -339,22 +350,32 @@ def farmer_edit(request, farmer_pk):
         if form.is_valid():
             user.first_name = form.cleaned_data['name']
             user.last_name = form.cleaned_data['surname']
-            user.username = form.cleaned_data['msisdn']
+            user.username = form.cleaned_data['msisdn1']
             user.save()
 
             farmer.operates_at_markets_exclusively(form.cleaned_data['markets'])
             farmer.farmergroup = form.cleaned_data['farmergroup']
             farmer.id_number = form.cleaned_data['id_number']
+
+            farmer.actor.update_msisdns([
+                form.cleaned_data['msisdn1'],
+                form.cleaned_data['msisdn2'],
+                form.cleaned_data['msisdn3'],
+                ])
+
             farmer.save()
             messages.success(request, "Farmer Profile has been updated")
             return HttpResponseRedirect(reverse('fncs:farmer_crops', kwargs={
                 'farmer_pk': farmer.pk
             }))
     else:
+        msisdns = actor.get_msisdns()
         form = forms.FarmerForm(initial={
             'name': user.first_name,
             'surname': user.last_name,
-            'msisdn': user.username,
+            'msisdn1': msisdns[0],
+            'msisdn2': msisdns[1] if len(msisdns) >= 2 else None,
+            'msisdn3': msisdns[2] if len(msisdns) >= 3 else None,
             'farmergroup': farmer.farmergroup,
             'markets': farmer.markets.all(),
             'id_number': farmer.id_number,

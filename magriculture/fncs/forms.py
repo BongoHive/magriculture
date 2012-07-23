@@ -83,7 +83,9 @@ class AgentForm(forms.Form):
 class FarmerForm(forms.Form):
     name = forms.CharField(label='Name', required=True)
     surname = forms.CharField(label='Surname', required=True)
-    msisdn = forms.CharField(label='Mobile Number', required=True)
+    msisdn1 = forms.CharField(label='Mobile Number 1', required=True)
+    msisdn2 = forms.CharField(label='Mobile Number 2', required=False)
+    msisdn3 = forms.CharField(label='Mobile Number 3', required=False)
     id_number = forms.CharField(label='National ID Number', required=False)
     farmergroup = forms.ModelChoiceField(label='Farmer Group', required=True,
         empty_label=None, queryset=FarmerGroup.objects.all())

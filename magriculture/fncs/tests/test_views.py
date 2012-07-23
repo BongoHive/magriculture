@@ -110,17 +110,18 @@ class FarmersTestCase(FNCSTestCase):
         response = self.client.get(reverse('fncs:farmer_new'))
         self.assertEqual(response.status_code, 200)
         response = self.client.post(reverse('fncs:farmer_new'), {
-            'msisdn': self.test_msisdn,
+            'msisdn1': self.test_msisdn,
             'name': 'name',
             'surname': 'surname',
             'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
         })
+        self.assertEqual(response.status_code, 302)
         self.assertTrue(utils.is_farmer(self.test_msisdn))
 
     def test_farmer_id_number(self):
         response = self.client.post(self.farmer_url('edit'), {
-            'msisdn': self.test_msisdn,
+            'msisdn1': self.test_msisdn,
             'name': 'name',
             'surname': 'surname',
             'farmergroup': self.farmergroup.pk,
@@ -230,7 +231,7 @@ class FarmersTestCase(FNCSTestCase):
         response = self.client.post(farmer_url, {
             'name': 'n',
             'surname': 'sn',
-            'msisdn': '1',
+            'msisdn1': '1',
             'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
         })

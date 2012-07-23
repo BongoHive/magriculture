@@ -16,7 +16,17 @@ def create_actor(sender, instance, created, **kwargs):
     every user created.
     """
     if created:
-        Actor.objects.create(user=instance)
+        # Update the name
+        actor = Actor.objects.create(user=instance)
+        actor.name = '%s %s' % (instance.first_name.strip(),
+                                    instance.last_name.strip())
+        actor.save()
+
+        # Automatically create an Identity
+        identity = actor.add_identity(instance.username)
+        if instance.has_usable_password():
+            identity.pin = instance.password
+            identity.save()
     else:
         actor = instance.get_profile()
         actor.name = '%s %s' % (instance.first_name.strip(),
@@ -185,6 +195,18 @@ class Actor(models.Model):
 
     def get_identity(self, msisdn):
         return self.identity_set.get(msisdn=msisdn)
+
+    def get_msisdns(self, limit=3):
+        return [identity.msisdn for identity
+            in self.identity_set.order_by('-created_at')[:limit]]
+
+    def update_msisdns(self, msisdns):
+        msisdns = [m for m in msisdns if m]
+        for identity in self.identity_set.exclude(msisdn__in=msisdns):
+            identity.expire()
+        for msisdn in msisdns:
+            if not self.identity_set.filter(msisdn=msisdn).exists():
+                self.add_identity(msisdn)
 
     @classmethod
     def _find_identity(cls, msisdn):

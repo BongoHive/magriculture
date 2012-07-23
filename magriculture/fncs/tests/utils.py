@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from magriculture.fncs.models.actors import (FarmerGroup, Farmer,
-        Agent, MarketMonitor, FarmerBusinessAdvisor)
+        Agent, MarketMonitor, FarmerBusinessAdvisor, Actor, Identity)
 from magriculture.fncs.models.geo import (Province, RPIArea, District, Ward,
         Zone, Market)
 from magriculture.fncs.models.props import (Crop, CropUnit)
@@ -171,7 +171,6 @@ def create_farmer(msisdn='27761234567', name="name", surname="surname",
     user.save()
     farmer, _ = Farmer.objects.get_or_create(farmergroup=farmergroup,
             actor=user.get_profile())
-    farmer.actor.add_identity(user.username)
     return farmer
 
 def create_agent(msisdn="27761234568", name="name", surname="surname"):
@@ -180,13 +179,11 @@ def create_agent(msisdn="27761234568", name="name", surname="surname"):
     user.last_name = surname
     user.save()
     agent, _ = Agent.objects.get_or_create(actor=user.get_profile())
-    agent.actor.add_identity(user.username)
     return agent
 
 def create_market_monitor(name="market monitor"):
     user, _ = User.objects.get_or_create(username=name, first_name=name)
     market_monitor, _ = MarketMonitor.objects.get_or_create(actor=user.get_profile())
-    market_monitor.actor.add_identity(user.username)
     return market_monitor
 
 def create_fba(msisdn='27761234568', name='name', surname='surname'):
@@ -196,11 +193,13 @@ def create_fba(msisdn='27761234568', name='name', surname='surname'):
     user.save()
     fba, _ = FarmerBusinessAdvisor.objects.get_or_create(
                 actor=user.get_profile())
-    fba.actor.add_identity(user.username)
     return fba
 
 def is_farmer(msisdn):
-    return Farmer.objects.filter(actor__user__username=msisdn).exists()
+    try:
+        return Actor.find(msisdn).as_farmer()
+    except Identity.DoesNotExist:
+        return False
 
 def farmer_url(pk, suffix='', **kwargs):
     if suffix:
