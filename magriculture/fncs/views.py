@@ -57,19 +57,38 @@ def farmer_new(request):
             farmergroup = form.cleaned_data['farmergroup']
             id_number = form.cleaned_data['id_number']
             markets = form.cleaned_data['markets']
-            farmer = Farmer.create(msisdn1, name, surname, farmergroup,
-                id_number=id_number)
-            for market in markets:
-                farmer.operates_at(market, agent)
+            matched_farmer = form.cleaned_data['matched_farmer']
 
-            farmer.actor.update_msisdns(msisdns)
+            if matched_farmer:
+                messages.info(request, 'Farmer added.')
+                for market in markets:
+                    matched_farmer.operates_at(market, agent)
+                farmer_url = reverse('fncs:farmer_edit', kwargs={
+                    'farmer_pk': matched_farmer.pk,
+                })
+                return redirect(farmer_url)
 
-            messages.success(request, "Farmer Created")
-            return HttpResponseRedirect(reverse("fncs:farmer_crops", kwargs={
-                'farmer_pk': farmer.pk
-            }))
+            possible_matches = Farmer.match(msisdns=msisdns,
+                                            id_number=id_number)
+            if possible_matches:
+                form.fields['matched_farmer'].queryset = possible_matches
+                messages.info(request, "This farmer possibly already exists. "
+                    "Please review the list of matched farmers to avoid "
+                    "double registrations")
+            else:
+                farmer = Farmer.create(msisdn1, name, surname, farmergroup,
+                                        id_number=id_number)
+                farmer.actor.update_msisdns(msisdns)
+                for market in markets:
+                    farmer.operates_at(market, agent)
+
+                messages.success(request, "Farmer Created")
+                return HttpResponseRedirect(reverse("fncs:farmer_crops", kwargs={
+                    'farmer_pk': farmer.pk
+                }))
     else:
         form = forms.FarmerForm()
+        form.fields['matched_farmer'].widget = HiddenInput()
     return render_to_response('farmers/new.html', {
         'form': form
     }, context_instance=RequestContext(request))

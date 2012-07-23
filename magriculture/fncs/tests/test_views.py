@@ -244,6 +244,60 @@ class FarmersTestCase(FNCSTestCase):
         self.assertEqual([market.pk for market in farmer.markets.all()],
             [market.pk for market in Market.objects.filter(pk=self.market.pk)])
 
+    def test_farmer_matching_on_msisdn(self):
+        farmer = utils.create_farmer()
+        msisdn = farmer.actor.get_msisdns()[0]
+        self.assertTrue(utils.is_farmer(msisdn))
+        # Now we try & recreate a farmer with a known MSISDN, should give us a
+        # matching suggestion
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': msisdn,
+            'name': 'name',
+            'surname': 'surname',
+            'farmergroup': self.farmergroup.pk,
+            'markets': [self.market.pk],
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, farmer.actor.name)
+
+    def test_farmer_matching_on_id_number(self):
+        farmer = utils.create_farmer()
+        farmer.id_number = '1234'
+        farmer.save()
+        # Now we try & recreate a farmer with a known MSISDN, should give us a
+        # matching suggestion
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': '123123123123',
+            'id_number': farmer.id_number, # same as previous farmer
+            'name': 'name',
+            'surname': 'surname',
+            'farmergroup': self.farmergroup.pk,
+            'markets': [self.market.pk],
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, farmer.actor.name)
+
+
+    def test_farmer_matching_redirect(self):
+        farmer = utils.create_farmer()
+        msisdn = farmer.actor.get_msisdns()[0]
+        other_agent = utils.create_agent(msisdn='1')
+        farmer.operates_at(self.market, other_agent)
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': msisdn,
+            'name': 'name',
+            'surname': 'surname',
+            'farmergroup': self.farmergroup.pk,
+            'markets': [self.market.pk],
+            'matched_farmer': farmer.pk,
+            })
+        self.assertRedirects(response, reverse('fncs:farmer_edit', kwargs={
+            'farmer_pk': farmer.pk,
+            }))
+        farmer = Farmer.objects.get(pk=farmer.pk)
+        self.assertEqual(set([other_agent, self.agent]),
+            set(farmer.agents.all()))
+
 
 class AgentTestCase(FNCSTestCase):
 
