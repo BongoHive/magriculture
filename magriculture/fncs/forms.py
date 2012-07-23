@@ -91,6 +91,8 @@ class FarmerForm(forms.Form):
         empty_label=None, queryset=FarmerGroup.objects.all())
     markets = forms.ModelMultipleChoiceField(label='Markets', required=True,
         queryset=Market.objects.all())
+    matched_farmer = forms.ModelChoiceField(label='Matched Farmer',
+        required=False, queryset=Farmer.objects.all())
 
 class CropsForm(forms.Form):
     crops = forms.ModelMultipleChoiceField(label='Crops', required=True,
