@@ -8,43 +8,38 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
-        # Adding model 'FarmerBusinessAdvisor'
-        db.create_table('fncs_farmerbusinessadvisor', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('actor', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['fncs.Actor'])),
-        ))
-        db.send_create_signal('fncs', ['FarmerBusinessAdvisor'])
+        # Deleting field 'Identity.user'
+        db.delete_column('fncs_identity', 'user_id')
 
-        # Adding model 'FBAdvisorRelationShip'
-        db.create_table('fncs_fbadvisorrelationship', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('fba', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['fncs.FarmerBusinessAdvisor'])),
-            ('farmer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['fncs.Farmer'])),
-            ('registered_by_actor', self.gf('django.db.models.fields.related.ForeignKey')(related_name='registered_by_actor', null=True, to=orm['fncs.Actor'])),
-            ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('updated_at', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-        ))
-        db.send_create_signal('fncs', ['FBAdvisorRelationShip'])
+        # Adding field 'Identity.actor'
+        db.add_column('fncs_identity', 'actor', self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['fncs.Actor']), keep_default=False)
 
-        # Adding M2M table for field fbas on 'Farmer'
-        db.create_table('fncs_farmer_fbas', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('farmer', models.ForeignKey(orm['fncs.farmer'], null=False)),
-            ('farmerbusinessadvisor', models.ForeignKey(orm['fncs.farmerbusinessadvisor'], null=False))
-        ))
-        db.create_unique('fncs_farmer_fbas', ['farmer_id', 'farmerbusinessadvisor_id'])
+        # Adding field 'Identity.expired_on'
+        db.add_column('fncs_identity', 'expired_on', self.gf('django.db.models.fields.DateTimeField')(null=True), keep_default=False)
+
+        # Adding field 'Identity.created_at'
+        db.add_column('fncs_identity', 'created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime.now(), blank=True), keep_default=False)
+
+        # Adding field 'Identity.updated_at'
+        db.add_column('fncs_identity', 'updated_at', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, default=datetime.datetime.now(), blank=True), keep_default=False)
 
 
     def backwards(self, orm):
 
-        # Deleting model 'FarmerBusinessAdvisor'
-        db.delete_table('fncs_farmerbusinessadvisor')
+        # Adding field 'Identity.user'
+        db.add_column('fncs_identity', 'user', self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['fncs.Actor']), keep_default=False)
 
-        # Deleting model 'FBAdvisorRelationShip'
-        db.delete_table('fncs_fbadvisorrelationship')
+        # Deleting field 'Identity.actor'
+        db.delete_column('fncs_identity', 'actor_id')
 
-        # Removing M2M table for field fbas on 'Farmer'
-        db.delete_table('fncs_farmer_fbas')
+        # Deleting field 'Identity.expired_on'
+        db.delete_column('fncs_identity', 'expired_on')
+
+        # Deleting field 'Identity.created_at'
+        db.delete_column('fncs_identity', 'created_at')
+
+        # Deleting field 'Identity.updated_at'
+        db.delete_column('fncs_identity', 'updated_at')
 
 
     models = {
@@ -151,6 +146,7 @@ class Migration(SchemaMigration):
             'fbas': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['fncs.FarmerBusinessAdvisor']", 'symmetrical': 'False'}),
             'hh_id': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id_number': ('django.db.models.fields.CharField', [], {'max_length': '255', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'markets': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['fncs.Market']", 'symmetrical': 'False'}),
             'number_of_females': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'number_of_males': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
@@ -188,6 +184,16 @@ class Migration(SchemaMigration):
             'farmergroups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['fncs.FarmerGroup']", 'symmetrical': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'sender': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['fncs.Actor']"})
+        },
+        'fncs.identity': {
+            'Meta': {'object_name': 'Identity'},
+            'actor': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['fncs.Actor']"}),
+            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'expired_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'msisdn': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            'pin': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'})
         },
         'fncs.market': {
             'Meta': {'ordering': "['name']", 'object_name': 'Market'},

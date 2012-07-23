@@ -25,6 +25,13 @@ def create_actor(sender, instance, created, **kwargs):
 
 post_save.connect(create_actor, sender=User)
 
+class ActiveIdentityManager(models.Manager):
+
+    def get_query_set(self):
+        qs = super(ActiveIdentityManager, self).get_query_set()
+        qs.filter(expired_on__isnull=True)
+        return qs
+
 class Identity(models.Model):
     """
     An identity for an actor through which they can get access the the service.
@@ -38,9 +45,22 @@ class Identity(models.Model):
     actor = models.ForeignKey('fncs.Actor')
     msisdn = models.CharField(unique=True, max_length=255)
     pin = models.CharField(max_length=255)
+    expired_on = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+    active = ActiveIdentityManager()
 
     class Meta:
         app_label = 'fncs'
+
+    def expire(self):
+        self.expired_on = datetime.now()
+        self.save()
+
+    def is_expired(self):
+        return (self.expired_on is None)
 
     def set_pin(self, raw_pin):
         # Copied over from django.contrib.auth.models.User
