@@ -4,6 +4,7 @@ from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import (Actor, Farmer, FarmerGroup,
                                             Identity)
 from magriculture.fncs.models.props import Message, GroupMessage, Note
+from magriculture.fncs.errors import ActorException
 from datetime import datetime, timedelta
 
 
@@ -92,8 +93,8 @@ class AgentTestCase(TestCase):
             recipient=farmer.actor))
 
     def test_send_farmergroup_message(self):
-        farmer1 = utils.create_farmer(farmergroup_name="group 1")
-        farmer2 = utils.create_farmer(farmergroup_name="group 2")
+        farmer1 = utils.create_farmer(msisdn='1', farmergroup_name="group 1")
+        farmer2 = utils.create_farmer(msisdn='2', farmergroup_name="group 2")
         farmergroups = FarmerGroup.objects.all()
         agent = utils.create_agent()
         agent.send_message_to_farmergroups(farmergroups, 'hello world')
@@ -277,4 +278,14 @@ class IdentityTestCase(ActorTestCase):
         identity.save()
         self.assertTrue(identity.check_pin('5678'))
         self.assertFalse(identity.check_pin('4567'))
+
+    def test_find_identity(self):
+        farmer = utils.create_farmer()
+        identity = farmer.actor.add_identity('1234', '1234')
+
+        self.assertEquals(farmer.actor.get_identity('1234'), identity)
+        self.assertEquals(Actor.find('1234'), farmer.actor)
+        self.assertEquals(Actor.find_with_pin('1234', '1234'), farmer.actor)
+        self.assertRaises(ActorException, Actor.find_with_pin, '1234',
+            'bad-pin')
 

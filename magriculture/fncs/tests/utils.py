@@ -171,6 +171,7 @@ def create_farmer(msisdn='27761234567', name="name", surname="surname",
     user.save()
     farmer, _ = Farmer.objects.get_or_create(farmergroup=farmergroup,
             actor=user.get_profile())
+    farmer.actor.add_identity(user.username)
     return farmer
 
 def create_agent(msisdn="27761234568", name="name", surname="surname",
@@ -182,23 +183,23 @@ def create_agent(msisdn="27761234568", name="name", surname="surname",
     user.last_name = surname
     user.save()
     agent, _ = Agent.objects.get_or_create(actor=user.get_profile())
+    agent.actor.add_identity(user.username)
     return agent
 
 def create_market_monitor(name="market monitor"):
     user, _ = User.objects.get_or_create(username=name, first_name=name)
     market_monitor, _ = MarketMonitor.objects.get_or_create(actor=user.get_profile())
+    market_monitor.actor.add_identity(user.username)
     return market_monitor
 
-def create_fba(msisdn='27761234568', name='name', surname='surname',
-        password=None):
+def create_fba(msisdn='27761234568', name='name', surname='surname'):
     user, _ = User.objects.get_or_create(username=msisdn)
-    if password:
-        user.set_password(password)
     user.first_name = name
     user.last_name = surname
     user.save()
     fba, _ = FarmerBusinessAdvisor.objects.get_or_create(
                 actor=user.get_profile())
+    fba.actor.add_identity(user.username)
     return fba
 
 def is_farmer(msisdn):

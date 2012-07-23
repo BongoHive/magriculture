@@ -176,11 +176,32 @@ class Actor(models.Model):
         return Message.objects.create(sender=self, recipient=recipient,
             content=message, group=group)
 
-    def add_identity(self, msisdn, pin):
+    def add_identity(self, msisdn, pin=None):
         identity = Identity(msisdn=msisdn, actor=self)
-        identity.set_pin(pin)
+        if pin:
+            identity.set_pin(pin)
         identity.save()
         return identity
+
+    def get_identity(self, msisdn):
+        return self.identity_set.get(msisdn=msisdn)
+
+    @classmethod
+    def _find_identity(cls, msisdn):
+        return Identity.objects.get(msisdn=msisdn)
+
+    @classmethod
+    def find(cls, msisdn):
+        return cls._find_identity(msisdn).actor
+
+    @classmethod
+    def find_with_pin(cls, msisdn, pin):
+        identity = cls._find_identity(msisdn)
+        if identity.pin:
+            if identity.check_pin(pin):
+                return identity.actor
+            raise errors.ActorException('Invalid pin')
+        return identity.actor
 
     class Meta:
         ordering = ['-name']

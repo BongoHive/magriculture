@@ -18,7 +18,7 @@ def create_farmer_for_agent(agent, market, **kwargs):
 
 def create_random_farmers(amount, agent, market):
     for i in range(amount):
-        yield create_farmer_for_agent(agent, market, msisdn=27761234567 + i)
+        yield create_farmer_for_agent(agent, market, msisdn=27731234567 + i)
 
 class FNCSTestCase(TestCase):
 
@@ -351,9 +351,12 @@ class PricesTestCase(FNCSTestCase):
 
 class FarmerBusinessAdvisorTestCase(FNCSTestCase):
     def setUp(self):
+        self.msisdn = '1234567890'
         self.pin = '1234'
-        self.fba = utils.create_fba(password=self.pin)
-        self.msisdn = self.fba.actor.user.username
+        self.fba = utils.create_fba(msisdn=self.msisdn)
+        identity = self.fba.actor.get_identity(self.msisdn)
+        identity.set_pin(self.pin)
+        identity.save()
         self.login()
 
     def test_available_permissions(self):
