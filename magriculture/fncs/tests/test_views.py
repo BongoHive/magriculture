@@ -18,7 +18,7 @@ def create_farmer_for_agent(agent, market, **kwargs):
 
 def create_random_farmers(amount, agent, market):
     for i in range(amount):
-        yield create_farmer_for_agent(agent, market, msisdn=27761234567 + i)
+        yield create_farmer_for_agent(agent, market, msisdn=27731234567 + i)
 
 class FNCSTestCase(TestCase):
 
@@ -28,8 +28,14 @@ class FNCSTestCase(TestCase):
         self.province = utils.create_province('test province')
         self.district = utils.create_district('test district', self.province)
         self.market = utils.create_market('test market', self.district)
-        self.agent = utils.create_agent(password='1234')
+
+        self.agent = utils.create_agent()
         self.msisdn = self.agent.actor.user.username
+
+        identity = self.agent.actor.get_identity(self.msisdn)
+        identity.set_pin(self.pin)
+        identity.save()
+
         self.login_url = '%s?next=%s' % (reverse('login'), reverse('fncs:home'))
         self.farmers = list(create_random_farmers(10, self.agent, self.market))
         self.farmer = self.farmers[0]
@@ -351,9 +357,12 @@ class PricesTestCase(FNCSTestCase):
 
 class FarmerBusinessAdvisorTestCase(FNCSTestCase):
     def setUp(self):
+        self.msisdn = '1234567890'
         self.pin = '1234'
-        self.fba = utils.create_fba(password=self.pin)
-        self.msisdn = self.fba.actor.user.username
+        self.fba = utils.create_fba(msisdn=self.msisdn)
+        identity = self.fba.actor.get_identity(self.msisdn)
+        identity.set_pin(self.pin)
+        identity.save()
         self.login()
 
     def test_available_permissions(self):
@@ -362,3 +371,16 @@ class FarmerBusinessAdvisorTestCase(FNCSTestCase):
         self.assertNotContains(response, 'inventory')
         self.assertContains(response, 'farmers')
         self.assertContains(response, 'market-prices')
+
+class IdentityAuthenticationBackendTestCase(TestCase):
+
+    def test_login_with_identity(self):
+        farmer = utils.create_farmer(msisdn='1234')
+        farmer.actor.add_identity('6789', '6789')
+        # Log in with the new identity
+        client = Client()
+        client.login(username='6789', password='6789')
+        response = client.get(reverse('fncs:home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['user'],
+            farmer.actor.user)

@@ -7,44 +7,21 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-
-        # Adding model 'FarmerBusinessAdvisor'
-        db.create_table('fncs_farmerbusinessadvisor', (
+        
+        # Adding model 'Identity'
+        db.create_table('fncs_identity', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('actor', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['fncs.Actor'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['fncs.Actor'])),
+            ('msisdn', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
+            ('pin', self.gf('django.db.models.fields.CharField')(max_length=255)),
         ))
-        db.send_create_signal('fncs', ['FarmerBusinessAdvisor'])
-
-        # Adding model 'FBAdvisorRelationShip'
-        db.create_table('fncs_fbadvisorrelationship', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('fba', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['fncs.FarmerBusinessAdvisor'])),
-            ('farmer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['fncs.Farmer'])),
-            ('registered_by_actor', self.gf('django.db.models.fields.related.ForeignKey')(related_name='registered_by_actor', null=True, to=orm['fncs.Actor'])),
-            ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('updated_at', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-        ))
-        db.send_create_signal('fncs', ['FBAdvisorRelationShip'])
-
-        # Adding M2M table for field fbas on 'Farmer'
-        db.create_table('fncs_farmer_fbas', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('farmer', models.ForeignKey(orm['fncs.farmer'], null=False)),
-            ('farmerbusinessadvisor', models.ForeignKey(orm['fncs.farmerbusinessadvisor'], null=False))
-        ))
-        db.create_unique('fncs_farmer_fbas', ['farmer_id', 'farmerbusinessadvisor_id'])
+        db.send_create_signal('fncs', ['Identity'])
 
 
     def backwards(self, orm):
-
-        # Deleting model 'FarmerBusinessAdvisor'
-        db.delete_table('fncs_farmerbusinessadvisor')
-
-        # Deleting model 'FBAdvisorRelationShip'
-        db.delete_table('fncs_fbadvisorrelationship')
-
-        # Removing M2M table for field fbas on 'Farmer'
-        db.delete_table('fncs_farmer_fbas')
+        
+        # Deleting model 'Identity'
+        db.delete_table('fncs_identity')
 
 
     models = {
@@ -151,6 +128,7 @@ class Migration(SchemaMigration):
             'fbas': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['fncs.FarmerBusinessAdvisor']", 'symmetrical': 'False'}),
             'hh_id': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'id_number': ('django.db.models.fields.CharField', [], {'max_length': '255', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'markets': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['fncs.Market']", 'symmetrical': 'False'}),
             'number_of_females': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'number_of_males': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
@@ -188,6 +166,13 @@ class Migration(SchemaMigration):
             'farmergroups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['fncs.FarmerGroup']", 'symmetrical': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'sender': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['fncs.Actor']"})
+        },
+        'fncs.identity': {
+            'Meta': {'object_name': 'Identity'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'msisdn': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            'pin': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['fncs.Actor']"})
         },
         'fncs.market': {
             'Meta': {'ordering': "['name']", 'object_name': 'Market'},
