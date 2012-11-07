@@ -50,6 +50,12 @@ HIGHEST_MARKETS = {
         ],
     }
 
+ALL_MARKETS = [
+        ("market1", "Kitwe"),
+        ("market2", "Ndola"),
+        ("market3", "Masala"),
+    ]
+
 
 class DummyResourceBase(Resource):
     """Base class for dummy resources."""
@@ -127,13 +133,31 @@ class DummyHighestMarketsResource(DummyResourceBase):
         return self.highest_markets[crop_id][:limit]
 
 
+class DummyAllMarketsResource(DummyResourceBase):
+    """Dummy implementation of the /markets/ HTTP api.
+
+    /v1/markets?limit=<id> maps to JSON with:
+
+      * a list of [market_id, market_name] pairs
+    """
+    def __init__(self, markets):
+        Resource.__init__(self)
+        self.markets = markets
+
+    def get_data(self, request):
+        limit = int(request.args.get("limit", [10])[0])
+        return self.markets[:limit]
+
+
 class DummyFncsApiResource(Resource):
-    def __init__(self, farmers, prices, highest_markets):
+    def __init__(self, farmers, prices, highest_markets, all_markets):
         Resource.__init__(self)
         self.putChild('farmer', DummyFarmerResource(farmers))
         self.putChild('price_history', DummyPriceHistoryResource(prices))
         self.putChild('highest_markets',
                       DummyHighestMarketsResource(highest_markets))
+        self.putChild('markets',
+                      DummyAllMarketsResource(all_markets))
 
 
 class TestFncsApi(unittest.TestCase):
@@ -141,7 +165,8 @@ class TestFncsApi(unittest.TestCase):
     def setUp(self):
 
         site_factory = Site(DummyFncsApiResource(FARMERS, PRICES,
-                                                 HIGHEST_MARKETS))
+                                                 HIGHEST_MARKETS,
+                                                 ALL_MARKETS))
         self.server = yield reactor.listenTCP(0, site_factory)
         addr = self.server.getHost()
         self.api = FncsApi("http://%s:%s/" % (addr.host, addr.port))
@@ -205,7 +230,8 @@ class TestFarmer(unittest.TestCase):
     @inlineCallbacks
     def test_from_user_id(self):
         site_factory = Site(DummyFncsApiResource(FARMERS, PRICES,
-                                                 HIGHEST_MARKETS))
+                                                 HIGHEST_MARKETS,
+                                                 ALL_MARKETS))
         server = yield reactor.listenTCP(0, site_factory)
         try:
             addr = server.getHost()
@@ -225,7 +251,8 @@ class TestCropPriceModel(unittest.TestCase):
     @inlineCallbacks
     def setUp(self):
         site_factory = Site(DummyFncsApiResource(FARMERS, PRICES,
-                                                 HIGHEST_MARKETS))
+                                                 HIGHEST_MARKETS,
+                                                 ALL_MARKETS))
         self.server = yield reactor.listenTCP(0, site_factory)
         addr = self.server.getHost()
         self.api = FncsApi("http://%s:%s/" % (addr.host, addr.port))
@@ -290,12 +317,13 @@ class TestCropPriceModel(unittest.TestCase):
         text, continue_session = yield model.process_event("1", self.api)
         self.assertEqual(text,
                          "Select which markets to view:\n"
-                         "1. Highest markets for Peas\n"
-                         "2. My markets\n")
+                         "1. All markets\n"
+                         "2. Best markets for Peas\n"
+                         "3. My markets")
         self.assertTrue(continue_session)
         self.assertEqual(model.selected_crop, 0)
 
-        text, continue_session = yield model.process_event("2", self.api)
+        text, continue_session = yield model.process_event("3", self.api)
         self.assertEqual(text, "Select a market:\n1. Kitwe")
         self.assertTrue(continue_session)
         self.assertEqual(model.markets, [("market1", "Kitwe")])
@@ -320,7 +348,7 @@ class TestCropPriceModel(unittest.TestCase):
         model = CropPriceModel(CropPriceModel.SELECT_MARKET_LIST, farmer,
                                selected_crop=0)
 
-        text, continue_session = yield model.process_event("1", self.api)
+        text, continue_session = yield model.process_event("2", self.api)
         self.assertEqual(text,
                          "Select a market:\n1. Kitwe\n2. Ndola")
         self.assertTrue(continue_session)
@@ -337,14 +365,42 @@ class TestCropPriceModel(unittest.TestCase):
         self.assertTrue(continue_session)
         self.assertEqual(model.selected_market, 1)
 
+    @inlineCallbacks
+    def test_all_markets(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        farmer.add_crop("crop1", "Peas")
+        model = CropPriceModel(CropPriceModel.SELECT_MARKET_LIST, farmer,
+                               selected_crop=0)
+
+        text, continue_session = yield model.process_event("1", self.api)
+        self.assertEqual(text,
+                         "Select a market:\n1. Kitwe\n2. Ndola\n3. Masala")
+        self.assertTrue(continue_session)
+        self.assertEqual(model.markets, [["market1", "Kitwe"],
+                                         ["market2", "Ndola"],
+                                         ["market3", "Masala"]])
+
+        text, continue_session = yield model.process_event("2", self.api)
+        self.assertEqual(text,
+                         "Prices of Peas in Ndola:\n"
+                         "  boxes: 1.27\n"
+                         "  crates: 1.70\n"
+                         "Enter 1 for next market, 2 for previous market.\n"
+                         "Enter 3 to exit.")
+        self.assertTrue(continue_session)
+        self.assertEqual(model.selected_market, 1)
+
 
 class TestCropPriceWorker(unittest.TestCase):
+
+    timeout = 5
 
     @inlineCallbacks
     def setUp(self):
         self.transport_name = 'test_transport'
         site_factory = Site(DummyFncsApiResource(FARMERS, PRICES,
-                                                 HIGHEST_MARKETS))
+                                                 HIGHEST_MARKETS,
+                                                 ALL_MARKETS))
         self.server = yield reactor.listenTCP(0, site_factory)
         addr = self.server.getHost()
         api_url = "http://%s:%s/" % (addr.host, addr.port)
