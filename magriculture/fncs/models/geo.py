@@ -84,8 +84,9 @@ class District(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return self.name
+
 
 class Ward(models.Model):
     """
@@ -103,7 +104,7 @@ class Ward(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return u"%s (Ward)" % (self.name,)
 
 
@@ -138,7 +139,8 @@ class Market(models.Model):
 
     def crops(self):
         """
-        List of :class:`magriculture.fncs.models.props.Crop` available in this market
+        List of :class:`magriculture.fncs.models.props.Crop` available
+        in this market
         """
         return Crop.objects.filter(cropreceipt__market=self).distinct()
 
