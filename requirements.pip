@@ -2,7 +2,7 @@ Django==1.4
 django-nose
 supervisor
 South==0.7.3
-gunicorn
+gunicorn==0.15
 pyflakes
 pep8
 coverage==3.4
