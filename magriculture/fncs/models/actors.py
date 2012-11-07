@@ -1,14 +1,16 @@
+from datetime import datetime
+import random
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from django.contrib.auth.models import check_password, get_hexdigest
+from django.contrib.auth.models import check_password, make_password
 
 from magriculture.fncs import errors
 from magriculture.fncs.models.geo import District
 from magriculture.fncs.models.props import (Message, GroupMessage, Note,
     Transaction, Crop)
-from datetime import datetime
-import logging
+
 
 def create_actor(sender, instance, created, **kwargs):
     """
@@ -73,13 +75,7 @@ class Identity(models.Model):
         return (self.expired_on is None)
 
     def set_pin(self, raw_pin):
-        # Copied over from django.contrib.auth.models.User
-        import random
-        algo = 'sha1'
-        salt = get_hexdigest(algo, str(random.random()),
-            str(random.random()))[:5]
-        hsh = get_hexdigest(algo, salt, raw_pin)
-        self.pin = '%s$%s$%s' % (algo, salt, hsh)
+        self.pin = make_password(raw_pin)
 
     def check_pin(self, pin):
         return check_password(pin, self.pin)
