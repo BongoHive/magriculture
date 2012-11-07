@@ -62,3 +62,10 @@ def get_highest_markets(request):
     highest_markets = [(market.pk, market.name) for market
                        in Market.highest_markets_for(crop)[:limit]]
     return HttpResponse(json.dumps(highest_markets))
+
+
+def get_markets(request):
+    limit = int(request.GET.get('limit', '10'))
+    markets = [(market.pk, market.name) for market
+               in Market.objects.all()[:limit]]
+    return HttpResponse(json.dumps(markets))
