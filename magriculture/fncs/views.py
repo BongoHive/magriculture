@@ -717,9 +717,10 @@ def todo(request):
 def health(request):
     return HttpResponse('')
 
+
 def agents(request):
     agents = Agent.objects.all()
-    q = request.GET.get('q','')
+    q = request.GET.get('q', '')
     if q:
         agents = agents.filter(actor__name__icontains=q)
     paginator = Paginator(agents, 5)
