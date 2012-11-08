@@ -150,6 +150,11 @@ class FarmersTestCase(FNCSTestCase):
         response = self.client.get(self.farmer_url())
         self.assertRedirects(response, self.farmer_url('sales'))
 
+    def test_farmer_sales(self):
+        response = self.client.get(self.farmer_url('sales'))
+        self.assertContains(response, 'Crop Intake')
+        self.assertContains(response, reverse('fncs:inventory_intake'))
+
     def test_farmer_sale(self):
         receipt = self.take_in(10, 'boxes', 'tomato')
         sale = utils.sell(receipt, 10, 10)
