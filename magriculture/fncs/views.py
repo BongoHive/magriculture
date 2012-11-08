@@ -736,17 +736,36 @@ def agent(request, agent_pk):
     agent = get_object_or_404(Agent, pk=agent_pk)
     actor = agent.actor
     user = actor.user
-    form = forms.AgentForm(initial={
-        'name': user.first_name,
-        'surname': user.last_name,
-        'msisdn': user.username,
-        'farmers': agent.farmers.all(),
-        'markets': agent.markets.all(),
-    })
+    if request.POST:
+        form = forms.AgentForm(request.POST)
+        if form.is_valid():
+            user.first_name = form.cleaned_data['name']
+            user.last_name = form.cleaned_data['surname']
+            user.username = form.cleaned_data['msisdn']
+            user.save()
+
+            agent.msisdn = form.cleaned_data['msisdn']
+            agent.farmers = form.cleaned_data['farmers']
+            agent.markets = form.cleaned_data['markets']
+            agent.save()
+
+            messages.success(request, "Agent Profile has been updated")
+            return HttpResponseRedirect(reverse('fncs:agent', kwargs={
+                'agent_pk': agent.pk
+            }))
+    else:
+        form = forms.AgentForm(initial={
+            'name': user.first_name,
+            'surname': user.last_name,
+            'msisdn': user.username,
+            'farmers': agent.farmers.all(),
+            'markets': agent.markets.all(),
+            })
+
     return render(request, 'agents/edit.html', {
         'agent': agent,
         'form': form,
-    })
+    }, context_instance=RequestContext(request))
 
 
 @login_required
