@@ -729,6 +729,8 @@ def agents(request):
         'q': q,
     })
 
+
+@login_required
 def agent(request, agent_pk):
     agent = get_object_or_404(Agent, pk=agent_pk)
     actor = agent.actor
@@ -745,7 +747,30 @@ def agent(request, agent_pk):
         'form': form,
     })
 
+
+@login_required
 def agent_new(request):
+    if request.POST:
+        form = forms.AgentForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            surname = form.cleaned_data['surname']
+            msisdn = form.cleaned_data['msisdn']
+            farmers = form.cleaned_data['farmers']
+            markets = form.cleaned_data['markets']
+
+            possible_matches = Agent.match(msisdns=[msisdn])
+            if possible_matches:
+                messages.info(request, "This agent already exists.")
+            else:
+                agent = Agent.create(msisdn, name, surname, farmers, markets)
+                messages.success(request, "Agent Created")
+                return HttpResponseRedirect(reverse("fncs:agent", kwargs={
+                    'agent_pk': agent.pk
+                }))
+    else:
+        form = forms.AgentForm()
+
     return render(request, 'agents/new.html', {
-        'form': forms.AgentForm(),
+        'form': form,
     })

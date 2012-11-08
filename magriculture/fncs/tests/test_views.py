@@ -311,6 +311,24 @@ class AgentTestCase(FNCSTestCase):
         self.test_msisdn = '27861234567'
         self.login()
 
+    def test_agent_creation(self):
+        self.assertFalse(utils.is_agent(self.test_msisdn))
+        response = self.client.get(reverse('fncs:agent_new'))
+        self.assertEqual(response.status_code, 200)
+        for farmer in Farmer.objects.all():
+            self.assertContains(response, unicode(farmer))
+        for market in Market.objects.all():
+            self.assertContains(response, unicode(market))
+        response = self.client.post(reverse('fncs:agent_new'), {
+            'msisdn': self.test_msisdn,
+            'name': 'name',
+            'surname': 'surname',
+            'farmers': [self.farmer.pk],
+            'markets': [self.market.pk],
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(utils.is_agent(self.test_msisdn))
+
     def test_sales(self):
         response = self.client.get(reverse('fncs:sales'))
         self.assertContains(response, 'Crop sale history')

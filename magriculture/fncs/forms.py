@@ -73,8 +73,8 @@ class AgentForm(forms.Form):
     name = forms.CharField(label='Name', required=True)
     surname = forms.CharField(label='Surname', required=True)
     msisdn = forms.CharField(label='Mobile Number', required=True)
-    farmers = forms.ModelChoiceField(label='Farmers', required=True,
-        empty_label=None, queryset=Farmer.objects.all())
+    farmers = forms.ModelMultipleChoiceField(label='Farmers', required=True,
+        queryset=Farmer.objects.all())
     markets = forms.ModelMultipleChoiceField(label='Markets', required=True,
         queryset=Market.objects.all())
 

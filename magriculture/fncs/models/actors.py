@@ -505,6 +505,44 @@ class Agent(models.Model):
     class Meta:
         app_label = 'fncs'
 
+    @classmethod
+    def create(cls, msisdn, name, surname, farmers, markets):
+        """
+        Create a new Agent.
+
+        If a user already exists it uses that record. If an agent
+        already exists for that user it returns that, otherwise a new
+        agent is created.
+
+        :type msisdn: str
+        :type name: str
+        :type surname: str
+        :param farmers: the farmers this agent works with
+        :type farmers: list of magriculture.fncs.models.actors.Farmer
+        :param markets: the markets this agent works in
+        :type markets: list of magriculture.fncs.models.actors.Market
+        :returns: an agent
+        :rtype: magriculture.fncs.models.actors.Agent
+        """
+        user, _ = User.objects.get_or_create(username=msisdn)
+        user.first_name = name
+        user.last_name = surname
+        user.save()
+
+        actor = user.get_profile()
+        if actor.agent_set.exists():
+            return actor.as_agent()
+
+        agent = cls(actor=actor)
+        agent.save()
+
+        for farmer in farmers:
+            agent.farmers.add(farmer)
+        for market in markets:
+            agent.markets.add(market)
+
+        return agent
+
     def is_selling_for(self, farmer, market):
         """
         Check to see if an agent is selling for a farmer at a given market,
@@ -679,8 +717,19 @@ class Agent(models.Model):
         """
         return self.actor.note_set.filter(about_actor=farmer.actor)
 
+    @classmethod
+    def match(cls, msisdns=None):
+        if not msisdns:
+            return []
+        actors = set([])
+        if msisdns:
+            for identity in Identity.objects.filter(msisdn__in=msisdns):
+                actors.add(identity.actor)
+        return cls.objects.filter(actor__in=actors)
+
     def __unicode__(self): # pragma: no cover
         return self.actor.name
+
 
 class FarmerBusinessAdvisor(models.Model):
     """
