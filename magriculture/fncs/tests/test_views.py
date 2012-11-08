@@ -152,8 +152,8 @@ class FarmersTestCase(FNCSTestCase):
 
     def test_farmer_sales(self):
         response = self.client.get(self.farmer_url('sales'))
-        self.assertContains(response, 'Register new Sale', status_code=200)
         self.assertContains(response, 'Crop Intake')
+        self.assertContains(response, reverse('fncs:inventory_intake'))
 
     def test_farmer_sale(self):
         receipt = self.take_in(10, 'boxes', 'tomato')
