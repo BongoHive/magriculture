@@ -536,10 +536,8 @@ class Agent(models.Model):
         agent = cls(actor=actor)
         agent.save()
 
-        for farmer in farmers:
-            agent.farmers.add(farmer)
-        for market in markets:
-            agent.markets.add(market)
+        agent.farmers = farmers
+        agent.markets = markets
 
         return agent
 
