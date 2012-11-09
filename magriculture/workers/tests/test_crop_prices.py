@@ -10,7 +10,8 @@ from twisted.web import http
 from vumi.tests.utils import get_stubbed_worker, FakeRedis
 from vumi.message import TransportUserMessage
 from magriculture.workers.crop_prices import (Farmer, CropPriceModel,
-                                              CropPriceWorker, FncsApi)
+                                              CropPriceWorker, FncsApi,
+                                              MarketList)
 
 
 # Test data for farmers and prices
@@ -245,6 +246,17 @@ class TestFarmer(unittest.TestCase):
             self.assertEqual(farmer.markets, FARMERS[farmer_id]["markets"])
         finally:
             yield server.loseConnection()
+
+
+class TestMarketList(unittest.TestCase):
+    def test_format_name(self):
+        market_list = MarketList("Markets for %(crop)s")
+        self.assertEqual(market_list.format_name("beans"),
+                         "Markets for beans")
+
+    def test_market_list(self):
+        market_list = MarketList("Markets for %(crop)s")
+        self.assertRaises(NotImplementedError, market_list.market_list)
 
 
 class TestCropPriceModel(unittest.TestCase):
