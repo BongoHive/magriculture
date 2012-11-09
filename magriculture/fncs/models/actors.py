@@ -717,12 +717,7 @@ class Agent(models.Model):
 
     @classmethod
     def match(cls, msisdns=None):
-        if not msisdns:
-            return []
-        actors = set([])
-        if msisdns:
-            for identity in Identity.objects.filter(msisdn__in=msisdns):
-                actors.add(identity.actor)
+        actors = Actor.objects.filter(identity__msisdn__in=msisdns)
         return cls.objects.filter(actor__in=actors)
 
     def __unicode__(self): # pragma: no cover
