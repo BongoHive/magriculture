@@ -7,28 +7,16 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
-        # Adding field 'Identity.expired_on'
-        db.add_column('fncs_identity', 'expired_on', self.gf('django.db.models.fields.DateTimeField')(null=True), keep_default=False)
-
-        # Adding field 'Identity.created_at'
-        db.add_column('fncs_identity', 'created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2012, 7, 23, 20, 49, 59, 270944), blank=True), keep_default=False)
-
-        # Adding field 'Identity.updated_at'
-        db.add_column('fncs_identity', 'updated_at', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, default=datetime.datetime(2012, 7, 23, 20, 50, 3, 225191), blank=True), keep_default=False)
-
+        # This was a bad migration that got deleted. The module is
+        # being kept here for backwards compatibility with databases
+        # that have already run this migration.
+        pass
 
     def backwards(self, orm):
-        
-        # Deleting field 'Identity.expired_on'
-        db.delete_column('fncs_identity', 'expired_on')
-
-        # Deleting field 'Identity.created_at'
-        db.delete_column('fncs_identity', 'created_at')
-
-        # Deleting field 'Identity.updated_at'
-        db.delete_column('fncs_identity', 'updated_at')
-
+        # This was a bad migration that got deleted. The module is
+        # being kept here for backwards compatibility with databases
+        # that have already run this migration.
+        pass
 
     models = {
         'auth.group': {

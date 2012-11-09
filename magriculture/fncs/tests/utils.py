@@ -201,6 +201,12 @@ def is_farmer(msisdn):
     except Identity.DoesNotExist:
         return False
 
+def is_agent(msisdn):
+    try:
+        return Actor.find(msisdn).as_agent()
+    except Identity.DoesNotExist:
+        return False
+
 def farmer_url(pk, suffix='', **kwargs):
     if suffix:
         suffix = '_%s' % suffix

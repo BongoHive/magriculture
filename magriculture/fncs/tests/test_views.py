@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 
 from magriculture.fncs.tests import utils
-from magriculture.fncs.models.actors import FarmerGroup, Farmer, MarketMonitor
+from magriculture.fncs.models.actors import Agent, Farmer, MarketMonitor
 from magriculture.fncs.models.geo import Market
 
 
@@ -310,6 +310,49 @@ class AgentTestCase(FNCSTestCase):
         super(AgentTestCase, self).setUp()
         self.test_msisdn = '27861234567'
         self.login()
+
+    def test_agent_creation(self):
+        self.assertFalse(utils.is_agent(self.test_msisdn))
+        response = self.client.get(reverse('fncs:agent_new'))
+        self.assertEqual(response.status_code, 200)
+        for farmer in Farmer.objects.all():
+            self.assertContains(response, unicode(farmer))
+        for market in Market.objects.all():
+            self.assertContains(response, unicode(market))
+        response = self.client.post(reverse('fncs:agent_new'), {
+            'msisdn': self.test_msisdn,
+            'name': 'name',
+            'surname': 'surname',
+            'farmers': [self.farmer.pk],
+            'markets': [self.market.pk],
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(utils.is_agent(self.test_msisdn))
+
+    def test_agent_edit(self):
+        agent_url = reverse('fncs:agent', kwargs={'agent_pk': self.agent.pk})
+        response = self.client.get(agent_url)
+        user = self.agent.actor.user
+        self.assertContains(response, user.first_name)
+        self.assertContains(response, user.last_name)
+        self.assertContains(response, user.username)
+        response = self.client.post(agent_url, {
+            'name': 'n',
+            'surname': 'sn',
+            'msisdn': '1',
+            'farmers': [self.farmer.pk],
+            'markets': [self.market.pk],
+        })
+        self.assertRedirects(response, agent_url)
+        agent = Agent.objects.get(pk=self.agent.pk)
+        user = agent.actor.user
+        self.assertEqual(user.first_name, 'n')
+        self.assertEqual(user.last_name, 'sn')
+        self.assertEqual(user.username, '1')
+        self.assertEqual([farmer.pk for farmer in agent.farmers.all()],
+                         [self.farmer.pk])
+        self.assertEqual([market.pk for market in agent.markets.all()],
+                         [self.market.pk])
 
     def test_sales(self):
         response = self.client.get(reverse('fncs:sales'))
