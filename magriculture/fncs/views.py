@@ -145,7 +145,7 @@ def farmer_new_sale_detail(request, farmer_pk):
     redirect_to_farmer = HttpResponseRedirect(reverse('fncs:farmer', kwargs={
         'farmer_pk': farmer_pk
     }))
-    if request.POST:
+    if request.method == "POST":
         if 'cancel' in request.POST:
             return redirect_to_farmer
         else:
@@ -191,7 +191,7 @@ def farmer_new_message(request, farmer_pk):
     redirect_to_farmer = HttpResponseRedirect(reverse('fncs:farmer', kwargs={
         'farmer_pk': farmer.pk
     }))
-    if request.POST:
+    if request.method == "POST":
 
         if 'cancel' in request.POST:
             messages.success(request, 'Message cancelled')
@@ -231,7 +231,7 @@ def farmer_new_note(request, farmer_pk):
     redirect_to_farmer_notes = HttpResponseRedirect(reverse('fncs:farmer_notes',
         kwargs={ 'farmer_pk': farmer_pk}))
 
-    if request.POST:
+    if request.method == "POST":
         if 'cancel' in request.POST:
             return redirect_to_farmer_notes
 
@@ -269,7 +269,7 @@ def group_message_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
     farmergroups = FarmerGroup.objects.distinct().filter(farmer__in=agent.farmers.all())
-    if request.POST:
+    if request.method == "POST":
         if 'cancel' in request.POST:
             messages.success(request, 'Message Cancelled')
             return HttpResponseRedirect(reverse('fncs:messages'))
@@ -292,7 +292,7 @@ def group_message_write(request):
     if not farmergroups.exists():
         raise Http404
 
-    if request.POST:
+    if request.method == "POST":
 
         if 'cancel' in request.POST:
             messages.success(request, 'The message has been cancelled')
@@ -343,7 +343,7 @@ def sales_agent_breakdown(request):
 @login_required
 def farmer_crops(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
-    if request.POST:
+    if request.method == "POST":
         form = forms.CropsForm(request.POST)
         if form.is_valid():
             selected_crops = form.cleaned_data['crops']
@@ -366,7 +366,7 @@ def farmer_edit(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     actor = farmer.actor
     user = actor.user
-    if request.POST:
+    if request.method == "POST":
         form = forms.FarmerForm(request.POST)
         if form.is_valid():
             user.first_name = form.cleaned_data['name']
@@ -533,7 +533,7 @@ def market_register_offer(request, market_pk):
     actor = request.user.get_profile()
     marketmonitor = actor.as_marketmonitor()
     market = get_object_or_404(Market, pk=market_pk)
-    if request.POST:
+    if request.method == "POST":
 
         if 'cancel' in request.POST:
             return HttpResponseRedirect(reverse('fncs:market_new_offer'))
@@ -600,7 +600,7 @@ def inventory_sale_details(request):
         messages.error(request,
             "You don't have any inventory to sell for %s" % (farmer,))
         return redirect(reverse('fncs:inventory_sale'))
-    if request.POST:
+    if request.method == "POST":
         form = forms.CropReceiptSaleStep2Form(request.POST)
         if form.is_valid():
             amount = form.cleaned_data['amount']
@@ -645,7 +645,7 @@ def inventory_intake_details(request):
     agent = actor.as_agent()
     market = get_object_or_404(Market, pk=request.REQUEST.get('market'))
     crop = get_object_or_404(Crop, pk=request.REQUEST.get('crop'))
-    if request.POST:
+    if request.method == "POST":
         form = forms.CropReceiptStep2Form(request.POST)
         if form.is_valid():
             market = form.cleaned_data['market']
@@ -686,7 +686,7 @@ def inventory_direct_sale(request, receipt_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
     crop_receipt = get_object_or_404(CropReceipt, pk=receipt_pk)
-    if request.POST:
+    if request.method == "POST":
         form = forms.DirectSaleForm(request.POST)
         if form.is_valid():
             amount = form.cleaned_data['amount']
