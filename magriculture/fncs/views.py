@@ -765,7 +765,7 @@ def agent(request, agent_pk):
     return render(request, 'agents/edit.html', {
         'agent': agent,
         'form': form,
-    }, context_instance=RequestContext(request))
+    })
 
 
 @login_required
