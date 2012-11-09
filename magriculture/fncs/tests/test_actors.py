@@ -193,6 +193,20 @@ class FarmerTestCase(TestCase):
         self.assertEquals(farmer.farmergroup.name, "farmer group")
         self.assertEquals(farmer.agents.count(), 0)
 
+    def test_farmer_match(self):
+        def match(*args, **kw):
+            return sorted(Farmer.match(*args, **kw),
+                          key=lambda x: x.actor.user.first_name)
+
+        joe = utils.create_farmer(name="joe", msisdn="1")
+        [joe_msisdn] = joe.actor.get_msisdns()
+        bob = utils.create_farmer(name="bob", msisdn="2", id_number="1234")
+        self.assertEqual(match(), [])
+        self.assertEqual(match(id_number=bob.id_number), [bob])
+        self.assertEqual(match(msisdns=[joe_msisdn]), [joe])
+        self.assertEqual(match(msisdns=[joe_msisdn], id_number=bob.id_number),
+                         [bob, joe])
+
     def test_farmer_agent_link(self):
         farmer = utils.create_farmer()
         market = utils.create_market("market", farmer.farmergroup.district)
