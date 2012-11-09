@@ -311,7 +311,12 @@ class TestCropPriceModel(unittest.TestCase):
         model = CropPriceModel(CropPriceModel.START, farmer)
 
         text, continue_session = yield model.process_event(None, self.api)
-        self.assertEqual(text, "Hi Farmer Bob.\nSelect a crop:\n1. Peas")
+        self.assertEqual(text, "Hi Farmer Bob.\nSelect a service:\n"
+                         "1. Market prices")
+        self.assertTrue(continue_session)
+
+        text, continue_session = yield model.process_event("1", self.api)
+        self.assertEqual(text, "Select a crop:\n1. Peas")
         self.assertTrue(continue_session)
 
         text, continue_session = yield model.process_event("1", self.api)
@@ -460,7 +465,7 @@ class TestCropPriceWorker(unittest.TestCase):
         yield self.send("1")
         [_start, reply] = yield self.recv(1)
         self.assertEqual(reply[0], "reply")
-        self.assertTrue(reply[1].startswith("Select which markets to view:"))
+        self.assertTrue(reply[1].startswith("Select a crop:"))
 
     @inlineCallbacks
     def test_session_close(self):

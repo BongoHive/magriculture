@@ -109,6 +109,12 @@ class BestMarkets(MarketList):
         return api.get_highest_markets(crop_id, self.max_markets)
 
 
+class ServiceItem(object):
+    def __init__(self, start_state, description):
+        self.start_state = start_state
+        self.description = description
+
+
 class CropPriceModel(object):
     """A simple state model of the interaction with a farmer
     viewing crop prices.
@@ -127,15 +133,22 @@ class CropPriceModel(object):
         The item from farmer.markets selected by the user.
     """
     # states of the model
+    SELECT_SERVICE = "select_service"
     SELECT_CROP = "select_crop"
     SELECT_MARKET_LIST = "select_market_list"
     SELECT_MARKET = "select_market"
     SHOW_PRICES = "show_prices"
     END = "end"
     STATES = (
-        SELECT_CROP, SELECT_MARKET_LIST, SELECT_MARKET, SHOW_PRICES, END,
-        )
-    START = SELECT_CROP
+        SELECT_SERVICE, SELECT_CROP, SELECT_MARKET_LIST, SELECT_MARKET,
+        SHOW_PRICES, END,
+    )
+    START = SELECT_SERVICE
+
+    # servicse
+    SERVICES = [
+        ServiceItem("select_crop", "Market prices"),
+    ]
 
     # market lists
     ALL_MARKETS = "all_markets"
@@ -191,6 +204,28 @@ class CropPriceModel(object):
             choice = None
         return choice
 
+    def handle_select_service(self, text, _api):
+        choice = self.get_choice(text, 1, len(self.SERVICES))
+        if choice is None:
+            return "Please entre the number of the service."
+        self.state = self.SERVICES[choice - 1].start_state
+
+    def display_select_service(self, err, _api):
+        template = (
+            "Hi %(farmer_name)s.\n"
+            "%(err)s"
+            "Select a service:\n"
+            "%(services)s")
+        services = "\n".join([
+            "%d. %s" % (i + 1, service.description)
+            for i, service in enumerate(self.SERVICES)
+        ])
+        return template % {
+            "farmer_name": self.farmer.farmer_name,
+            "err": err + "\n" if err is not None else "",
+            "services": services,
+        }
+
     def handle_select_crop(self, text, _api):
         choice = self.get_choice(text, 1, len(self.farmer.crops))
         if choice is None:
@@ -200,7 +235,6 @@ class CropPriceModel(object):
 
     def display_select_crop(self, err, _api):
         template = (
-            "Hi %(farmer_name)s.\n"
             "%(err)s"
             "Select a crop:\n"
             "%(crops)s")
@@ -209,10 +243,9 @@ class CropPriceModel(object):
             crop_lines.append("%d. %s" % (i + 1, crop_name))
         crops = "\n".join(crop_lines)
         return template % {
-            "farmer_name": self.farmer.farmer_name,
             "err": err + "\n" if err is not None else "",
             "crops": crops,
-            }
+        }
 
     @inlineCallbacks
     def handle_select_market_list(self, text, api):
