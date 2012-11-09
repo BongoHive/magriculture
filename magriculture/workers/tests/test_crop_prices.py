@@ -11,7 +11,8 @@ from vumi.tests.utils import get_stubbed_worker, FakeRedis
 from vumi.message import TransportUserMessage
 from magriculture.workers.crop_prices import (Farmer, CropPriceModel,
                                               CropPriceWorker, FncsApi,
-                                              MarketList)
+                                              MarketList, AllMarkets,
+                                              MyMarkets, BestMarkets)
 
 
 # Test data for farmers and prices
@@ -250,13 +251,57 @@ class TestFarmer(unittest.TestCase):
 
 class TestMarketList(unittest.TestCase):
     def test_format_name(self):
-        market_list = MarketList("Markets for %(crop)s")
-        self.assertEqual(market_list.format_name("beans"),
+        markets = MarketList("Markets for %(crop)s")
+        self.assertEqual(markets.format_name("beans"),
                          "Markets for beans")
 
     def test_market_list(self):
-        market_list = MarketList("Markets for %(crop)s")
-        self.assertRaises(NotImplementedError, market_list.market_list)
+        markets = MarketList("Markets for %(crop)s")
+        self.assertRaises(NotImplementedError, markets.market_list)
+
+
+class TestAllMarkets(unittest.TestCase):
+
+    class DummyApi(object):
+        def get_markets(self, limit):
+            markets = [("id%d" % i, "Market %d" % i) for i in range(5)]
+            return markets[:limit]
+
+    def test_market_list(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        api = self.DummyApi()
+        markets = AllMarkets("All Markets", 2)
+        self.assertEqual(markets.market_list(api, farmer, "crop1"),
+                         [('id0', 'Market 0'), ('id1', 'Market 1')])
+
+
+class TestMyMarkets(unittest.TestCase):
+    def test_market_list(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        farmer.markets = [('id0', 'Market 0'), ('id1', 'Market 1')]
+        api = object()
+        markets = MyMarkets("My Markets")
+        self.assertEqual(markets.market_list(api, farmer, "crop1"),
+                         [('id0', 'Market 0'), ('id1', 'Market 1')])
+
+
+class TestBestMarkets(unittest.TestCase):
+    class DummyApi(object):
+        def __init__(self):
+            self._crop_ids = []
+
+        def get_highest_markets(self, crop_id, limit):
+            self._crop_ids.append(crop_id)
+            markets = [("id%d" % i, "Market %d" % i) for i in range(5)]
+            return markets[:limit]
+
+    def test_market_list(self):
+        farmer = Farmer("fakeid1", "Farmer Bob")
+        api = self.DummyApi()
+        markets = BestMarkets("All Markets", 2)
+        self.assertEqual(markets.market_list(api, farmer, "crop1"),
+                         [('id0', 'Market 0'), ('id1', 'Market 1')])
+        self.assertEqual(api._crop_ids, ["crop1"])
 
 
 class TestCropPriceModel(unittest.TestCase):
