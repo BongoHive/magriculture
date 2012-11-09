@@ -717,9 +717,10 @@ def todo(request):
 def health(request):
     return HttpResponse('')
 
+
 def agents(request):
     agents = Agent.objects.all()
-    q = request.GET.get('q','')
+    q = request.GET.get('q', '')
     if q:
         agents = agents.filter(actor__name__icontains=q)
     paginator = Paginator(agents, 5)
@@ -729,23 +730,67 @@ def agents(request):
         'q': q,
     })
 
+
+@login_required
 def agent(request, agent_pk):
     agent = get_object_or_404(Agent, pk=agent_pk)
     actor = agent.actor
     user = actor.user
-    form = forms.AgentForm(initial={
-        'name': user.first_name,
-        'surname': user.last_name,
-        'msisdn': user.username,
-        'farmers': agent.farmers.all(),
-        'markets': agent.markets.all(),
-    })
+    if request.method == "POST":
+        form = forms.AgentForm(request.POST)
+        if form.is_valid():
+            user.first_name = form.cleaned_data['name']
+            user.last_name = form.cleaned_data['surname']
+            user.username = form.cleaned_data['msisdn']
+            user.save()
+
+            agent.msisdn = form.cleaned_data['msisdn']
+            agent.farmers = form.cleaned_data['farmers']
+            agent.markets = form.cleaned_data['markets']
+            agent.save()
+
+            messages.success(request, "Agent Profile has been updated")
+            return HttpResponseRedirect(reverse('fncs:agent', kwargs={
+                'agent_pk': agent.pk
+            }))
+    else:
+        form = forms.AgentForm(initial={
+            'name': user.first_name,
+            'surname': user.last_name,
+            'msisdn': user.username,
+            'farmers': agent.farmers.all(),
+            'markets': agent.markets.all(),
+            })
+
     return render(request, 'agents/edit.html', {
         'agent': agent,
         'form': form,
     })
 
+
+@login_required
 def agent_new(request):
+    if request.method == "POST":
+        form = forms.AgentForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            surname = form.cleaned_data['surname']
+            msisdn = form.cleaned_data['msisdn']
+            farmers = form.cleaned_data['farmers']
+            markets = form.cleaned_data['markets']
+
+            possible_matches = Agent.match(msisdns=[msisdn])
+            if possible_matches:
+                messages.info(request, "This agent already exists.")
+            else:
+                agent = Agent.create(msisdn, name, surname, farmers, markets)
+                messages.success(request, "Agent Created")
+                return HttpResponseRedirect(reverse("fncs:agent", kwargs={
+                    'agent_pk': agent.pk
+                }))
+    else:
+        form = forms.AgentForm()
+
     return render(request, 'agents/new.html', {
-        'form': forms.AgentForm(),
+        'form': form,
     })
