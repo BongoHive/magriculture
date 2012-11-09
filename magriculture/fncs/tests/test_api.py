@@ -126,7 +126,6 @@ class ApiTestCase(TestCase):
             })
         self.assertEqual(response.status_code, 200)
         highest_markets = json.loads(response.content)
-        print "HM:", highest_markets
         self.assertEqual(highest_markets, [
             [market.pk, market.name] for market in markets
             ])
@@ -140,5 +139,25 @@ class ApiTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         highest_markets = json.loads(response.content)
         self.assertEqual(highest_markets, [
+            [market.pk, market.name] for market in markets[:2]
+            ])
+
+    def test_get_markets(self):
+        _crop, markets = self.create_highest_markets(prices=[50, 100, 200])
+        response = self.client.get(reverse('fncs:api_get_markets'), {})
+        self.assertEqual(response.status_code, 200)
+        all_markets = json.loads(response.content)
+        self.assertEqual(all_markets, [
+            [market.pk, market.name] for market in markets
+            ])
+
+    def test_get_markets_with_limit(self):
+        _crop, markets = self.create_highest_markets(prices=[50, 100, 200])
+        response = self.client.get(reverse('fncs:api_get_markets'), {
+            'limit': '2',
+            })
+        self.assertEqual(response.status_code, 200)
+        all_markets = json.loads(response.content)
+        self.assertEqual(all_markets, [
             [market.pk, market.name] for market in markets[:2]
             ])
