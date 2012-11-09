@@ -205,7 +205,7 @@ class CropPriceModel(object):
     def handle_select_service(self, text, _api):
         choice = self.get_choice(text, 1, len(self.SERVICES))
         if choice is None:
-            return "Please entre the number of the service."
+            return "Please enter the number of the service."
         self.state = self.SERVICES[choice - 1].start_state
 
     def display_select_service(self, err, _api):
