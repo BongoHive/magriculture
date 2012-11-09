@@ -151,9 +151,6 @@ class CropPriceModel(object):
     ]
 
     # market lists
-    ALL_MARKETS = "all_markets"
-    HIGHEST_MARKETS = "highest_markets"
-    MY_MARKETS = "my_markets"
     MARKET_LISTS = (
         AllMarkets("All markets", max_markets=10),
         BestMarkets("Best markets for %(crop)s", max_markets=5),
