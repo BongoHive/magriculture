@@ -154,7 +154,8 @@ class CropPriceModel(object):
     MARKET_LISTS = (
         AllMarkets("All markets", max_markets=10),
         BestMarkets("Best markets for %(crop)s", max_markets=5),
-        MyMarkets("My markets"),
+        # Uncomment to add MyMarkets back (you will need to update tests)
+        # MyMarkets("My markets"),
     )
 
     def __init__(self, state, farmer, selected_crop=None,

@@ -380,21 +380,22 @@ class TestCropPriceModel(unittest.TestCase):
         self.assertEqual(text,
                          "Select which markets to view:\n"
                          "1. All markets\n"
-                         "2. Best markets for Peas\n"
-                         "3. My markets")
+                         "2. Best markets for Peas")
         self.assertTrue(continue_session)
         self.assertEqual(model.selected_crop, 0)
 
-        text, continue_session = yield model.process_event("3", self.api)
-        self.assertEqual(text, "Select a market:\n1. Kitwe")
+        text, continue_session = yield model.process_event("2", self.api)
+        self.assertEqual(text, "Select a market:\n1. Kitwe\n2. Ndola")
         self.assertTrue(continue_session)
-        self.assertEqual(model.markets, [("market1", "Kitwe")])
+        self.assertEqual(model.markets, [["market1", "Kitwe"],
+                                         ["market2", "Ndola"]])
 
         text, continue_session = yield model.process_event("1", self.api)
         self.assertEqual(text,
                          "Prices of Peas in Kitwe:\n"
                          "  boxes: 1.27\n"
                          "  crates: 1.70\n"
+                         "Enter 1 for next market, 2 for previous market.\n"
                          "Enter 3 to exit.")
         self.assertTrue(continue_session)
         self.assertEqual(model.selected_market, 0)
