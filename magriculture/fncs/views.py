@@ -736,7 +736,7 @@ def agent(request, agent_pk):
     agent = get_object_or_404(Agent, pk=agent_pk)
     actor = agent.actor
     user = actor.user
-    if request.POST:
+    if request.method == "POST":
         form = forms.AgentForm(request.POST)
         if form.is_valid():
             user.first_name = form.cleaned_data['name']
@@ -770,7 +770,7 @@ def agent(request, agent_pk):
 
 @login_required
 def agent_new(request):
-    if request.POST:
+    if request.method == "POST":
         form = forms.AgentForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
