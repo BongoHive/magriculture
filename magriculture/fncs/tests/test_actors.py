@@ -234,16 +234,6 @@ class FarmerTestCase(TestCase):
         farmer.grows_crop(crop)
         self.assertIn(crop, farmer.crops.all())
 
-    def test_farmer_creation(self):
-        district = utils.random_district()
-        rpiarea = utils.create_rpiarea("rpiarea")
-        zone = utils.create_zone("zone", rpiarea)
-        ward = utils.create_ward("ward", district)
-        farmergroup = utils.create_farmergroup("farmer group", zone, district, ward)
-        farmer = Farmer.create('27761234567', 'first', 'last', farmergroup)
-        self.assertEquals(farmer.actor.name, 'first last')
-        self.assertEquals(farmer.actor.user.username, '27761234567')
-
     def test_farmer_market_setting(self):
         farmer = utils.create_farmer()
         market1 = utils.create_market("market 1", farmer.farmergroup.district)
