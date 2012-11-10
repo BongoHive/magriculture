@@ -2,7 +2,8 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import render_to_response, get_object_or_404, render, redirect
+from django.shortcuts import (render_to_response, get_object_or_404, render,
+                              redirect)
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.forms.widgets import HiddenInput
@@ -11,21 +12,24 @@ import urllib
 
 from magriculture.fncs.models.actors import Farmer, FarmerGroup, Agent
 from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
-                                            CropUnit, Offer, CropReceipt, DirectSale)
+                                            CropUnit, Offer, CropReceipt,
+                                            DirectSale)
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs import forms
+
 
 @login_required
 def home(request):
     return render_to_response('home.html',
-        context_instance=RequestContext(request))
+                              context_instance=RequestContext(request))
+
 
 @login_required
 def farmers(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
     farmers = agent.farmers.all()
-    q = request.GET.get('q','')
+    q = request.GET.get('q', '')
     if q:
         farmers = farmers.filter(actor__name__icontains=q)
     paginator = Paginator(farmers, 5)
@@ -35,6 +39,7 @@ def farmers(request):
         'page': page,
         'q': q
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def farmer_new(request):
@@ -49,7 +54,7 @@ def farmer_new(request):
                 form.cleaned_data['msisdn1'],
                 form.cleaned_data['msisdn2'],
                 form.cleaned_data['msisdn3'],
-                ]
+            ]
             [msisdn1, msisdn2, msisdn3] = msisdns
 
             name = form.cleaned_data['name']
@@ -74,20 +79,21 @@ def farmer_new(request):
             if possible_matches:
                 form.fields['matched_farmer'].queryset = possible_matches
                 messages.info(request, "This farmer possibly already exists. "
-                    "Please review the list of matched farmers to avoid "
-                    "double registrations")
+                              "Please review the list of matched farmers to "
+                              "avoid double registrations")
             else:
                 farmer = Farmer.create(msisdn1, name, surname, farmergroup,
-                                        id_number=id_number)
+                                       id_number=id_number)
                 farmer.actor.update_msisdns(msisdns)
                 if agent:
                     for market in markets:
                         farmer.operates_at(market, agent)
 
                 messages.success(request, "Farmer Created")
-                return HttpResponseRedirect(reverse("fncs:farmer_crops", kwargs={
-                    'farmer_pk': farmer.pk
-                }))
+                return HttpResponseRedirect(reverse("fncs:farmer_crops",
+                                                    kwargs={
+                                                        'farmer_pk': farmer.pk,
+                                                    }))
     else:
         form = forms.FarmerForm()
         form.fields['matched_farmer'].widget = HiddenInput()
@@ -95,11 +101,13 @@ def farmer_new(request):
         'form': form
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def farmer(request, farmer_pk):
     return HttpResponseRedirect(reverse('fncs:farmer_sales', kwargs={
         'farmer_pk': farmer_pk
     }))
+
 
 @login_required
 def farmer_sales(request, farmer_pk):
@@ -113,14 +121,17 @@ def farmer_sales(request, farmer_pk):
         'page': page,
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def farmer_sale(request, farmer_pk, sale_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
-    transaction = get_object_or_404(Transaction, crop_receipt__farmer=farmer, pk=sale_pk)
+    transaction = get_object_or_404(Transaction, crop_receipt__farmer=farmer,
+                                    pk=sale_pk)
     return render_to_response('farmers/sale.html', {
         'farmer': farmer,
         'transaction': transaction,
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def farmer_new_sale(request, farmer_pk):
@@ -129,16 +140,19 @@ def farmer_new_sale(request, farmer_pk):
 
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     form = forms.SelectCropForm()
-    form.fields['crop_receipt'].queryset = agent.cropreceipts_available_for(farmer)
+    form.fields['crop_receipt'].queryset = agent.cropreceipts_available_for(
+        farmer)
     return render_to_response('farmers/new_sale.html', {
         'farmer': farmer,
         'form': form,
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def farmer_new_sale_detail(request, farmer_pk):
-    crop_receipt = get_object_or_404(CropReceipt, pk=request.GET.get('crop_receipt'))
-    farmer = get_object_or_404(Farmer, pk = farmer_pk)
+    crop_receipt = get_object_or_404(CropReceipt,
+                                     pk=request.GET.get('crop_receipt'))
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
     actor = request.user.get_profile()
     agent = actor.as_agent()
 
@@ -154,9 +168,8 @@ def farmer_new_sale_detail(request, farmer_pk):
                 price = form.cleaned_data['price']
                 amount = form.cleaned_data['amount']
                 agent.register_sale(crop_receipt, price, amount)
-                messages.success(request,
-                    "New sale registered and %s will be notified via SMS" % (
-                        farmer.actor.name,))
+                messages.success(request, "New sale registered and %s will be"
+                                 " notified via SMS" % (farmer.actor.name,))
                 return redirect_to_farmer
 
     else:
@@ -170,18 +183,20 @@ def farmer_new_sale_detail(request, farmer_pk):
         'crop_receipt': crop_receipt
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def farmer_messages(request, farmer_pk):
     actor = request.user.get_profile()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
-    paginator = Paginator(farmer.actor.receivedmessages_set \
-                                .filter(sender=actor), 5)
-    page = paginator.page(request.GET.get('p',1))
+    paginator = Paginator(farmer.actor.receivedmessages_set
+                          .filter(sender=actor), 5)
+    page = paginator.page(request.GET.get('p', 1))
     return render_to_response('farmers/messages.html', {
         'farmer': farmer,
         'paginator': paginator,
         'page': page
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def farmer_new_message(request, farmer_pk):
@@ -200,8 +215,8 @@ def farmer_new_message(request, farmer_pk):
         form = forms.MessageForm(request.POST)
         if form.is_valid():
             agent.send_message_to_farmer(farmer, form.cleaned_data['content'])
-            messages.success(request,
-                'The message has been sent to %s via SMS' % farmer.actor.name)
+            messages.success(request, 'The message has been sent to %s via SMS'
+                             % farmer.actor.name)
             return redirect_to_farmer
     else:
         form = forms.MessageForm()
@@ -210,26 +225,28 @@ def farmer_new_message(request, farmer_pk):
         'form': form
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def farmer_notes(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     paginator = Paginator(agent.notes_for(farmer), 5)
-    page = paginator.page(request.GET.get('p',1))
+    page = paginator.page(request.GET.get('p', 1))
     return render_to_response('farmers/notes.html', {
         'farmer': farmer,
         'paginator': paginator,
         'page': page,
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def farmer_new_note(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
-    redirect_to_farmer_notes = HttpResponseRedirect(reverse('fncs:farmer_notes',
-        kwargs={ 'farmer_pk': farmer_pk}))
+    redirect_to_farmer_notes = HttpResponseRedirect(
+        reverse('fncs:farmer_notes', kwargs={'farmer_pk': farmer_pk}))
 
     if request.method == "POST":
         if 'cancel' in request.POST:
@@ -247,6 +264,7 @@ def farmer_new_note(request, farmer_pk):
         'form': form,
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def farmer_profile(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
@@ -254,21 +272,24 @@ def farmer_profile(request, farmer_pk):
         'farmer': farmer
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def group_messages(request):
     actor = request.user.get_profile()
     paginator = Paginator(GroupMessage.objects.filter(sender=actor), 5)
-    page = paginator.page(request.GET.get('p',1))
+    page = paginator.page(request.GET.get('p', 1))
     return render_to_response('messages.html', {
         'paginator': paginator,
         'page': page
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def group_message_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
-    farmergroups = FarmerGroup.objects.distinct().filter(farmer__in=agent.farmers.all())
+    farmergroups = FarmerGroup.objects.distinct().filter(
+        farmer__in=agent.farmers.all())
     if request.method == "POST":
         if 'cancel' in request.POST:
             messages.success(request, 'Message Cancelled')
@@ -277,11 +298,12 @@ def group_message_new(request):
             return HttpResponseRedirect('%s?%s' % (
                 reverse('fncs:group_message_write'),
                 urllib.urlencode([('fg', fg_id) for fg_id
-                    in request.POST.getlist('fg')])
+                                  in request.POST.getlist('fg')])
             ))
     return render_to_response('group_messages_new.html', {
         'farmergroups': farmergroups
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def group_message_write(request):
@@ -302,8 +324,8 @@ def group_message_write(request):
         if form.is_valid():
             content = form.cleaned_data['content']
             agent.send_message_to_farmergroups(farmergroups, content)
-            messages.success(request,
-                'The message has been sent to all group members via SMS')
+            messages.success(request, 'The message has been sent to all group'
+                             ' members via SMS')
             return HttpResponseRedirect(reverse('fncs:messages'))
     else:
         form = forms.GroupMessageForm()
@@ -313,10 +335,12 @@ def group_message_write(request):
         'farmergroups': farmergroups
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def sales(request):
     return render_to_response('sales.html', {
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def sales_crops(request):
@@ -329,10 +353,12 @@ def sales_crops(request):
         'page': page
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def sales_agents(request):
     return render_to_response('sales_agents.html', {
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def sales_agent_breakdown(request):
@@ -361,6 +387,7 @@ def farmer_crops(request, farmer_pk):
         'farmer': farmer
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def farmer_edit(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
@@ -374,7 +401,8 @@ def farmer_edit(request, farmer_pk):
             user.username = form.cleaned_data['msisdn1']
             user.save()
 
-            farmer.operates_at_markets_exclusively(form.cleaned_data['markets'])
+            farmer.operates_at_markets_exclusively(
+                form.cleaned_data['markets'])
             farmer.farmergroup = form.cleaned_data['farmergroup']
             farmer.id_number = form.cleaned_data['id_number']
 
@@ -382,7 +410,7 @@ def farmer_edit(request, farmer_pk):
                 form.cleaned_data['msisdn1'],
                 form.cleaned_data['msisdn2'],
                 form.cleaned_data['msisdn3'],
-                ])
+            ])
 
             farmer.save()
             messages.success(request, "Farmer Profile has been updated")
@@ -406,10 +434,12 @@ def farmer_edit(request, farmer_pk):
         'farmer': farmer
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def market_prices(request):
     return render_to_response('markets/prices.html', {
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def market_sales(request):
@@ -420,16 +450,18 @@ def market_sales(request):
         'page': page,
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def market_sale(request, market_pk):
     market = get_object_or_404(Market, pk=market_pk)
     paginator = Paginator(market.crops(), 5)
-    page = paginator.page(request.GET.get('p',1))
+    page = paginator.page(request.GET.get('p', 1))
     return render_to_response('markets/sale.html', {
         'market': market,
         'paginator': paginator,
         'page': page
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def crop(request, market_pk, crop_pk):
@@ -444,6 +476,7 @@ def crop(request, market_pk, crop_pk):
         'page': page
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def crop_unit(request, market_pk, crop_pk, unit_pk):
     market = get_object_or_404(Market, pk=market_pk)
@@ -451,7 +484,7 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
     unit = get_object_or_404(CropUnit, pk=unit_pk)
     transactions = Transaction.objects.filter(
         crop_receipt__unit=unit, crop_receipt__crop=crop,
-            crop_receipt__market=market)
+        crop_receipt__market=market)
     paginator = Paginator(transactions, 5)
     page = paginator.page(request.GET.get('p', 1))
 
@@ -463,6 +496,7 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
         'page': page
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def market_offers(request):
     market_ids = [offer.market_id for offer in Offer.objects.all()]
@@ -473,6 +507,7 @@ def market_offers(request):
         'paginator': paginator,
         'page': page
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def market_offer(request, market_pk):
@@ -486,11 +521,12 @@ def market_offer(request, market_pk):
         'page': page
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def offer(request, market_pk, crop_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
-    offers = Offer.objects.filter(market=market,crop=crop)
+    offers = Offer.objects.filter(market=market, crop=crop)
     units = list(set([offer.unit for offer in offers]))
     paginator = Paginator(units, 5)
     page = paginator.page(request.GET.get('p', 1))
@@ -501,13 +537,14 @@ def offer(request, market_pk, crop_pk):
         'page': page
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def offer_unit(request, market_pk, crop_pk, unit_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
     unit = get_object_or_404(CropUnit, pk=unit_pk)
     offers = Offer.objects.filter(unit=unit, crop=crop,
-                                                market=market)
+                                  market=market)
     paginator = Paginator(offers, 5)
     page = paginator.page(request.GET.get('p', 1))
 
@@ -519,6 +556,7 @@ def offer_unit(request, market_pk, crop_pk, unit_pk):
         'page': page
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def market_new_offer(request, *args, **kwargs):
     paginator = Paginator(Market.objects.all(), 5)
@@ -527,6 +565,7 @@ def market_new_offer(request, *args, **kwargs):
         'paginator': paginator,
         'page': page
     }, context_instance=RequestContext(request))
+
 
 @login_required
 def market_register_offer(request, market_pk):
@@ -546,7 +585,7 @@ def market_register_offer(request, market_pk):
             price_ceiling = form.cleaned_data['price_ceiling']
             market = form.cleaned_data['market']
             marketmonitor.register_offer(market, crop, unit, price_floor,
-                                            price_ceiling)
+                                         price_ceiling)
             messages.success(request, 'Opening price has been registered')
             return HttpResponseRedirect(reverse('fncs:market_new_offer'))
     else:
@@ -559,6 +598,7 @@ def market_register_offer(request, market_pk):
         'market': market
     }, context_instance=RequestContext(request))
 
+
 @login_required
 def inventory(request):
     actor = request.user.get_profile()
@@ -570,6 +610,7 @@ def inventory(request):
         'paginator': paginator,
         'page': page,
     })
+
 
 @login_required
 def inventory_sale(request):
@@ -590,6 +631,7 @@ def inventory_sale(request):
         'form': form,
     })
 
+
 @login_required
 def inventory_sale_details(request):
     actor = request.user.get_profile()
@@ -597,8 +639,8 @@ def inventory_sale_details(request):
     farmer = get_object_or_404(Farmer, pk=request.REQUEST.get('farmer'))
     crop_receipts = agent.cropreceipts_available_for(farmer)
     if not crop_receipts.exists():
-        messages.error(request,
-            "You don't have any inventory to sell for %s" % (farmer,))
+        messages.error(request, "You don't have any inventory to sell for %s"
+                       % (farmer,))
         return redirect(reverse('fncs:inventory_sale'))
     if request.method == "POST":
         form = forms.CropReceiptSaleStep2Form(request.POST)
@@ -608,9 +650,8 @@ def inventory_sale_details(request):
             crop_receipt = form.cleaned_data['crop_receipt']
             remaining_inventory = crop_receipt.remaining_inventory()
             if remaining_inventory < amount:
-                messages.error(request,
-                    "Selling beyond inventory, you only have %s left" % (
-                        crop_receipt,))
+                messages.error(request, "Selling beyond inventory, you only"
+                               " have %s left" % (crop_receipt,))
             else:
                 agent.register_sale(crop_receipt, amount, price)
                 messages.success(request, "Sale registered succesfully")
@@ -627,6 +668,7 @@ def inventory_sale_details(request):
         'form': form,
     })
 
+
 @login_required
 def inventory_intake(request):
     actor = request.user.get_profile()
@@ -638,6 +680,7 @@ def inventory_intake(request):
     return render(request, 'inventory_intake.html', {
         'form': form,
     })
+
 
 @login_required
 def inventory_intake_details(request):
@@ -655,14 +698,16 @@ def inventory_intake_details(request):
             crop = form.cleaned_data['crop']
             quality = form.cleaned_data['quality']
             receipt = agent.take_in_crop(market, farmer, amount,
-                                            crop_unit, crop, quality=quality)
+                                         crop_unit, crop, quality=quality)
             if 'direct_sale' in request.POST:
-                messages.success(request, u'%s has been added to your inventory' % receipt)
+                messages.success(request, u'%s has been added to your'
+                                 ' inventory' % receipt)
                 return redirect(reverse('fncs:inventory_direct_sale', kwargs={
                     'receipt_pk': receipt.pk,
                 }))
             else:
-                messages.success(request,u'%s has been added to your inventory' % receipt)
+                messages.success(request, u'%s has been added to your'
+                                 ' inventory' % receipt)
                 return redirect(reverse('fncs:inventory'))
 
     else:
@@ -681,6 +726,7 @@ def inventory_intake_details(request):
         'market': market,
     })
 
+
 @login_required
 def inventory_direct_sale(request, receipt_pk):
     actor = request.user.get_profile()
@@ -692,10 +738,9 @@ def inventory_direct_sale(request, receipt_pk):
             amount = form.cleaned_data['amount']
             price = form.cleaned_data['price']
             transaction = agent.register_sale(crop_receipt, amount, price)
-            direct_sale = DirectSale.objects.create(transaction=transaction)
-            messages.success(request, u'%s have been captured as a direct sale' % (
-                amount,
-            ))
+            DirectSale.objects.create(transaction=transaction)
+            messages.success(request, u'%s have been captured as a direct sale'
+                             % (amount,))
             return redirect(reverse('fncs:inventory'))
     else:
         form = forms.DirectSaleForm(initial={
@@ -708,11 +753,13 @@ def inventory_direct_sale(request, receipt_pk):
         'crop_receipt': crop_receipt,
     })
 
+
 def todo(request):
     """Anything that resolves to here still needs to be completed"""
     return render_to_response('todo.html', {
 
     }, context_instance=RequestContext(request))
+
 
 def health(request):
     return HttpResponse('')
@@ -760,7 +807,7 @@ def agent(request, agent_pk):
             'msisdn': user.username,
             'farmers': agent.farmers.all(),
             'markets': agent.markets.all(),
-            })
+        })
 
     return render(request, 'agents/edit.html', {
         'agent': agent,

@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import (Actor, Farmer, FarmerGroup,
-                                            Identity)
+                                             Identity)
 from magriculture.fncs.models.props import Message, GroupMessage, Note
 from magriculture.fncs.errors import ActorException
 from datetime import datetime, timedelta
@@ -65,7 +65,7 @@ class AgentTestCase(TestCase):
         self.assertEquals(crop_receipt.remaining_inventory(), 0)
 
         self.assertAlmostEqual(transaction.created_at, datetime.now(),
-            delta=timedelta(seconds=2))
+                               delta=timedelta(seconds=2))
         self.assertIn(transaction, farmer.transactions())
         self.assertTrue(farmer.is_growing_crop(crop))
         self.assertIn(transaction, agent.sales_for(farmer))
@@ -82,15 +82,17 @@ class AgentTestCase(TestCase):
         agent = utils.create_agent()
         receipt1 = utils.take_in(market, agent, farmer1, 10, 'box', 'tomato')
         receipt2 = utils.take_in(market, agent, farmer2, 10, 'box', 'onion')
-        self.assertEqual([receipt1], list(agent.cropreceipts_available_for(farmer1)))
-        self.assertEqual([receipt2], list(agent.cropreceipts_available_for(farmer2)))
+        self.assertEqual([receipt1],
+                         list(agent.cropreceipts_available_for(farmer1)))
+        self.assertEqual([receipt2],
+                         list(agent.cropreceipts_available_for(farmer2)))
 
     def test_send_farmer_message(self):
         farmer = utils.create_farmer()
         agent = utils.create_agent()
         message = agent.send_message_to_farmer(farmer, 'hello world')
         self.assertIn(message, Message.objects.filter(sender=agent.actor,
-            recipient=farmer.actor))
+                                                      recipient=farmer.actor))
 
     def test_send_farmergroup_message(self):
         farmer1 = utils.create_farmer(msisdn='1', farmergroup_name="group 1")
@@ -112,7 +114,6 @@ class AgentTestCase(TestCase):
         self.assertIn(note, agent.notes_for(farmer))
 
 
-
 class MarketMonitorTestCase(TestCase):
 
     def test_market_monitor_registration(self):
@@ -128,7 +129,8 @@ class MarketMonitorTestCase(TestCase):
         price_floor = 150
         price_ceiling = 200
 
-        offer = monitor.register_offer(market, crop, unit, price_floor, price_ceiling)
+        offer = monitor.register_offer(market, crop, unit, price_floor,
+                                       price_ceiling)
         self.assertTrue(monitor.is_monitoring(market))
         self.assertIn(market, monitor.markets.all())
         for rpiarea in market.rpiareas():
@@ -139,7 +141,7 @@ class MarketMonitorTestCase(TestCase):
         self.assertEquals(offer.unit, unit)
         self.assertEquals(offer.market, market)
         self.assertAlmostEqual(offer.created_at, datetime.now(),
-            delta=timedelta(seconds=2))
+                               delta=timedelta(seconds=2))
 
 
 class FarmerBusinessAdvisorTestCase(TestCase):
@@ -170,6 +172,7 @@ class FarmerBusinessAdvisorTestCase(TestCase):
         self.assertEqual([farmer1], list(fba1.get_registered_farmers()))
         self.assertEqual([farmer2], list(fba2.get_registered_farmers()))
 
+
 class FarmerTestCase(TestCase):
 
     def test_farmer_create_helper(self):
@@ -183,7 +186,8 @@ class FarmerTestCase(TestCase):
         farmer1 = Farmer.create("0761234567", "name", "surname", farmergroup)
         self.assertTrue(Farmer.objects.count(), 1)
         self.assertEqual(farmer1.actor.name, 'name surname')
-        farmer2 = Farmer.create("0761234567", "new name", "new surname", farmergroup)
+        farmer2 = Farmer.create("0761234567", "new name", "new surname",
+                                farmergroup)
         self.assertTrue(Farmer.objects.count(), 1)
         self.assertEqual(farmer2.actor.name, 'new name new surname')
 
@@ -216,7 +220,7 @@ class FarmerTestCase(TestCase):
         unit = utils.create_crop_unit("boxes")
         amount = 10
 
-        receipt = agent.take_in_crop(market, farmer, amount, unit, crop)
+        agent.take_in_crop(market, farmer, amount, unit, crop)
 
         self.assertTrue(agent.is_selling_for(farmer, market))
         self.assertIn(market, agent.markets.all())
@@ -256,7 +260,7 @@ class FarmerTestCase(TestCase):
         # prime the farmer with 1 market
         farmer.markets.add(market1)
         # test the destructive set
-        farmer.operates_at_markets_exclusively([market2,market3])
+        farmer.operates_at_markets_exclusively([market2, market3])
         self.assertNotIn(market1, farmer.markets.all())
         self.assertIn(market2, farmer.markets.all())
         self.assertIn(market3, farmer.markets.all())
@@ -272,6 +276,7 @@ class FarmerTestCase(TestCase):
         self.assertNotIn(crop1, farmer.crops.all())
         self.assertIn(crop2, farmer.crops.all())
         self.assertIn(crop3, farmer.crops.all())
+
 
 class IdentityTestCase(ActorTestCase):
 
@@ -291,5 +296,4 @@ class IdentityTestCase(ActorTestCase):
         self.assertEquals(Actor.find('1234'), farmer.actor)
         self.assertEquals(Actor.find_with_pin('1234', '1234'), farmer.actor)
         self.assertRaises(ActorException, Actor.find_with_pin, '1234',
-            'bad-pin')
-
+                          'bad-pin')
