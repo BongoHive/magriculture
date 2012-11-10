@@ -381,15 +381,11 @@ class Farmer(models.Model):
 
     @classmethod
     def match(cls, msisdns=None, id_number=None):
-        if not (msisdns or id_number):
-            return []
-        actors = set([])
+        actors = set()
         if msisdns:
-            for identity in Identity.objects.filter(msisdn__in=msisdns):
-                actors.add(identity.actor)
+            actors.update(Actor.objects.filter(identity__msisdn__in=msisdns))
         if id_number:
-            for farmer in cls.objects.filter(id_number=id_number):
-                actors.add(farmer.actor)
+            actors.update(Actor.objects.filter(farmer__id_number=id_number))
         return cls.objects.filter(actor__in=actors)
 
     def __unicode__(self): # pragma: no cover

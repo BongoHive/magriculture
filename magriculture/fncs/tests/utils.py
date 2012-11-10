@@ -157,7 +157,7 @@ def create_crop_unit(name):
 def create_farmer(msisdn='27761234567', name="name", surname="surname",
         farmergroup_name="farmer group", province_name="province",
         zone_name="zone", district_name="district", ward_name="ward",
-        rpiarea_name="rpiarea"):
+        rpiarea_name="rpiarea", id_number=None):
     rpiarea = create_rpiarea(rpiarea_name)
     province = create_province(province_name)
     zone = create_zone(zone_name, rpiarea)
@@ -170,7 +170,7 @@ def create_farmer(msisdn='27761234567', name="name", surname="surname",
     user.last_name = surname
     user.save()
     farmer, _ = Farmer.objects.get_or_create(farmergroup=farmergroup,
-            actor=user.get_profile())
+            actor=user.get_profile(), id_number=id_number)
     return farmer
 
 def create_agent(msisdn="27761234568", name="name", surname="surname"):
