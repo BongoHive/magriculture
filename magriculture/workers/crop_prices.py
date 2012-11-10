@@ -24,7 +24,7 @@ class FncsApi(object):
         log.msg("Fetching url %r" % url)
         d = http_request(url, '', {
             'User-Agent': 'mAgriculture HTTP Request',
-            }, method='GET')
+        }, method='GET')
         d.addCallback(json.loads)
         return d
 
@@ -70,7 +70,7 @@ class Farmer(object):
             "farmer_name": self.farmer_name,
             "crops": self.crops,
             "markets": self.markets,
-            }
+        }
         return json.dumps(data)
 
     @classmethod
@@ -181,7 +181,7 @@ class CropPriceModel(object):
             "selected_crop": self.selected_crop,
             "selected_market": self.selected_market,
             "markets": self.markets,
-            }
+        }
         return json.dumps(model_data)
 
     @classmethod
@@ -260,7 +260,7 @@ class CropPriceModel(object):
             "%(err)s"
             "Select which markets to view:\n"
             "%(market_lists)s"
-            )
+        )
         market_lists = []
         crop = self.farmer.crops[self.selected_crop][1]
         for i, market_list in enumerate(self.MARKET_LISTS):
@@ -269,7 +269,7 @@ class CropPriceModel(object):
         return template % {
             "err": err + "\n" if err is not None else "",
             "market_lists": "\n".join(market_lists),
-            }
+        }
 
     def handle_select_market(self, text, _api):
         choice = self.get_choice(text, 1, len(self.markets))
@@ -290,7 +290,7 @@ class CropPriceModel(object):
         return template % {
             "err": err + "\n" if err is not None else "",
             "markets": markets,
-            }
+        }
 
     def handle_show_prices(self, text, _api):
         choice = self.get_choice(text, 1, 3)
@@ -329,15 +329,15 @@ class CropPriceModel(object):
             else:
                 avg_text = "-"
             price_lines.append("  %s: %s" % (unit_info["unit_name"],
-                                           avg_text))
+                                             avg_text))
         price_text = "\n".join(price_lines)
         returnValue(template % {
-                "crop": crop_name,
-                "market": market_name,
-                "err": err + "\n" if err is not None else "",
-                "price_text": price_text,
-                "next_prev": next_prev,
-                })
+            "crop": crop_name,
+            "market": market_name,
+            "err": err + "\n" if err is not None else "",
+            "price_text": price_text,
+            "next_prev": next_prev,
+        })
 
     def display_end(self, err, api):
         return "Goodbye!"
@@ -382,9 +382,9 @@ class CropPriceWorker(ApplicationWorker):
         self.r_config = self.config.get('redis_config', {})
         self.r_server = redis.Redis(**self.r_config)
         self.session_manager = SessionManager(
-                self.r_server,
-                self.worker_name,
-                max_session_length=self.MAX_SESSION_LENGTH)
+            self.r_server,
+            self.worker_name,
+            max_session_length=self.MAX_SESSION_LENGTH)
         self.api = FncsApi(self.config['api_url'])
 
         yield super(CropPriceWorker, self).startWorker()
