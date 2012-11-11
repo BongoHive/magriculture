@@ -6,7 +6,8 @@ from magriculture.fncs.models.props import (Crop, Transaction, Message,
                                             CropUnit)
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs.models.actors import (FarmerGroup, Farmer)
-from magriculture.fncs.widgets import SplitSelectDateTimeWidget
+from magriculture.fncs.widgets import (
+    SplitSelectDateTimeWidget, MultiFuzzyWidget)
 
 
 class SelectCropForm(forms.Form):
@@ -99,6 +100,14 @@ class FarmerForm(forms.Form):
     matched_farmer = forms.ModelChoiceField(
         label='Matched Farmer',
         required=False, queryset=Farmer.objects.all())
+
+
+class FarmerGeoForm(forms.Form):
+    search = forms.CharField(label='Search', required=True)
+    district = forms.ModelChoidField(
+        label='District')
+    ward = forms.ModelChoiceField(
+        label='Ward')
 
 
 class CropsForm(forms.Form):

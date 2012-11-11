@@ -103,6 +103,21 @@ def farmer_new(request):
 
 
 @login_required
+def farmer_geo(request, farmer_pk):
+    """Set the location of a farmer."""
+    if request.POST:
+        form = forms.FarmerGeoForm(request.POST)
+        if form.is_valid():
+            pass
+    else:
+        form = forms.FarmerGeoForm()
+        form.fields['matched_farmer'].widget = HiddenInput()
+    return render_to_response('farmers/geo.html', {
+        'form': form,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
 def farmer(request, farmer_pk):
     return HttpResponseRedirect(reverse('fncs:farmer_sales', kwargs={
         'farmer_pk': farmer_pk

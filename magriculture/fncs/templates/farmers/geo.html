@@ -6,14 +6,14 @@
 
     <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a></div>
     
-    <div class="h2">New Farmer</div>
+    <div class="h2">Set Farmer's Location</div>
     
-    <form class="standard" method="post" action="{% url fncs:farmer_new %}">
+    <form class="standard" method="post" action="{% url fncs:farmer_geo %}">
         {% if form.errors %}
             <div class="error">Please see error below.</div>
         {% endif %}
         {{form}}
-        <input type="submit" name="submit" class="submit" value="Save and set location &raquo;" />
+        <input type="submit" name="submit" class="submit" value="Save and add crops &raquo;" />
         {% csrf_token %}
     </form>        
     
