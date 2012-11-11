@@ -1,6 +1,7 @@
 from django.db import models
 from magriculture.fncs.models.props import Crop, Transaction
 
+
 class Province(models.Model):
     """
     A province, the normal geographic kind
@@ -11,18 +12,18 @@ class Province(models.Model):
     name = models.CharField(blank=False, max_length=255)
     #: the country the province is part of, this is a two letter country code.
     country = models.CharField(blank=False, max_length=100, default='--',
-        choices=(
-            ('--', 'Unspecified'),
-            ('ZM', 'Zambia'),
-            ('KE', 'Kenya'),
-        ))
+                               choices=(
+                                   ('--', 'Unspecified'),
+                                   ('ZM', 'Zambia'),
+                                   ('KE', 'Kenya'),
+                               ))
 
     class Meta:
         ordering = ['-name']
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return u"%s (Province)" % (self.name,)
 
 
@@ -43,7 +44,7 @@ class RPIArea(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return u"%s (RPIArea)" % (self.name,)
 
 
@@ -64,7 +65,7 @@ class Zone(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return u"%s (Zone)" % (self.name,)
 
 
@@ -124,11 +125,11 @@ class Market(models.Model):
     altitude = models.FloatField(blank=True, null=True)
     #: the volume of this market, choices 'unknown', 'low' or 'high'
     volume = models.CharField(blank=True, max_length=100, default='unknown',
-        choices=(
-            ('unknown', 'Unknown'),
-            ('low', 'Low'),
-            ('high', 'High'),
-        ))
+                              choices=(
+                                  ('unknown', 'Unknown'),
+                                  ('low', 'Low'),
+                                  ('high', 'High'),
+                              ))
 
     def rpiareas(self):
         """
@@ -177,5 +178,5 @@ class Market(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return self.name

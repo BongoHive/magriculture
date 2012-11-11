@@ -1,5 +1,4 @@
 from datetime import datetime
-import random
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -9,7 +8,7 @@ from django.contrib.auth.models import check_password, make_password
 from magriculture.fncs import errors
 from magriculture.fncs.models.geo import District
 from magriculture.fncs.models.props import (Message, GroupMessage, Note,
-    Transaction, Crop)
+                                            Transaction, Crop)
 
 
 def create_actor(sender, instance, created, **kwargs):
@@ -21,7 +20,7 @@ def create_actor(sender, instance, created, **kwargs):
         # Update the name
         actor = Actor.objects.create(user=instance)
         actor.name = '%s %s' % (instance.first_name.strip(),
-                                    instance.last_name.strip())
+                                instance.last_name.strip())
         actor.save()
 
         # Automatically create an Identity
@@ -32,10 +31,11 @@ def create_actor(sender, instance, created, **kwargs):
     else:
         actor = instance.get_profile()
         actor.name = '%s %s' % (instance.first_name.strip(),
-                                    instance.last_name.strip())
+                                instance.last_name.strip())
         actor.save()
 
 post_save.connect(create_actor, sender=User)
+
 
 class ActiveIdentityManager(models.Manager):
 
@@ -43,6 +43,7 @@ class ActiveIdentityManager(models.Manager):
         qs = super(ActiveIdentityManager, self).get_query_set()
         qs.filter(expired_on__isnull=True)
         return qs
+
 
 class Identity(models.Model):
     """
@@ -79,6 +80,7 @@ class Identity(models.Model):
 
     def check_pin(self, pin):
         return check_password(pin, self.pin)
+
 
 class Actor(models.Model):
     """
@@ -180,7 +182,7 @@ class Actor(models.Model):
 
         """
         return Message.objects.create(sender=self, recipient=recipient,
-            content=message, group=group)
+                                      content=message, group=group)
 
     def add_identity(self, msisdn, pin=None):
         identity = Identity(msisdn=msisdn, actor=self)
@@ -194,7 +196,7 @@ class Actor(models.Model):
 
     def get_msisdns(self, limit=3):
         return [identity.msisdn for identity
-            in self.identity_set.order_by('-created_at')[:limit]]
+                in self.identity_set.order_by('-created_at')[:limit]]
 
     def update_msisdns(self, msisdns):
         msisdns = [m for m in msisdns if m]
@@ -226,7 +228,7 @@ class Actor(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return u"%s (Actor)" % self.name
 
 
@@ -239,7 +241,7 @@ class Farmer(models.Model):
     farmergroup = models.ForeignKey('fncs.FarmerGroup', null=True)
     agents = models.ManyToManyField('fncs.Agent')
     id_number = models.CharField(blank=True, null=True, max_length=255,
-        unique=True)
+                                 unique=True)
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
     wards = models.ManyToManyField('fncs.Ward')
@@ -352,8 +354,9 @@ class Farmer(models.Model):
         """
         Create a new Farmer.
 
-        If a user already exists it uses that record. If a farmer already
-        exists for that user it returns that, otherwise a new farmer is created.
+        If a user already exists it uses that record. If a farmer
+        already exists for that user it returns that, otherwise a new
+        farmer is created.
 
         :type msisdn: str
         :type name: str
@@ -388,7 +391,7 @@ class Farmer(models.Model):
             actors.update(Actor.objects.filter(farmer__id_number=id_number))
         return cls.objects.filter(actor__in=actors)
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return self.actor.name
 
 
@@ -399,12 +402,14 @@ class FarmerGroup(models.Model):
     """
     #: The name of the group
     name = models.CharField(blank=False, max_length=255)
-    #: The :class:`magriculture.fncs.models.geo.Zone` this group operates in. About to be deprecated.
+    #: The :class:`magriculture.fncs.models.geo.Zone` this group
+    #: operates in. About to be deprecated.
     zone = models.ForeignKey('fncs.Zone', null=True)
-    #: The :class:`magriculture.fncs.models.geo.District` this group operates in
+    #: The :class:`magriculture.fncs.models.geo.District` this group
+    #: operates in
     district = models.ForeignKey('fncs.District', null=True)
-    #: Which :class:`magriculture.fncs.models.geo.Ward` this group is active in,
-    #: a M2M relationship.
+    #: Which :class:`magriculture.fncs.models.geo.Ward` this group is
+    #: active in, a M2M relationship.
     wards = models.ManyToManyField('fncs.Ward')
     #: The :class:`ExtensionOfficer` assigned to
     #: this FarmerGroup
@@ -422,7 +427,7 @@ class FarmerGroup(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return self.name
 
 
@@ -434,8 +439,9 @@ class ExtensionOfficer(models.Model):
     class Meta:
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return u"%s (ExtensionOfficer)" % (self.actor,)
+
 
 class MarketMonitor(models.Model):
     """A market monitor is an actor that is linked to a market and provides
@@ -467,9 +473,9 @@ class MarketMonitor(models.Model):
         :rtype: magriculture.fncs.models.props.Offer
 
         """
-        offer = self.offer_set.create(crop=crop, unit=unit,
-                    price_floor=price_floor, price_ceiling=price_ceiling,
-                    market=market)
+        offer = self.offer_set.create(
+            crop=crop, unit=unit, price_floor=price_floor,
+            price_ceiling=price_ceiling, market=market)
         self.markets.add(market)
         for rpiarea in market.rpiareas():
             self.rpiareas.add(rpiarea)
@@ -481,8 +487,9 @@ class MarketMonitor(models.Model):
     class Meta:
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return u"%s (MarketMonitor)" % (self.actor,)
+
 
 class Agent(models.Model):
     """
@@ -553,7 +560,7 @@ class Agent(models.Model):
 
         """
         return self.cropreceipt_set.filter(farmer=farmer,
-            market=market).exists()
+                                           market=market).exists()
 
     def transactions(self):
         """
@@ -596,13 +603,14 @@ class Agent(models.Model):
         # crops he is selling
         farmer.markets.add(market)
         farmer.crops.add(crop)
-        return self.cropreceipt_set.create(market=market, farmer=farmer,
-            amount=amount, unit=unit, crop=crop, created_at=datetime.now(),
-            **kwargs)
+        return self.cropreceipt_set.create(
+            market=market, farmer=farmer, amount=amount, unit=unit, crop=crop,
+            created_at=datetime.now(), **kwargs)
 
     def cropreceipts_available_for(self, farmer):
         """
-        Get a list of :class:`magriculture.fncs.models.props.CropReceipt` avaible
+        Get a list of
+        :class:`magriculture.fncs.models.props.CropReceipt` avaible
         for the given :class:`Farmer`
 
         :param farmer: a :class:`Farmer`
@@ -616,14 +624,15 @@ class Agent(models.Model):
 
         :returns: list of :class:`CropReceipt`
         """
-        return self.cropreceipt_set.filter(reconciled=False).order_by('-created_at')
+        return self.cropreceipt_set.filter(reconciled=False).order_by(
+            '-created_at')
 
     def crops_available(self):
         """
         :returns: list of :class:`Crop`
         """
         return Crop.objects.filter(cropreceipt__agent=self,
-            cropreceipt__reconciled=False).distinct()
+                                   cropreceipt__reconciled=False).distinct()
 
     def register_sale(self, crop_receipt, amount, price):
         """
@@ -638,12 +647,14 @@ class Agent(models.Model):
         :param price: the price at which it was sold
         :type price: float
 
-        :raises: :class:`magriculture.fncs.errors.CropReceiptException` if not enough inventory
+        :raises: :class:`magriculture.fncs.errors.CropReceiptException` if not
+                 enough inventory
         """
         if crop_receipt.remaining_inventory() < amount:
             raise errors.CropReceiptException, 'not enough inventory'
-        transaction = Transaction.objects.create(crop_receipt=crop_receipt,
-            amount=amount, price=price, created_at=datetime.now())
+        transaction = Transaction.objects.create(
+            crop_receipt=crop_receipt, amount=amount, price=price,
+            created_at=datetime.now())
 
         # see if we've sold everything we have and then update the
         # reconciled boolean
@@ -661,7 +672,7 @@ class Agent(models.Model):
 
         """
         return Transaction.objects.filter(crop_receipt__farmer=farmer,
-            crop_receipt__agent=self)
+                                          crop_receipt__agent=self)
 
     def send_message_to_farmer(self, farmer, message, group=None):
         """
@@ -669,7 +680,8 @@ class Agent(models.Model):
 
         :param farmer: :class:`Farmer`
         :param message: :func:`str`, the message text
-        :param group: :class:`magriculture.fncs.models.props.GroupMessage`, defaults to `None`
+        :param group: :class:`magriculture.fncs.models.props.GroupMessage`,
+                      defaults to `None`
         :returns: the message sent, `magriculture.fncs.models.props.Message`
         """
         return self.actor.send_message(farmer.actor, message, group)
@@ -680,11 +692,12 @@ class Agent(models.Model):
 
         :param farmergroups: list of :class:`FarmerGroup`
         :param message: :func:`str`, message to send.
-        :returns: the group message sent, :class:`magriculture.fncs.models.props.GroupMessage`
+        :returns: the group message sent,
+                  :class:`magriculture.fncs.models.props.GroupMessage`
 
         """
         groupmessage = GroupMessage.objects.create(sender=self.actor,
-                        content=message)
+                                                   content=message)
         for farmergroup in farmergroups:
             groupmessage.farmergroups.add(farmergroup)
             for farmer in farmergroup.members():
@@ -700,7 +713,7 @@ class Agent(models.Model):
         :returns: the note object, :class:`magriculture.fncs.models.props.Note`
         """
         return Note.objects.create(owner=self.actor, about_actor=farmer.actor,
-            content=note)
+                                   content=note)
 
     def notes_for(self, farmer):
         """
@@ -716,22 +729,22 @@ class Agent(models.Model):
         actors = Actor.objects.filter(identity__msisdn__in=msisdns)
         return cls.objects.filter(actor__in=actors)
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return self.actor.name
 
 
 class FarmerBusinessAdvisor(models.Model):
     """
-    A FarmerBusinessAdvisor is an actor that is registers farmers on the system.
-    In practice a FarmerBusinessAdvisor is somone who would most likely
-    head up a FarmerGroup
+    A FarmerBusinessAdvisor is an actor that is registers farmers on
+    the system.  In practice a FarmerBusinessAdvisor is somone who
+    would most likely head up a FarmerGroup
     """
     #: the :class:`Actor` this agent belongs to
     actor = models.ForeignKey('fncs.Actor')
     #: the :class:`Farmer` this agent is doing
     #: business for
-    farmers = models.ManyToManyField('fncs.Farmer', through=
-        'fncs.FBAdvisorRelationShip')
+    farmers = models.ManyToManyField('fncs.Farmer',
+                                     through='fncs.FBAdvisorRelationShip')
 
     def get_registered_farmers(self):
         return Farmer.objects.filter(
@@ -745,18 +758,19 @@ class FarmerBusinessAdvisor(models.Model):
 
     def register_farmer(self, farmer):
         if not FBAdvisorRelationShip.objects.filter(farmer=farmer).exists():
-            FBAdvisorRelationShip.objects.create(fba=self, farmer=farmer,
-                registered_by_actor=self.actor)
+            FBAdvisorRelationShip.objects.create(
+                fba=self, farmer=farmer, registered_by_actor=self.actor)
             return True
         else:
             FBAdvisorRelationShip.objects.create(fba=self, farmer=farmer)
             return True
 
+
 class FBAdvisorRelationShip(models.Model):
     fba = models.ForeignKey('fncs.FarmerBusinessAdvisor')
     farmer = models.ForeignKey('fncs.Farmer')
-    registered_by_actor = models.ForeignKey('fncs.Actor',
-        null=True, related_name='registered_by_actor')
+    registered_by_actor = models.ForeignKey(
+        'fncs.Actor', null=True, related_name='registered_by_actor')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

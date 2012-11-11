@@ -23,40 +23,40 @@ FARMERS = {
         "crops": [
             ["crop1", "Peas"],
             ["crop2", "Carrots"],
-            ],
+        ],
         "markets": [
             ["market1", "Kitwe"],
             ["market2", "Ndola"],
-            ],
-        },
-    }
+        ],
+    },
+}
 
 PRICES = {
     ("market1", "crop1", "unit1"): {
         "unit_name": "boxes",
         "prices": [1.2, 1.1, 1.5],
-        },
+    },
     ("market1", "crop1", "unit2"): {
         "unit_name": "crates",
         "prices": [1.6, 1.7, 1.8],
-        },
-    }
+    },
+}
 
 HIGHEST_MARKETS = {
     "crop1": [
         ("market1", "Kitwe"),
         ("market2", "Ndola"),
-        ],
+    ],
     "crop2": [
         ("market2", "Ndola"),
-        ],
-    }
+    ],
+}
 
 ALL_MARKETS = [
-        ("market1", "Kitwe"),
-        ("market2", "Ndola"),
-        ("market3", "Masala"),
-    ]
+    ("market1", "Kitwe"),
+    ("market2", "Ndola"),
+    ("market3", "Masala"),
+]
 
 
 class DummyResourceBase(Resource):
@@ -114,7 +114,7 @@ class DummyPriceHistoryResource(DummyResourceBase):
                 price_data[unit_id] = {
                     "unit_name": value["unit_name"],
                     "prices": value["prices"][:limit],
-                    }
+                }
         return price_data
 
 
@@ -185,7 +185,7 @@ class TestFncsApi(unittest.TestCase):
             "farmer_name": FARMERS[farmer_id]["farmer_name"],
             "crops": FARMERS[farmer_id]["crops"],
             "markets": FARMERS[farmer_id]["markets"],
-            })
+        })
 
     @inlineCallbacks
     def test_get_price_history(self):
@@ -194,12 +194,12 @@ class TestFncsApi(unittest.TestCase):
             "unit1": {
                 "unit_name": "boxes",
                 "prices": PRICES[("market1", "crop1", "unit1")]["prices"][:2],
-                },
+            },
             "unit2": {
                 "unit_name": "crates",
                 "prices": PRICES[("market1", "crop1", "unit2")]["prices"][:2],
-                },
-            })
+            },
+        })
 
 
 class TestFarmer(unittest.TestCase):
@@ -214,7 +214,7 @@ class TestFarmer(unittest.TestCase):
             "farmer_name": "Farmer Bob",
             "crops": [["cropid1", "Peas"]],
             "markets": [["marketid1", "Small Town Market"]],
-            })
+        })
 
     def test_unserialize(self):
         data = json.dumps({
@@ -222,7 +222,7 @@ class TestFarmer(unittest.TestCase):
             "farmer_name": "Farmer Bob",
             "crops": [["cropid1", "Peas"]],
             "markets": [["marketid1", "Small Town Market"]],
-            })
+        })
         farmer = Farmer.unserialize(data)
         self.assertEqual(farmer.user_id, "fakeid1")
         self.assertEqual(farmer.farmer_name, "Farmer Bob")
@@ -328,7 +328,7 @@ class TestCropPriceModel(unittest.TestCase):
             "selected_crop": 1,
             "selected_market": None,
             "markets": None,
-            })
+        })
 
     def test_unserialize(self):
         farmer = Farmer("fakeid1", "Farmer Bob")
@@ -338,7 +338,7 @@ class TestCropPriceModel(unittest.TestCase):
             "selected_crop": 1,
             "selected_market": 2,
             "markets": [["market1", "Kitwe"]],
-            })
+        })
         model = CropPriceModel.unserialize(data)
         self.assertEqual(model.state, CropPriceModel.SELECT_CROP)
         self.assertEqual(model.selected_crop, 1)
@@ -501,7 +501,7 @@ class TestCropPriceWorker(unittest.TestCase):
     @inlineCallbacks
     def recv(self, n=0):
         msgs = yield self.broker.wait_messages('vumi', '%s.outbound'
-                                                % self.transport_name, n)
+                                               % self.transport_name, n)
 
         def reply_code(msg):
             if msg['session_event'] == TransportUserMessage.SESSION_CLOSE:
