@@ -107,11 +107,11 @@ def farmer_location(request, farmer_pk):
     """Set the location of a farmer."""
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     if request.POST:
-        form = forms.FarmerGeoForm(request.POST)
+        form = forms.FarmerLocationForm(request.POST)
         if form.is_valid():
             pass
     else:
-        form = forms.FarmerGeoForm()
+        form = forms.FarmerLocationForm()
     return render_to_response('farmers/location.html', {
         'farmer': farmer,
         'form': form,
