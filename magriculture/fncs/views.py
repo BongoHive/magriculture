@@ -105,6 +105,7 @@ def farmer_new(request):
 @login_required
 def farmer_geo(request, farmer_pk):
     """Set the location of a farmer."""
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
     if request.POST:
         form = forms.FarmerGeoForm(request.POST)
         if form.is_valid():
@@ -113,6 +114,7 @@ def farmer_geo(request, farmer_pk):
         form = forms.FarmerGeoForm()
         form.fields['matched_farmer'].widget = HiddenInput()
     return render_to_response('farmers/geo.html', {
+        'farmer': farmer,
         'form': form,
     }, context_instance=RequestContext(request))
 
