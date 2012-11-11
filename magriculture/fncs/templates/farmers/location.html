@@ -8,7 +8,7 @@
     
     <div class="h2">Set Farmer's Location</div>
     
-    <form class="standard" method="post" action="{% url fncs:farmer_geo farmer_pk=farmer.pk %}">
+    <form class="standard" method="post" action="{% url fncs:farmer_location farmer_pk=farmer.pk %}">
         {% if form.errors %}
             <div class="error">Please see error below.</div>
         {% endif %}
