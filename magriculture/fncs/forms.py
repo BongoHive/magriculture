@@ -6,8 +6,7 @@ from magriculture.fncs.models.props import (Crop, Transaction, Message,
                                             CropUnit)
 from magriculture.fncs.models.geo import Market
 from magriculture.fncs.models.actors import (FarmerGroup, Farmer)
-from magriculture.fncs.widgets import (
-    SplitSelectDateTimeWidget, MultiFuzzyWidget)
+from magriculture.fncs.widgets import SplitSelectDateTimeWidget
 
 
 class SelectCropForm(forms.Form):
@@ -103,11 +102,20 @@ class FarmerForm(forms.Form):
 
 
 class FarmerGeoForm(forms.Form):
-    search = forms.CharField(label='Search', required=True)
-    district = forms.ModelChoidField(
-        label='District')
-    ward = forms.ModelChoiceField(
-        label='Ward')
+    search = forms.CharField(label='Search for ward or district')
+    location = forms.ChoiceField(label='Select ward or district')
+
+    def __init__(self, *args, **kwargs):
+        super(FarmerGeoForm, self).__init__(*args, **kwargs)
+        search = self.initial.get('search') or ''
+        if search:
+            self.fields['location'].choices = self._location_choices(search)
+        else:
+            self.fields['location'].is_hidden = True
+
+    def _location_choices(self, search):
+        # TODO: put fuzzy search here
+        return [('ward:1', 'Ward 1'), ('district:2', 'District 2')]
 
 
 class CropsForm(forms.Form):
