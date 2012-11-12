@@ -1,10 +1,12 @@
 from django import forms
 from django.forms.widgets import HiddenInput, Textarea
+from ngram import NGram
+
 from magriculture.fncs.models.props import (Crop, Transaction, Message,
                                             GroupMessage, Note, Offer,
                                             CropReceipt, CROP_QUALITY_CHOICES,
                                             CropUnit)
-from magriculture.fncs.models.geo import Market
+from magriculture.fncs.models.geo import Market, Ward, District
 from magriculture.fncs.models.actors import (FarmerGroup, Farmer)
 from magriculture.fncs.widgets import SplitSelectDateTimeWidget
 
@@ -109,17 +111,29 @@ class FarmerLocationForm(forms.Form):
     search = forms.CharField(widget=HiddenInput())
     location = forms.ChoiceField(label='Select ward or district')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, num_choices=10, *args, **kwargs):
         super(FarmerLocationForm, self).__init__(*args, **kwargs)
+        self.num_choices = num_choices
         search = self.data.get('search') or self.initial.get('search') or ''
         if search:
             self.fields['location'].choices = self._location_choices(search)
         else:
             self.fields['location'].is_hidden = True
 
+    def _location_to_name(self, location):
+        return location.name.lower()
+
+    def _location_to_choice(self, location):
+        location_type = location.__class__.__name__.lower()
+        return ('%s:%d' % (location_type, location.pk),
+                '%s (%s)' % (location.name, location_type))
+
     def _location_choices(self, search):
-        # TODO: put fuzzy search here
-        return [('ward:1', 'Ward 1'), ('district:2', 'District 2')]
+        ngram_index = NGram(key=self._location_to_name)
+        ngram_index.update(Ward.objects.all())
+        ngram_index.update(District.objects.all())
+        locations = ngram_index.search(search)[:self.num_choices]
+        return [self._location_to_choice(l) for l, _score in locations]
 
 
 class CropsForm(forms.Form):
