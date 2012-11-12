@@ -124,8 +124,8 @@ def farmer_location_search(request, farmer_pk):
 def farmer_location_save(request, farmer_pk):
     """Set the location of a farmer."""
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
-    if request.POST:
-        location_form = forms.FarmerLocationForm(request.POST)
+    if request.method == "POST":
+        location_form = forms.FarmerLocationForm(data=request.POST)
         if location_form.is_valid():
             # TODO: save location
             return HttpResponseRedirect(
