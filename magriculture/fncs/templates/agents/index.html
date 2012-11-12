@@ -11,7 +11,7 @@
             {% for agent in page.object_list %}
                 <div class="item">
                     <a href="{% url fncs:agent agent_pk=agent.pk %}">{{agent.actor.name}}</a> 
-                    <span class="area">{{agent.districts.all|join:", "}}</span><br />
+                    <span class="area">{{agent.market_districts.all|join:", "}}</span><br />
                     <span class="subtitle">{{agent.crops.all|join:", "}}</span>
                 </div>
             {% empty %}

@@ -11,7 +11,7 @@
             {% for farmer in page.object_list %}
                 <div class="item">
                     <a href="{% url fncs:farmer farmer_pk=farmer.pk %}">{{farmer.actor.name}}</a> 
-                    <span class="area">{{farmer.districts.all|join:", "}}</span><br />
+                    <span class="area">{{farmer.market_districts.all|join:", "}}</span><br />
                     <span class="subtitle">{{farmer.crops.all|join:", "}}</span>
                 </div>
             {% empty %}
