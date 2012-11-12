@@ -101,13 +101,17 @@ class FarmerForm(forms.Form):
         required=False, queryset=Farmer.objects.all())
 
 
-class FarmerLocationForm(forms.Form):
+class FarmerLocationSearchForm(forms.Form):
     search = forms.CharField(label='Search for ward or district')
+
+
+class FarmerLocationForm(forms.Form):
+    search = forms.CharField(widget=HiddenInput())
     location = forms.ChoiceField(label='Select ward or district')
 
     def __init__(self, *args, **kwargs):
         super(FarmerLocationForm, self).__init__(*args, **kwargs)
-        search = self.initial.get('search') or ''
+        search = self.data.get('search') or self.initial.get('search') or ''
         if search:
             self.fields['location'].choices = self._location_choices(search)
         else:

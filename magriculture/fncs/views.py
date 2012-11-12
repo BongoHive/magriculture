@@ -90,10 +90,9 @@ def farmer_new(request):
                         farmer.operates_at(market, agent)
 
                 messages.success(request, "Farmer Created")
-                return HttpResponseRedirect(reverse("fncs:farmer_location",
-                                                    kwargs={
-                                                        'farmer_pk': farmer.pk,
-                                                    }))
+                return HttpResponseRedirect(
+                    reverse("fncs:farmer_location_search", kwargs={
+                            'farmer_pk': farmer.pk}))
     else:
         form = forms.FarmerForm()
         form.fields['matched_farmer'].widget = HiddenInput()
@@ -103,18 +102,43 @@ def farmer_new(request):
 
 
 @login_required
-def farmer_location(request, farmer_pk):
+def farmer_location_search(request, farmer_pk):
+    """Search for a farmer's location."""
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    location_form = None
+    if request.POST:
+        search_form = forms.FarmerLocationSearchForm(request.POST)
+        if search_form.is_valid():
+            location_form = forms.FarmerLocationForm(
+                initial={'search': search_form.cleaned_data['search']})
+    else:
+        search_form = forms.FarmerLocationSearchForm()
+    return render_to_response('farmers/location.html', {
+        'farmer': farmer,
+        'search_form': search_form,
+        'location_form': location_form
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def farmer_location_save(request, farmer_pk):
     """Set the location of a farmer."""
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     if request.POST:
-        form = forms.FarmerLocationForm(request.POST)
-        if form.is_valid():
-            pass
+        location_form = forms.FarmerLocationForm(request.POST)
+        if location_form.is_valid():
+            # TODO: save location
+            return HttpResponseRedirect(
+                reverse("fncs:farmer", kwargs={'farmer_pk': farmer.pk}))
+        search_form = forms.FarmerLocationSearchForm(
+            initial={'search': location_form.data.get('search')})
     else:
-        form = forms.FarmerLocationForm()
+        search_form = forms.FarmerLocationSearchForm()
+        location_form = None
     return render_to_response('farmers/location.html', {
         'farmer': farmer,
-        'form': form,
+        'search_form': search_form,
+        'location_form': location_form,
     }, context_instance=RequestContext(request))
 
 

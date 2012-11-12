@@ -8,15 +8,25 @@
     
     <div class="h2">Set Farmer's Location</div>
     
-    <form class="standard" method="post" action="{% url fncs:farmer_location farmer_pk=farmer.pk %}">
+    <form class="standard" method="post" action="{% url fncs:farmer_location_search farmer_pk=farmer.pk %}">
         {% if form.errors %}
             <div class="error">Please see error below.</div>
         {% endif %}
-        {{form}}
-        <input type="submit" name="submit" class="submit" value="Save and add crops &raquo;" />
+        {{search_form}}
+        <input type="submit" name="submit" class="submit" value="Search &raquo;" />
         {% csrf_token %}
-    </form>        
-    
+    </form>
+    {% if location_form %}
+    <form class="standard" method="post" action="{% url fncs:farmer_location_save farmer_pk=farmer.pk %}">
+        {% if form.errors %}
+            <div class="error">Please see error below.</div>
+        {% endif %}
+        {{location_form}}
+        <input type="submit" name="submit" class="submit" value="Save location &raquo;" />
+        {% csrf_token %}
+    </form>
+    {% endif %}
+
     <div class="h2">Menu</div>
     {% include "includes/menu.html" %}
 </div> <!-- /.content -->{% endblock %}
