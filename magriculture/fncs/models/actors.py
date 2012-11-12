@@ -245,6 +245,7 @@ class Farmer(models.Model):
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
     wards = models.ManyToManyField('fncs.Ward')
+    districts = models.ManyToManyField('fncs.District')
     crops = models.ManyToManyField('fncs.Crop')
     hh_id = models.CharField(blank=True, max_length=100)
     participant_type = models.CharField(blank=True, max_length=100, choices=(
