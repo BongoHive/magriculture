@@ -120,6 +120,23 @@ class FarmerLocationForm(forms.Form):
         else:
             self.fields['location'].is_hidden = True
 
+    def save_location(self, farmer):
+        location = self.cleaned_data.get('location')
+        if location is None:
+            # TODO: Is there a better error to raise?
+            raise ValueError("Please validate location before saving.")
+        location_type, _, location_pk = location.partition(":")
+        print location_type, location_pk
+        if location_type == 'ward':
+            ward = Ward.objects.get(pk=location_pk)
+            farmer.wards.add(ward)
+        elif location_type == 'district':
+            district = District.objects.get(pk=location_pk)
+            farmer.districts.add(district)
+        else:
+            # TODO: Is there a better error to raise
+            raise ValueError("This shouldn't happen")
+
     def _location_to_name(self, location):
         return location.name.lower()
 

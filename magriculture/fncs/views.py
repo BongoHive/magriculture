@@ -116,7 +116,7 @@ def farmer_location_search(request, farmer_pk):
     return render_to_response('farmers/location.html', {
         'farmer': farmer,
         'search_form': search_form,
-        'location_form': location_form
+        'location_form': location_form,
     }, context_instance=RequestContext(request))
 
 
@@ -127,7 +127,7 @@ def farmer_location_save(request, farmer_pk):
     if request.method == "POST":
         location_form = forms.FarmerLocationForm(data=request.POST)
         if location_form.is_valid():
-            # TODO: save location
+            location_form.save_location(farmer)
             return HttpResponseRedirect(
                 reverse("fncs:farmer", kwargs={'farmer_pk': farmer.pk}))
         search_form = forms.FarmerLocationSearchForm(
