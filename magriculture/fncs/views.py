@@ -106,7 +106,7 @@ def farmer_location_search(request, farmer_pk):
     """Search for a farmer's location."""
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     location_form = None
-    if request.POST:
+    if request.method == "POST":
         search_form = forms.FarmerLocationSearchForm(request.POST)
         if search_form.is_valid():
             location_form = forms.FarmerLocationForm(
