@@ -27,6 +27,7 @@ class FNCSTestCase(TestCase):
         self.pin = '1234'
         self.province = utils.create_province('test province')
         self.district = utils.create_district('test district', self.province)
+        self.ward = utils.create_ward('test ward', self.district)
         self.market = utils.create_market('test market', self.district)
 
         self.agent = utils.create_agent()
@@ -118,6 +119,39 @@ class FarmersTestCase(FNCSTestCase):
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(utils.is_farmer(self.test_msisdn))
+
+    def test_farmer_location_search_no_query(self):
+        response = self.client.get(self.farmer_url('location_search'))
+        self.assertContains(response, 'Search for ward or district:')
+        self.assertNotContains(response, 'Select ward or district')
+
+    def test_farmer_location_search_with_query(self):
+        response = self.client.post(self.farmer_url('location_search'), {
+            'search': self.ward.name.lower()})
+        self.assertContains(response, 'Search for ward or district:')
+        self.assertContains(response, 'Select ward or district:')
+        self.assertContains(response, '%s (ward)' % (self.ward.name,))
+
+    def test_farmer_location_search_with_query_but_no_result(self):
+        response = self.client.post(self.farmer_url('location_search'), {
+            'search': 'unknown'})
+        self.assertContains(response, 'Search for ward or district:')
+        self.assertContains(response, 'No locations found. '
+                            'Please search again.')
+
+    def test_farmer_location_save_ward(self):
+        response = self.client.post(self.farmer_url('location_save'), {
+            'search': self.ward.name.lower(),
+            'location': 'ward:%d' % self.ward.pk}, follow=True)
+        self.assertEqual(list(self.farmer.wards.all()), [self.ward])
+        self.assertRedirects(response, self.farmer_url('sales'))
+
+    def test_farmer_location_save_district(self):
+        response = self.client.post(self.farmer_url('location_save'), {
+            'search': self.district.name.lower(),
+            'location': 'district:%d' % self.district.pk}, follow=True)
+        self.assertEqual(list(self.farmer.districts.all()), [self.district])
+        self.assertRedirects(response, self.farmer_url('sales'))
 
     def test_farmer_id_number(self):
         response = self.client.post(self.farmer_url('edit'), {
