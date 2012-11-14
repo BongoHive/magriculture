@@ -245,6 +245,7 @@ class Farmer(models.Model):
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
     wards = models.ManyToManyField('fncs.Ward')
+    districts = models.ManyToManyField('fncs.District')
     crops = models.ManyToManyField('fncs.Crop')
     hh_id = models.CharField(blank=True, max_length=100)
     participant_type = models.CharField(blank=True, max_length=100, choices=(
@@ -294,7 +295,7 @@ class Farmer(models.Model):
         for crop in crops:
             self.grows_crop(crop)
 
-    def districts(self):
+    def market_districts(self):
         """
         Returns the districts that this farmer is active in
 
@@ -723,6 +724,15 @@ class Agent(models.Model):
         :returns: list of :class:`magriculture.fncs.models.props.Note`
         """
         return self.actor.note_set.filter(about_actor=farmer.actor)
+
+    def market_districts(self):
+        """
+        Returns the districts that this agent is active in
+
+        :returns: list
+        :rtype: magriculture.fncs.models.geo.District
+        """
+        return District.objects.filter(market__in=self.markets.all())
 
     @classmethod
     def match(cls, msisdns=None):

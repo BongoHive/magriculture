@@ -1,10 +1,12 @@
 from django import forms
 from django.forms.widgets import HiddenInput, Textarea
+from ngram import NGram
+
 from magriculture.fncs.models.props import (Crop, Transaction, Message,
                                             GroupMessage, Note, Offer,
                                             CropReceipt, CROP_QUALITY_CHOICES,
                                             CropUnit)
-from magriculture.fncs.models.geo import Market
+from magriculture.fncs.models.geo import Market, Ward, District
 from magriculture.fncs.models.actors import (FarmerGroup, Farmer)
 from magriculture.fncs.widgets import SplitSelectDateTimeWidget
 
@@ -99,6 +101,54 @@ class FarmerForm(forms.Form):
     matched_farmer = forms.ModelChoiceField(
         label='Matched Farmer',
         required=False, queryset=Farmer.objects.all())
+
+
+class FarmerLocationSearchForm(forms.Form):
+    search = forms.CharField(label='Search for ward or district')
+
+
+class FarmerLocationForm(forms.Form):
+    search = forms.CharField(widget=HiddenInput())
+    location = forms.ChoiceField(label='Select ward or district')
+
+    def __init__(self, num_choices=10, *args, **kwargs):
+        super(FarmerLocationForm, self).__init__(*args, **kwargs)
+        self.num_choices = num_choices
+        search = self.data.get('search') or self.initial.get('search') or ''
+        if search:
+            self.fields['location'].choices = self._location_choices(search)
+        else:
+            self.fields['location'].is_hidden = True
+
+    def save_location(self, farmer):
+        location = self.cleaned_data.get('location')
+        if location is None:
+            raise ValueError("Please validate location before saving.")
+        location_type, _, location_pk = location.partition(":")
+        if location_type == 'ward':
+            ward = Ward.objects.get(pk=location_pk)
+            farmer.wards.add(ward)
+        elif location_type == 'district':
+            district = District.objects.get(pk=location_pk)
+            farmer.districts.add(district)
+        else:
+            raise ValueError("Unsupported location type"
+                             " (this shouldn't happen).")
+
+    def _location_to_name(self, location):
+        return location.name.lower()
+
+    def _location_to_choice(self, location):
+        location_type = location.__class__.__name__.lower()
+        return ('%s:%d' % (location_type, location.pk),
+                '%s (%s)' % (location.name, location_type))
+
+    def _location_choices(self, search):
+        ngram_index = NGram(key=self._location_to_name)
+        ngram_index.update(Ward.objects.all())
+        ngram_index.update(District.objects.all())
+        locations = ngram_index.search(search)[:self.num_choices]
+        return [self._location_to_choice(l) for l, _score in locations]
 
 
 class CropsForm(forms.Form):

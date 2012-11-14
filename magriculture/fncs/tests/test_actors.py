@@ -242,9 +242,9 @@ class FarmerTestCase(TestCase):
         farmer.operates_at(market1, agent1)
         farmer.operates_at(market2, agent2)
 
-        self.assertEquals(farmer.districts().count(), 2)
-        self.assertIn(district1, farmer.districts())
-        self.assertIn(district2, farmer.districts())
+        self.assertEquals(farmer.market_districts().count(), 2)
+        self.assertIn(district1, farmer.market_districts())
+        self.assertIn(district2, farmer.market_districts())
 
     def test_farmer_grows_crops(self):
         farmer = utils.create_farmer()

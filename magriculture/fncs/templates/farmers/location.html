@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include "includes/messages.html" %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a></div>
+    
+    <div class="h2">Set Farmer's Location</div>
+    
+    {% if location_form %}
+    <form class="standard" method="post" action="{% url fncs:farmer_location_save farmer_pk=farmer.pk %}">
+        {% if location_form.errors %}
+            <div class="error">Please see error below.</div>
+        {% endif %}
+        {% if location_form.fields.location.choices %}
+            {{location_form}}
+            <input type="submit" name="submit" class="submit" value="Save location &raquo;" />
+        {% else %}
+            <p>No locations found. Please search again.</p>
+        {% endif %}
+        {% csrf_token %}
+    </form>
+    {% endif %}
+
+    <form class="standard" method="post" action="{% url fncs:farmer_location_search farmer_pk=farmer.pk %}">
+        {% if search_form.errors %}
+            <div class="error">Please see error below.</div>
+        {% endif %}
+        {{search_form}}
+        <input type="submit" name="submit" class="submit" value="Search &raquo;" />
+        {% csrf_token %}
+    </form>
+
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->{% endblock %}
