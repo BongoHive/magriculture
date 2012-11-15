@@ -18,7 +18,7 @@ setup(
     author_email = 'dev@praekeltfoundation.org',
     packages = find_packages(),
     install_requires = ['setuptools'] +
-        remove_externals(listify('config/requirements.pip')),
+        remove_externals(listify('requirements.pip')),
     classifiers = [
         'Development Status :: 4 - Beta',
         'Intended Audience :: Private Developers',
