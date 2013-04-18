@@ -9,6 +9,7 @@ from magriculture.fncs import errors
 from magriculture.fncs.models.geo import District
 from magriculture.fncs.models.props import (Message, GroupMessage, Note,
                                             Transaction, Crop)
+from magriculture.sms import send_sms
 
 
 def create_actor(sender, instance, created, **kwargs):
@@ -181,6 +182,9 @@ class Actor(models.Model):
         :rtype: magriculture.fncs.models.props.Message
 
         """
+        msisdns = recipient.get_msisdns()
+        if msisdns:
+            send_sms(msisdns[0], message)
         return Message.objects.create(sender=self, recipient=recipient,
                                       content=message, group=group)
 
