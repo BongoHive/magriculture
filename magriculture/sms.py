@@ -1,6 +1,8 @@
 """Send SMSes via a Vumi Go HTTP API."""
 
 import json
+import logging
+
 import requests
 
 from django.conf import settings
@@ -17,7 +19,7 @@ class SmsSendingError(Exception):
 class SmsSender(object):
     def __init__(self):
         """Override in sub-classes."""
-        raise NotImplementedError
+        pass
 
     def send_sms(self, to_addr, content):
         """Send an SMS.
@@ -63,6 +65,14 @@ class VumiGoSender(SmsSender):
         return reply
 
 
+class LoggingSender(SmsSender):
+    def __init__(self, logger="magriculture.sms"):
+        self._logger = logging.getLogger(logger)
+
+    def send_sms(self, to_addr, content):
+        self._logger.log("SMS to %r: %r" % (to_addr, content))
+
+
 def create_sender(sms_config):
     """Factory for creating an SMS sender from settings.
 
@@ -76,6 +86,7 @@ def create_sender(sms_config):
         raise SmsSetupError("SMS_SETTINGS contains no sender_type")
     senders = {
         "vumigo": VumiGoSender,
+        "logging": LoggingSender,
     }
     sender_cls = senders.get(sender_type)
     if sender_cls is None:
