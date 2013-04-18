@@ -8,6 +8,7 @@ pep8
 coverage==3.4
 psycopg2==2.4
 xlrd==0.7.1
+requests
 Sphinx
 django-sentry
 ngram
