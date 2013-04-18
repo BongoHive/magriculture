@@ -170,3 +170,8 @@ AUTHENTICATION_BACKENDS = (
 
 # map of codes -> replacement prefix
 MAGRICULTURE_IN_COUNTRY_CODES = [('260', '0')]
+
+SMS_CONFIG = {
+    "sender_type": "logging",
+    "logger": "magriculture.sms",
+}
