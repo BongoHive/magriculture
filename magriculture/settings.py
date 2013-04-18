@@ -2,6 +2,8 @@
 import os.path
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+
 def abspath(*args):
     """convert relative paths to absolute paths relative to PROJECT_ROOT"""
     return os.path.join(PROJECT_ROOT, *args)
@@ -17,12 +19,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'magriculture',                      # Or path to database file if using sqlite3.
-        'USER': 'magriculture',                      # Not used with sqlite3.
-        'PASSWORD': 'magriculture',                  # Not used with sqlite3.
-        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'magriculture',
+        'USER': 'magriculture',
+        'PASSWORD': 'magriculture',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -85,7 +87,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -95,7 +96,6 @@ SECRET_KEY = 'c5gt4rhjve1t-mgk3-e4*ford3pum3l!vqny%q9_a_&sfqbv2x'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -109,10 +109,11 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'magriculture.urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Put strings here, like "/home/html/django_templates"
+    # or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    abspath("fncs","templates"),
+    abspath("fncs", "templates"),
 )
 
 INSTALLED_APPS = (
@@ -165,7 +166,7 @@ SOUTH_TESTS_MIGRATE = False
 AUTHENTICATION_BACKENDS = (
     'magriculture.fncs.auth.backends.IdentityBackend',
     'django.contrib.auth.backends.ModelBackend',
-    )
+)
 
 # map of codes -> replacement prefix
 MAGRICULTURE_IN_COUNTRY_CODES = [('260', '0')]
