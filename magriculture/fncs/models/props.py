@@ -10,6 +10,7 @@ CROP_QUALITY_CHOICES = (
     (0, 'Poor'),
 )
 
+
 class Crop(models.Model):
     """
     A crop is an item that is being traded
@@ -26,8 +27,9 @@ class Crop(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return self.name
+
 
 class CropUnit(models.Model):
     """
@@ -43,8 +45,9 @@ class CropUnit(models.Model):
         get_latest_by = 'pk'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
+    def __unicode__(self):
         return self.name
+
 
 class CropReceipt(models.Model):
     """
@@ -63,7 +66,7 @@ class CropReceipt(models.Model):
     #: the quality of the crop, :func:`int`, choices in
     #: `CROP_QUALITY_CHOICES`
     quality = models.IntegerField(blank=False, default=5,
-        choices=CROP_QUALITY_CHOICES)
+                                  choices=CROP_QUALITY_CHOICES)
     #: the amount of delivered in :class:`CropUnit`
     amount = models.FloatField('Quantity')
     created_at = models.DateTimeField(blank=False)
@@ -84,12 +87,14 @@ class CropReceipt(models.Model):
         """
         aggregate = Transaction.objects.filter(crop_receipt=self).aggregate(
             total_sold=models.Sum('amount'))
-        # If there are no transactions, total_sold will be None, if that's the case then we want to return zero
+        # If there are no transactions, total_sold will be None, if
+        # that's the case then we want to return zero
         sold_inventory = aggregate.get('total_sold') or 0
         return self.amount - sold_inventory
 
     def __unicode__(self):  # pragma: no cover
-        return u"%s %s %s of %s from %s" % (self.remaining_inventory(),
+        return u"%s %s %s of %s from %s" % (
+            self.remaining_inventory(),
             self.get_quality_display(), self.unit, self.crop,
             self.created_at.strftime('%d %b'),)
 
@@ -104,6 +109,7 @@ class DirectSale(models.Model):
 
     class Meta:
         app_label = 'fncs'
+
 
 class Transaction(models.Model):
     """
@@ -131,9 +137,10 @@ class Transaction(models.Model):
         :param unit: :class:`CropUnit`
         :returns: list of prices as floats.
         """
-        return cls.objects.filter(crop_receipt__market=market,
+        return cls.objects.filter(
+            crop_receipt__market=market,
             crop_receipt__crop=crop, crop_receipt__unit=unit). \
-                values_list('price', flat=True)
+            values_list('price', flat=True)
 
     def save(self, *args, **kwargs):
         if not self.total:
@@ -145,9 +152,11 @@ class Transaction(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
-        return u"%s %s of %s" % (floatformat(self.amount), self.crop_receipt.unit,
-                                    self.crop_receipt.crop)
+    def __unicode__(self):
+        return u"%s %s of %s" % (
+            floatformat(self.amount), self.crop_receipt.unit,
+            self.crop_receipt.crop)
+
 
 class Offer(models.Model):
     """
@@ -183,7 +192,7 @@ class Offer(models.Model):
         :returns: list of (`price_floor`,`price_ceiling`) tuples.
         """
         return cls.objects.filter(market=market, crop=crop, unit=unit). \
-                values_list('price_floor', 'price_ceiling')
+            values_list('price_floor', 'price_ceiling')
 
     @classmethod
     def average_price_history_for(cls, market, crop, unit):
@@ -194,16 +203,17 @@ class Offer(models.Model):
         :returns: list of average prices as floats
         """
         return [sum(price_range) / 2.0 for price_range in
-                    cls.price_history_for(market, crop, unit)]
+                cls.price_history_for(market, crop, unit)]
 
     class Meta:
         ordering = ['-created_at']
         get_latest_by = 'created_at'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
-        return u"%s of %s between %s and %s (Offer)" % (self.unit, self.crop,
-            self.price_floor, self.price_ceiling)
+    def __unicode__(self):
+        return u"%s of %s between %s and %s (Offer)" % (
+            self.unit, self.crop, self.price_floor, self.price_ceiling)
+
 
 class Message(models.Model):
     """
@@ -213,7 +223,8 @@ class Message(models.Model):
     sender = models.ForeignKey('fncs.Actor', related_name='sentmessages_set')
     #: the :class:`magriculture.fncs.models.actors.Actor` receiving the
     #: message
-    recipient = models.ForeignKey('fncs.Actor', related_name='receivedmessages_set')
+    recipient = models.ForeignKey('fncs.Actor',
+                                  related_name='receivedmessages_set')
     # the content of the message, :func:`str`
     content = models.CharField(max_length=120)
     # the timestamp :func:`datetime.datetime` of the message
@@ -226,9 +237,10 @@ class Message(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
-        return u"Message from %s to %s at %s" % (self.sender, self.recipient,
-            self.created_at)
+    def __unicode__(self):
+        return u"Message from %s to %s at %s" % (
+            self.sender, self.recipient, self.created_at)
+
 
 class GroupMessage(models.Model):
     """
@@ -249,9 +261,10 @@ class GroupMessage(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
-        return 'GroupMessage from %s to %s groups at %s' % (self.sender,
-            self.farmergroups.count(), self.created_at)
+    def __unicode__(self):
+        return 'GroupMessage from %s to %s groups at %s' % (
+            self.sender, self.farmergroups.count(), self.created_at)
+
 
 class Note(models.Model):
     """
@@ -262,7 +275,8 @@ class Note(models.Model):
     owner = models.ForeignKey('fncs.Actor')
     #: the :class:`magriculture.fncs.models.actors.Actor` who this note is
     #: about
-    about_actor = models.ForeignKey('fncs.Actor', related_name='attachednote_set')
+    about_actor = models.ForeignKey('fncs.Actor',
+                                    related_name='attachednote_set')
     #: the content of the note
     content = models.TextField()
     #: the :func:`datetime.datetime` timestamp
@@ -273,6 +287,6 @@ class Note(models.Model):
         get_latest_by = 'created_at'
         app_label = 'fncs'
 
-    def __unicode__(self): # pragma: no cover
-        return u"Note from %s to %s at %s" % (self.owner, self.about_actor,
-            self.created_at)
+    def __unicode__(self):
+        return u"Note from %s to %s at %s" % (
+            self.owner, self.about_actor, self.created_at)
