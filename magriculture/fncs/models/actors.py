@@ -661,11 +661,16 @@ class Agent(models.Model):
             crop_receipt=crop_receipt, amount=amount, price=price,
             created_at=datetime.now())
 
+        self.send_message_to_farmer(crop_receipt.farmer,
+                                    transaction.as_sms())
+
         # see if we've sold everything we have and then update the
         # reconciled boolean
         if crop_receipt.remaining_inventory() <= 0:
             crop_receipt.reconciled = True
             crop_receipt.save()
+            self.send_message_to_farmer(crop_receipt.farmer,
+                                        crop_receipt.as_sms())
         return transaction
 
     def sales_for(self, farmer):

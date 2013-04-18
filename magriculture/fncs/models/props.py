@@ -92,6 +92,24 @@ class CropReceipt(models.Model):
         sold_inventory = aggregate.get('total_sold') or 0
         return self.amount - sold_inventory
 
+    def as_sms(self):
+        """Return an SMS representation of a crop receipt."""
+        if self.reconciled:
+            fmt_str = ("%(quantity)g %(unit)s(s) of %(crop)s"
+                       " all sold by %(agent)s")
+            remaining = 0.0
+        else:
+            fmt_str = ("%(remaining)g of %(quantity)g %(unit)s(s) of %(crop)s"
+                       " left to be sold by %(agent)s")
+            remaining = self.remaining_inventory()
+        return fmt_str % {
+            "quantity": self.amount,
+            "unit": self.unit,
+            "crop": self.crop,
+            "agent": self.agent,
+            "remaining": remaining,
+        }
+
     def __unicode__(self):  # pragma: no cover
         return u"%s %s %s of %s from %s" % (
             self.remaining_inventory(),
@@ -141,6 +159,21 @@ class Transaction(models.Model):
             crop_receipt__market=market,
             crop_receipt__crop=crop, crop_receipt__unit=unit). \
             values_list('price', flat=True)
+
+    def as_sms(self):
+        """Return an SMS representation of this transaction."""
+        crop_receipt = self.crop_receipt
+        return (
+            "%(agent)s sold %(quantity)g %(unit)s(s) of %(crop)s"
+            " for %(total).2f (%(price).2f per %(unit)s)"
+        ) % {
+            "agent": crop_receipt.agent,
+            "quantity": self.amount,
+            "unit": crop_receipt.unit,
+            "crop": crop_receipt.crop,
+            "price": self.price,
+            "total": self.total,
+        }
 
     def save(self, *args, **kwargs):
         if not self.total:
