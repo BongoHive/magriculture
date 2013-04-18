@@ -66,11 +66,12 @@ class VumiGoSender(SmsSender):
 
 
 class LoggingSender(SmsSender):
-    def __init__(self, logger="magriculture.sms"):
+    def __init__(self, logger="magriculture.sms", level=logging.INFO):
         self._logger = logging.getLogger(logger)
+        self._level = level
 
     def send_sms(self, to_addr, content):
-        self._logger.log("SMS to %r: %r" % (to_addr, content))
+        self._logger.log(self._level, "SMS to %r: %r" % (to_addr, content))
 
 
 def create_sender(sms_config):
