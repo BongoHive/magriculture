@@ -23,5 +23,6 @@ dist/*
 .coverage-results/
 htmlcov/
 coverage-html/
+go-js/node_modules
 **/coverage.xml
 **/nosetests.xml

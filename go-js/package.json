@@ -1,0 +1,31 @@
+{
+  "name": "magriculture-go",
+  "version": "0.0.1",
+  "description": "A Vumi Go USSD application for mAgriculture.",
+  "main": "lib/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "vumigo_v01": "0.1.x"
+  },
+  "devDependencies": {
+    "mocha": "1.7.x",
+    "sinon": "1.6.x"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/praekelt/magriculture"
+  },
+  "keywords": [
+    "magriculture",
+    "ussd",
+    "zambia",
+  ],
+  "author": "Praekelt Foundation <dev@praekeltfoundation.org>",
+  "license": "BSD",
+  "readmeFilename": "README"
+}
