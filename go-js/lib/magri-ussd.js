@@ -468,12 +468,13 @@ function MagriWorker() {
 
             var unit_ids = [];
             for (var unit_id in prices) {
-                units.push(unit_id);
+                unit_ids.push(unit_id);
             }
             unit_ids.sort();
 
             var price_lines = [];
-            for (var unit in unit_ids) {
+            for (var idx in unit_ids) {
+                var unit_id = unit_ids[idx];
                 var unit_info = prices[unit_id];
                 var unit_prices = unit_info.prices;
                 if (unit_prices.length) {

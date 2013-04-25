@@ -86,17 +86,42 @@ describe("test menu worker", function() {
                        "3. Masala$")
         });
     });
-
-    // show_prices
-
-    it("show_prices should to to end", function() {
+    it("select_market should show_prices for selected market", function() {
+        tester.check_state({
+            user: {
+                current_state: "select_market",
+                answers: {
+                    select_crop: "crop1"
+                },
+                custom: {
+                    chosen_markets: [
+                        ["market1", "Kitwe"],
+                        ["market2", "Ndola"]
+                    ],
+                    chosen_crop_name: "Peas"
+                },
+            },
+            content: "1",
+            next_state: "show_prices",
+            response: ("^Prices of Peas in Kitwe:[^]" +
+                       "  boxes: 1.27[^]" +
+                       "  crates: 1.70[^]" +
+                       "Enter 1 for next market, 2 for previous market\.[^]" +
+                       "Enter 3 to exit\.$")
+        });
+    });
+    it.skip("show_prices should move to next market on 1", function() {
+    });
+    it.skip("show_prices should move to previous market on 2", function() {
+    });
+    it("show_prices should move to end on 3", function() {
         tester.check_state({
             user: {
                 current_state: "show_prices",
                 custom: {
                     chosen_markets: [
-                        ["crop0", "Peas"],
-                        ["crop1", "Beans"]
+                        ["market1", "Kitwe"],
+                        ["market2", "Ndola"]
                     ]
                 }
             },
