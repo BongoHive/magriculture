@@ -390,7 +390,11 @@ function MagriWorker() {
         ];
         return new ChoiceState(
             state_name,
-            "select_market",
+            function (choice) {
+                // clear chosen_markets list
+                self.set_user_item(im.user, "chosen_markets", null);
+                return "select_market";
+            },
             _.gettext("Select which markets to view:"),
             choices,
             _.gettext("Please select a list of markets.")
@@ -401,16 +405,24 @@ function MagriWorker() {
         var _ = im.i18n;
         var p;
         var lima_links_api = self.lima_links_api(im);
-        var market_list = im.get_user_answer("select_market_list");
-        if (market_list == "all_markets") {
-            p = lima_links_api.all_markets(10);
-        }
-        else if (market_list == "best_markets") {
-            var crop_id = im.get_user_answer("select_crop");
-            p = lima_links_api.highest_markets(crop_id, 5);
+        var markets = self.get_user_item(im.user, "chosen_markets");
+        if (!markets) {
+            var market_list = im.get_user_answer("select_market_list");
+            if (market_list == "all_markets") {
+                p = lima_links_api.all_markets(10);
+            }
+            else {
+                // if (market_list == "best_markets") {
+                var crop_id = im.get_user_answer("select_crop");
+                p = lima_links_api.highest_markets(crop_id, 5);
+            }
+            p.add_callback(function(markets) {
+                self.set_user_item(im.user, "chosen_markets", markets);
+                return markets;
+            });
         }
         else {
-            p = success([]);
+            p = success(markets);
         }
         p.add_callback(function (markets) {
             var choices = markets.map(function (crop) {
@@ -439,6 +451,7 @@ function MagriWorker() {
 
         var crop_id = im.get_user_answer("select_crop");
         var market_id = im.get_user_answer("select_market");
+        var markets = self.get_user_item(im.user, "chosen_markets");
         var p = lima_links_api.price_history(market_id, crop_id, 5)
 
         p.add_callback(function (prices) {
@@ -447,8 +460,8 @@ function MagriWorker() {
                                          " 2 for previous market.") + "\n"
                              : "")
             var exit = _.gettext("Enter 3 to exit.")
-            var crop_name = im.get_user_item("chosen_crop_name");
-            var market_name = im.get_user_item("chosen_market_name");
+            var crop_name = self.get_user_item(im.user, "chosen_crop_name");
+            var market_name = self.get_user_item(im.user, "chosen_market_name");
 
             var title = _.translate("Prices of %1$s in %2$s:"
                                    ).fetch(crop_name, market_name);

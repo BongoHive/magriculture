@@ -86,8 +86,26 @@ describe("test menu worker", function() {
                        "3. Masala$")
         });
     });
+
     // show_prices
-    // end
+
+    it("show_prices should to to end", function() {
+        tester.check_state({
+            user: {
+                current_state: "show_prices",
+                custom: {
+                    chosen_markets: [
+                        ["crop0", "Peas"],
+                        ["crop1", "Beans"]
+                    ]
+                }
+            },
+            content: "3",
+            next_state: "end",
+            continue_session: false,
+            response: ("^Goodbye!")
+        });
+    });
 });
 
 
