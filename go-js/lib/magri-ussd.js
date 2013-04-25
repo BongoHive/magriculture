@@ -192,7 +192,7 @@ function LimaLinksApi(im, url, opts) {
 
 function MagriWorker() {
     var self = this;
-    StateCreator.call(self, "intro");
+    StateCreator.call(self, "select_service");
 
     var _ = new jed({});
 
@@ -443,7 +443,7 @@ function MagriWorker() {
 
         p.add_callback(function (prices) {
             var next_prev = (markets.length > 1
-                             ? _.gettext("Enter 1 for next market,"
+                             ? _.gettext("Enter 1 for next market," +
                                          " 2 for previous market.") + "\n"
                              : "")
             var exit = _.gettext("Enter 3 to exit.")
@@ -455,7 +455,7 @@ function MagriWorker() {
 
             var unit_ids = [];
             for (var unit_id in prices) {
-                units.push(unit_id;
+                units.push(unit_id);
             }
             unit_ids.sort();
 
@@ -503,7 +503,7 @@ function MagriWorker() {
                     return (content == "1" ||
                             content == "2" ||
                             content == "3");
-                }
+                },
                 _.gettext("Invalid selection.")
             );
         });
