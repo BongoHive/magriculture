@@ -110,6 +110,29 @@ describe("test menu worker", function() {
                        "Enter 3 to exit\.$")
         });
     });
+    it("select_market should explain if selected market has no prices", function() {
+        tester.check_state({
+            user: {
+                current_state: "select_market",
+                answers: {
+                    select_crop: "crop2"
+                },
+                custom: {
+                    chosen_markets: [
+                        ["market1", "Kitwe"],
+                        ["market2", "Ndola"]
+                    ],
+                    chosen_crop_name: "Carrots"
+                },
+            },
+            content: "1",
+            next_state: "show_prices",
+            response: ("^Prices of Carrots in Kitwe:[^]" +
+                       "  No prices available\.[^]" +
+                       "Enter 1 for next market, 2 for previous market\.[^]" +
+                       "Enter 3 to exit\.$")
+        });
+    });
     it("show_prices should move to previous market on 1", function() {
         tester.check_state({
             user: {

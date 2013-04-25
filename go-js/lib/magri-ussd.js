@@ -591,6 +591,9 @@ function MagriWorker() {
                     }
                     price_lines.push("  " + unit_info.unit_name + ": " + avg_text);
                 }
+                if (!price_lines.length) {
+                    price_lines.push("  " + _.gettext("No prices available."));
+                }
 
                 var price_text = price_lines.join("\n");
                 var text = title + "\n" + price_text + "\n" + next_prev + exit;
@@ -618,6 +621,16 @@ function MagriWorker() {
         _.gettext("Goodbye!"),
         "select_service"
     ));
+
+    self.switch_state = function(state_name, im) {
+        if (typeof state_name == "undefined")
+            state_name = self.start_state;
+        if (!self.state_creators[state_name]) {
+            state_name = self.start_state;
+        }
+        var creator = self.state_creators[state_name];
+        return maybe_promise(creator.call(self, state_name, im));
+    };
 }
 
 
