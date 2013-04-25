@@ -29,6 +29,16 @@ describe("test menu worker", function() {
                        "1. Market prices$")
         });
     });
+    it("select_crop should respond", function() {
+        tester.check_state({
+            user: {current_state: "select_crop"},
+            content: null,
+            next_state: "select_crop",
+            response: ("^Select a crop:[^]" +
+                       "1. Peas[^]" +
+                       "2. Carrots$")
+        });
+    });
 });
 
 
