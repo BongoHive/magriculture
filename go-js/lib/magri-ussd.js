@@ -84,6 +84,14 @@ function DummyLimaLinksApi(im) {
                     prices: [1.6, 1.7, 1.8]
                 }
             }
+        },
+        "market2": {
+            "crop1": {
+                "unit1": {
+                    unit_name: "boxes",
+                    prices: []
+                }
+            }
         }
     };
 
@@ -186,6 +194,92 @@ function LimaLinksApi(im, url, opts) {
         return self.api_call("markets", {
             limit: limit
         });
+    };
+}
+
+
+function BookletState(name, opts) {
+
+    var self = this;
+    opts = opts || {};
+    State.call(self, name, opts.handlers);
+
+    self.next = opts.next;
+    self.pages = opts.pages; // pages are from 0 -> pages - 1
+    self.page_changed = opts.page_changed; // page_changed(self) -> promise
+
+    self.initial_page = opts.initial_page || 0;
+    self.buttons = opts.buttons || {"1": -1, "2": +1, "3": "exit"};
+    self.footer_text = opts.footer_text || "1 for prev, 2 for next, 3 to end.";
+
+    self.page_text = "No page."
+
+    var orig_on_enter = self.on_enter;
+    self.on_enter = function() {
+        self.set_current_page(self.im.user, self.initial_page);
+        return orig_on_enter();
+    };
+
+    self.get_current_page = function(user) {
+        var pages = user.pages || {};
+        return pages[self.name] || 0;
+    };
+
+    self.set_current_page = function(user, page) {
+        if (typeof user.pages == 'undefined') {
+            user.pages = {};
+        }
+        user.pages[self.name] = page;
+    };
+
+    self.inc_current_page = function(user, amount) {
+        var page = self.get_current_page(user) + amount;
+        page = page % self.pages;
+        if (page < 0) {
+            page += self.pages;
+        }
+        self.set_current_page(user, page);
+    };
+
+    self.set_page_text = function(text) {
+        self.page_text = text;
+    };
+
+    self.input_event = function(content, done) {
+        if (!content) { content = ""; }
+        content = content.trim();
+
+        var button = self.buttons[content];
+        if (typeof button === "undefined") {
+            done();
+            return;
+        }
+
+        var amount = Number(button);
+        if (!Number.isNaN(amount)) {
+            self.inc_current_page(self.im.user, amount);
+            var p = self.page_changed(self);
+            p.add_callback(done);
+            return;
+        }
+
+        if (button !== "exit") {
+            done();
+            return;
+        }
+
+        self.call_possible_function(
+            self.next, self, [content],
+            function (next) {
+                self.im.set_user_state(next);
+                self.save_response(content);
+                done();
+            }
+        );
+    };
+
+    self.display = function() {
+        return self.page_text;
     };
 }
 
@@ -433,8 +527,14 @@ function MagriWorker() {
             return new ChoiceState(
                 state_name,
                 function (choice) {
-                    self.set_user_item(im.user, "chosen_market_name",
-                                       choice.label);
+                    var market_idxs = [];
+                    markets.forEach(function (elem, i) {
+                        if (elem[0] == choice.value) {
+                            market_idxs.push(i);
+                        }
+                    });
+                    self.set_user_item(im.user, "chosen_market_idx",
+                                       market_idxs[0]);
                     return "show_prices";
                 },
                 _.gettext("Select a market:"),
@@ -450,77 +550,66 @@ function MagriWorker() {
         var lima_links_api = self.lima_links_api(im);
 
         var crop_id = im.get_user_answer("select_crop");
-        var market_id = im.get_user_answer("select_market");
+        var crop_name = self.get_user_item(im.user, "chosen_crop_name");
+
+        var initial_market_idx = self.get_user_item(im.user, "chosen_market_idx");
         var markets = self.get_user_item(im.user, "chosen_markets");
-        var p = lima_links_api.price_history(market_id, crop_id, 5)
 
-        p.add_callback(function (prices) {
-            var next_prev = (markets.length > 1
-                             ? _.gettext("Enter 1 for next market," +
-                                         " 2 for previous market.") + "\n"
-                             : "")
-            var exit = _.gettext("Enter 3 to exit.")
-            var crop_name = self.get_user_item(im.user, "chosen_crop_name");
-            var market_name = self.get_user_item(im.user, "chosen_market_name");
+        var next_prev = (markets.length > 1
+                         ? _.gettext("Enter 1 for next market," +
+                                     " 2 for previous market.") + "\n"
+                         : "");
+        var exit = _.gettext("Enter 3 to exit.");
+        var footer_text = next_prev + exit;
 
-            var title = _.translate("Prices of %1$s in %2$s:"
-                                   ).fetch(crop_name, market_name);
-
-            var unit_ids = [];
-            for (var unit_id in prices) {
-                unit_ids.push(unit_id);
-            }
-            unit_ids.sort();
-
-            var price_lines = [];
-            for (var idx in unit_ids) {
-                var unit_id = unit_ids[idx];
-                var unit_info = prices[unit_id];
-                var unit_prices = unit_info.prices;
-                if (unit_prices.length) {
-                    var sum = unit_prices.reduce(function (x, y) {
-                        return x + y; });
-                    var avg_text = (sum / unit_prices.length).toFixed(2);
+        function page_changed(bookelt) {
+            var page = booklet.get_current_page(im.user);
+            var market_id = markets[page][0];
+            var market_name = markets[page][1];
+            var p = lima_links_api.price_history(market_id, crop_id, 5)
+            p.add_callback(function(prices) {
+                var title = _.translate("Prices of %1$s in %2$s:"
+                                       ).fetch(crop_name, market_name);
+                var unit_ids = [];
+                for (var unit_id in prices) {
+                    unit_ids.push(unit_id);
                 }
-                else {
-                    var avg_text = "-";
+                unit_ids.sort();
+
+                var price_lines = [];
+                for (var idx in unit_ids) {
+                    var unit_id = unit_ids[idx];
+                    var unit_info = prices[unit_id];
+                    var unit_prices = unit_info.prices;
+                    if (unit_prices.length) {
+                        var sum = unit_prices.reduce(function (x, y) {
+                            return x + y; });
+                        var avg_text = (sum / unit_prices.length).toFixed(2);
+                    }
+                    else {
+                        var avg_text = "-";
+                    }
+                    price_lines.push("  " + unit_info.unit_name + ": " + avg_text);
                 }
-                price_lines.push("  " + unit_info.unit_name + ": " + avg_text);
-            }
 
-            var price_text = price_lines.join("\n");
-            var text = title + "\n" + price_text + "\n" + next_prev + exit;
+                var price_text = price_lines.join("\n");
+                var text = title + "\n" + price_text + "\n" + next_prev + exit;
+                booklet.set_page_text(text);
+            });
+            return p;
+        }
 
-            return new FreeText(
-                state_name,
-                function (content) {
-                    if (content == "1") {
-                        // TODO:
-                        //self.selected_market -= 1
-                        //if self.selected_market < 0:
-                        //    self.selected_market = len(self.markets) - 1
-                        return "show_prices";
-                    }
-                    if (content == "2") {
-                        // TODO:
-                        // self.selected_market += 1
-                        // if self.selected_market >= len(self.markets):
-                        //    self.selected_market = 0
-                        return "show_prices";
-                    }
-                    if (content == "3") {
-                        return "end";
-                    }
-                },
-                text,
-                function (content) {
-                    return (content == "1" ||
-                            content == "2" ||
-                            content == "3");
-                },
-                _.gettext("Invalid selection.")
-            );
+        var booklet = new BookletState(state_name, {
+            next: "end",
+            pages: markets.length,
+            page_changed: page_changed,
+            initial_page: initial_market_idx,
+            buttons: {"1": -1, "2": +1, "3": "exit"},
+            footer_text: footer_text
         });
+
+        var p = page_changed(booklet);
+        p.add_callback(function () { return booklet; });
         return p;
     });
 
