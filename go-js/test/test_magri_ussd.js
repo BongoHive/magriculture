@@ -39,13 +39,14 @@ describe("test menu worker", function() {
                        "2. Carrots$")
         });
     });
-    it("select_market_list", function() {
+    it("select_market_list should respond", function() {
         tester.check_state({
-            user: {current_state: "select_market_list",
-                   custom: {
-                       chosen_crop_name: "Peas"
-                   }
-                  },
+            user: {
+                current_state: "select_market_list",
+                custom: {
+                    chosen_crop_name: "Peas"
+                }
+            },
             content: null,
             next_state: "select_market_list",
             response: ("^Select which markets to view:[^]" +
@@ -53,6 +54,40 @@ describe("test menu worker", function() {
                        "2. Best markets for Peas$")
         });
     });
+    it("select_market should respond (best_markets)", function() {
+        tester.check_state({
+            user: {
+                current_state: "select_market",
+                answers: {
+                    select_crop: "crop1",
+                    select_market_list: "best_markets"
+                }
+            },
+            content: null,
+            next_state: "select_market",
+            response: ("^Select a market:[^]" +
+                       "1. Kitwe[^]" +
+                       "2. Ndola$")
+        });
+    });
+    it("select_market should respond (all_markets)", function() {
+        tester.check_state({
+            user: {
+                current_state: "select_market",
+                answers: {
+                    select_market_list: "all_markets"
+                }
+            },
+            content: null,
+            next_state: "select_market",
+            response: ("^Select a market:[^]" +
+                       "1. Kitwe[^]" +
+                       "2. Ndola[^]" +
+                       "3. Masala$")
+        });
+    });
+    // show_prices
+    // end
 });
 
 

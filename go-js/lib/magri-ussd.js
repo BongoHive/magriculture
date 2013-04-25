@@ -410,7 +410,7 @@ function MagriWorker() {
             p = lima_links_api.highest_markets(crop_id, 5);
         }
         else {
-            p = succeed([]);
+            p = success([]);
         }
         p.add_callback(function (markets) {
             var choices = markets.map(function (crop) {
