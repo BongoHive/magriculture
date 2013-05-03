@@ -351,11 +351,11 @@ function MagriWorker() {
         return p;
     };
 
-    self.add_summary_item = function(user, section, item, value) {
+    self.add_summary_item = function(user, section_name, item, value) {
         var summary = self.get_user_item(user, 'summary', {});
-        var section = summary[section] || {};
+        var section = summary[section_name] || {};
         section[item] = value;
-        summary[section] = section;
+        summary[section_name] = section;
         self.set_user_item(user, 'summary', summary);
     };
 

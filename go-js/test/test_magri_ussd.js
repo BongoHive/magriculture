@@ -11,6 +11,13 @@ describe("test menu worker", function() {
         max_response_length: 160
     });
 
+    var assert_summary_equal = function(summary) {
+        function teardown(api, saved_user) {
+            assert.deepEqual(saved_user.custom.summary, summary);
+        };
+        return teardown;
+    };
+
     it("new users should see the select_service state", function () {
         tester.check_state({
             user: null,
@@ -107,7 +114,11 @@ describe("test menu worker", function() {
                        "  boxes: 1.27[^]" +
                        "  crates: 1.70[^]" +
                        "Enter 1 for next market, 2 for previous market\.[^]" +
-                       "Enter 3 to exit\.$")
+                       "Enter 3 to exit\.$"),
+            teardown: assert_summary_equal({
+                "Peas, boxes": { "Kitwe": "1.27" },
+                "Peas, crates": { "Kitwe": "1.70" }
+            })
         });
     });
     it("select_market should explain if selected market has no prices", function() {
@@ -130,7 +141,8 @@ describe("test menu worker", function() {
             response: ("^Prices of Carrots in Kitwe:[^]" +
                        "  No prices available\.[^]" +
                        "Enter 1 for next market, 2 for previous market\.[^]" +
-                       "Enter 3 to exit\.$")
+                       "Enter 3 to exit\.$"),
+            teardown: assert_summary_equal(undefined)
         });
     });
     it("show_prices should move to previous market on 1", function() {
