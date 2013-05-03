@@ -207,6 +207,89 @@ describe("test menu worker", function() {
             response: ("^Goodbye!")
         });
     });
-    it.skip("should sms prices selected", function () {
+});
+
+describe("test sms sending", function() {
+    var tester = new test_utils.ImTester(app.api, {
+        max_response_length: 160,
+        custom_setup: function (api) {
+            api.config_store.config = JSON.stringify({
+                sms_tag: ["pool", "tag123"]
+            });
+        },
+        custom_teardown: function (api) {
+            assert.ok(api.outbound_sends.every(
+                function (send) {
+                    return (send.tagpool == "pool" &&
+                            send.tag == "tag123" &&
+                            send.to_addr == "1234567");
+                }
+            ));
+        }
+    });
+
+    var assert_single_sms = function(content) {
+        var teardown = function(api) {
+            var sms = api.outbound_sends[0];
+            assert.equal(api.outbound_sends.length, 1);
+            assert.equal(sms.content, content);
+        };
+        return teardown;
+    };
+
+    var assert_no_sms = function() {
+        var teardown = function(api) {
+            assert.equal(api.outbound_sends.length, 0);
+        };
+        return teardown;
+    };
+
+    var get_user = function() {
+        return {
+            current_state: "show_prices",
+            custom: {
+                chosen_markets: [
+                    ["market1", "Kitwe"],
+                    ["market2", "Ndola"]
+                ],
+                chosen_market_idx: 0,
+                chosen_crop_name: "Peas"
+            }
+        };
+    };
+
+    it("should not sms summary if no prices present", function () {
+        tester.check_state({
+            user: get_user(),
+            content: "3",
+            next_state: "end",
+            continue_session: false,
+            response: ("^Goodbye!"),
+            teardown: assert_no_sms()
+        });
+    });
+
+    it("should sms summary if prices present", function () {
+        var user = get_user();
+        user.custom.summary = {
+            "Peas, boxes": {
+                "Kitwe": "15000",
+                "Ndola": "15500",
+            },
+            "Peas, crates": {
+                "Kitwe": "16000",
+            }
+        };
+        tester.check_state({
+            user: user,
+            content: "3",
+            next_state: "end",
+            continue_session: false,
+            response: ("^Goodbye!"),
+            teardown: assert_single_sms(
+                "Peas, boxes: Ndola K15500, Kitwe K15000\n" +
+                "Peas, crates: Kitwe K16000"
+            )
+        });
     });
 });
