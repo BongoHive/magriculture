@@ -351,9 +351,41 @@ function MagriWorker() {
         return p;
     };
 
-    self.send_sms_prices = function(im) {
-        var _ = im.i18n;
-        var msg = _.gettext("TODO:");
+    self.add_summary_item = function(user, section, item, value) {
+        var summary = self.get_user_item(user, 'summary', {});
+        var section = summary[section] || {};
+        section[item] = value;
+        summary[section] = section;
+        self.set_user_item(user, 'summary', summary);
+    };
+
+    self.sorted_keys = function(obj, cmp) {
+        var keys = [];
+        for (var k in obj) {
+            keys.push(k);
+        };
+        keys.sort(cmp);
+        return keys;
+    };
+
+    self.sms_session_summary = function(im) {
+        var summary = self.get_user_item(im.user, 'summary', {});
+        var section_names = self.sorted_keys(summary);
+        if (section_names.length === 0) {
+            return success(false);
+        };
+        var lines = [];
+        for (var k in section_names) {
+            var section_name = section_names[k];
+            var section = summary[section_name];
+            var item_names = self.sorted_keys(section, function (i1, i2) {
+                return section[i2] - section[i1];
+            });
+            var items = item_names.slice(0, 3).map(function (item_name) {
+                return item_name + " K" + section[item_name]; })
+            lines.push(section_name + ": " + items.join(", "));
+        };
+        var msg = lines.join("\n");
         return self.send_sms(im, msg);
     };
 
@@ -585,6 +617,8 @@ function MagriWorker() {
                         var sum = unit_prices.reduce(function (x, y) {
                             return x + y; });
                         var avg_text = (sum / unit_prices.length).toFixed(2);
+                        self.add_summary_item(im.user, crop_name + ", " + unit_info.unit_name,
+                                              market_name, avg_text);
                     }
                     else {
                         var avg_text = "-";
@@ -619,7 +653,14 @@ function MagriWorker() {
     self.add_state(new EndState(
         "end",
         _.gettext("Goodbye!"),
-        "select_service"
+        "select_service",
+        {
+            on_enter: function() {
+                var im = this.im;
+                var p = self.sms_session_summary(im);
+                return p;
+            }
+        }
     ));
 
     self.switch_state = function(state_name, im) {
