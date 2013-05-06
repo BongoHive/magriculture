@@ -463,6 +463,15 @@ function MagriWorker() {
         var lima_links_api = self.lima_links_api(im);
         var p = lima_links_api.get_farmer(im.user_addr);
         p.add_callback(function (farmer) {
+            if (farmer === null) {
+                return new EndState(
+                    state_name,
+                    _.gettext("You are not registered. Please register" +
+                              " your phone with a market agent."),
+                    "select_service"
+                );
+            }
+
             var choices = [
                 new Choice("select_crop", _.gettext("Market prices"))
             ];
