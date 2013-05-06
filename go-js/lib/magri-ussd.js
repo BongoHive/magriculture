@@ -50,6 +50,7 @@ var FreeText = vumigo.states.FreeText;
 var EndState = vumigo.states.EndState;
 var InteractionMachine = vumigo.state_machine.InteractionMachine;
 var StateCreator = vumigo.state_machine.StateCreator;
+var JsonApi = vumigo.http_api.JsonApi;
 
 
 function DummyLimaLinksApi(im) {
