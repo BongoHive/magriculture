@@ -12,3 +12,4 @@ requests
 Sphinx
 django-sentry
 ngram
+raven>=2.0,<3.0
