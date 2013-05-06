@@ -4,7 +4,7 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.conf import settings
-from django.core.exceptions import DoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 from magriculture.fncs.models.actors import Actor
 from magriculture.fncs.models.props import Transaction, Crop
 from magriculture.fncs.models.geo import Market
@@ -29,7 +29,7 @@ def get_farmer(request):
     # farmers for the same actor.
     try:
         farmer = Actor.find(msisdn).as_farmer()
-    except DoesNotExist:
+    except ObjectDoesNotExist:
         return HttpResponse(json.dumps({"status": "No farmer found."}),
                             status=404)
     crops = [(crop.pk, crop.name) for crop in farmer.crops.all()]
