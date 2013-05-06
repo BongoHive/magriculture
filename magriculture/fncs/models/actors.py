@@ -784,6 +784,9 @@ class FarmerBusinessAdvisor(models.Model):
             FBAdvisorRelationShip.objects.create(fba=self, farmer=farmer)
             return True
 
+    def __unicode__(self):
+        return self.actor.name
+
 
 class FBAdvisorRelationShip(models.Model):
     fba = models.ForeignKey('fncs.FarmerBusinessAdvisor')
