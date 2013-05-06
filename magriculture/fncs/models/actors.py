@@ -82,6 +82,9 @@ class Identity(models.Model):
     def check_pin(self, pin):
         return check_password(pin, self.pin)
 
+    def __unicode__(self):
+        return u"%s (Identity)" % self.actor.name
+
 
 class Actor(models.Model):
     """
@@ -783,6 +786,9 @@ class FarmerBusinessAdvisor(models.Model):
         else:
             FBAdvisorRelationShip.objects.create(fba=self, farmer=farmer)
             return True
+
+    def __unicode__(self):
+        return self.actor.name
 
 
 class FBAdvisorRelationShip(models.Model):
