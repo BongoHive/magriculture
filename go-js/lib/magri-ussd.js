@@ -160,7 +160,7 @@ function LimaLinksApi(im, url, opts) {
     var self = this;
 
     self.url = url;
-    self.json_api = JsonApi(im, opts);
+    self.json_api = new JsonApi(im, opts);
 
     // in case we need to translate content from the API later
     self.lang = im.user.lang || im.config.default_lang || "en";
