@@ -23,6 +23,7 @@ admin.site.register(actors.Agent, AgentAdmin)
 admin.site.register(actors.FarmerGroup)
 admin.site.register(actors.ExtensionOfficer)
 admin.site.register(actors.MarketMonitor)
+admin.site.register(actors.FarmerBusinessAdvisor)
 
 admin.site.register(props.Crop)
 admin.site.register(props.CropUnit)
