@@ -24,13 +24,16 @@ def strip_in_country_codes(msisdn):
 
 def get_farmer(request):
     msisdn = request.GET.get('msisdn')
+    if msisdn is None:
+        return HttpResponse(json.dumps({"reason": "No msisdn given."}),
+                            status=400)
     msisdn = strip_in_country_codes(msisdn)
     # Something's wrong with our db, we've got multiple
     # farmers for the same actor.
     try:
         farmer = Actor.find(msisdn).as_farmer()
     except ObjectDoesNotExist:
-        return HttpResponse(json.dumps({"status": "No farmer found."}),
+        return HttpResponse(json.dumps({"reason": "No farmer found."}),
                             status=404)
     crops = [(crop.pk, crop.name) for crop in farmer.crops.all()]
     markets = [(market.pk, market.name) for market in farmer.markets.all()]
