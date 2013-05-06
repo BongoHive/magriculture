@@ -2,9 +2,10 @@
 
 import json
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, get_list_or_404
+from django.shortcuts import get_object_or_404
 from django.conf import settings
-from magriculture.fncs.models.actors import Actor, Farmer
+from django.core.exceptions import DoesNotExist
+from magriculture.fncs.models.actors import Actor
 from magriculture.fncs.models.props import Transaction, Crop
 from magriculture.fncs.models.geo import Market
 
@@ -26,14 +27,18 @@ def get_farmer(request):
     msisdn = strip_in_country_codes(msisdn)
     # Something's wrong with our db, we've got multiple
     # farmers for the same actor.
-    farmer = Actor.find(msisdn).as_farmer()
+    try:
+        farmer = Actor.find(msisdn).as_farmer()
+    except DoesNotExist:
+        return HttpResponse(json.dumps({"status": "No farmer found."}),
+                            status=404)
     crops = [(crop.pk, crop.name) for crop in farmer.crops.all()]
     markets = [(market.pk, market.name) for market in farmer.markets.all()]
     farmer_data = {
         "farmer_name": farmer.actor.name,
         "crops": crops,
         "markets": markets,
-        }
+    }
     return HttpResponse(json.dumps(farmer_data))
 
 
@@ -51,7 +56,7 @@ def get_price_history(request):
             prices[unit.pk] = {
                 "unit_name": unit.name,
                 "prices": unit_prices,
-                }
+            }
     return HttpResponse(json.dumps(prices))
 
 
