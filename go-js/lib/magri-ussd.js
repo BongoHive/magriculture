@@ -390,6 +390,13 @@ function MagriWorker() {
         return self.send_sms(im, msg);
     };
 
+    self.send_sms_first_possible_timeout = function(im) {
+        var _ = im.i18n;
+        var msg = _.gettext("Your Lima Links USSD session timed out." +
+                            " Dial *739*739# to resume.");
+        return self.send_sms(im, msg);
+    };
+
     // Session handling
 
     self.get_user_item = function(user, item, default_value) {
