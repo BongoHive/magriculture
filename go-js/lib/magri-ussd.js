@@ -352,6 +352,10 @@ function MagriWorker() {
         self.set_user_item(user, 'summary', summary);
     };
 
+    self.clear_summary = function(user) {
+        self.set_user_item(user, 'summary', {});
+    };
+
     self.sorted_keys = function(obj, cmp) {
         var keys = [];
         for (var k in obj) {
@@ -379,6 +383,7 @@ function MagriWorker() {
             lines.push(section_name + ": " + items.join(", "));
         }
         var msg = lines.join("\n");
+        self.clear_summary(im.user);
         return self.send_sms(im, msg);
     };
 
