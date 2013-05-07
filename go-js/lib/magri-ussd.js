@@ -291,14 +291,6 @@ function MagriWorker() {
 
     var _ = new jed({});
 
-    // only allow printable ASCII x20 (space) to x73 (tilde)
-    self.non_printable_ascii_re = /[^\x20-\x7E]/g;
-
-    self.clean_text = function(title) {
-        // replace non-ASCII characters with ?
-        return title.replace(self.non_printable_ascii_re, '?');
-    };
-
     self.lima_links_api = function(im) {
         var cfg = im.config.lima_links_api;
         if (!cfg) {
