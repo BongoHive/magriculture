@@ -210,8 +210,8 @@ function BookletState(name, opts) {
     self.page_changed = opts.page_changed; // page_changed(self) -> promise
 
     self.initial_page = opts.initial_page || 0;
-    self.buttons = opts.buttons || {"1": -1, "2": +1, "3": "exit"};
-    self.footer_text = opts.footer_text || "1 for prev, 2 for next, 3 to end.";
+    self.buttons = opts.buttons || {"1": -1, "2": +1, "0": "exit"};
+    self.footer_text = opts.footer_text || "1 for prev, 2 for next, 0 to end.";
 
     self.page_text = "No page.";
 
@@ -608,7 +608,7 @@ function MagriWorker() {
                          _.gettext("Enter 1 for next market," +
                                      " 2 for previous market.") + "\n"
                          : "");
-        var exit = _.gettext("Enter 3 to exit.");
+        var exit = _.gettext("Enter 0 to exit.");
         var footer_text = next_prev + exit;
 
         function page_changed(booklet) {
@@ -660,7 +660,7 @@ function MagriWorker() {
             pages: markets.length,
             page_changed: page_changed,
             initial_page: initial_market_idx,
-            buttons: {"1": -1, "2": +1, "3": "exit"},
+            buttons: {"1": -1, "2": +1, "0": "exit"},
             footer_text: footer_text
         });
 

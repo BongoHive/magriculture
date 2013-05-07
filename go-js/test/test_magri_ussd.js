@@ -114,7 +114,7 @@ describe("test menu worker", function() {
                        "  boxes: 1.27[^]" +
                        "  crates: 1.70[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 3 to exit\\.$"),
+                       "Enter 0 to exit\\.$"),
             teardown: assert_summary_equal({
                 "Peas, boxes": { "Kitwe": "1.27" },
                 "Peas, crates": { "Kitwe": "1.70" }
@@ -141,7 +141,7 @@ describe("test menu worker", function() {
             response: ("^Prices of Carrots in Kitwe:[^]" +
                        "  No prices available\\.[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 3 to exit\\.$"),
+                       "Enter 0 to exit\\.$"),
             teardown: assert_summary_equal(undefined)
         });
     });
@@ -169,7 +169,7 @@ describe("test menu worker", function() {
             response: ("^Prices of Peas in Ndola:[^]" +
                        "  boxes: -[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 3 to exit\\.$")
+                       "Enter 0 to exit\\.$")
         });
     });
     it("show_prices should move to next market on 2", function() {
@@ -197,10 +197,10 @@ describe("test menu worker", function() {
                        "  boxes: 1.27[^]" +
                        "  crates: 1.70[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 3 to exit\\.$")
+                       "Enter 0 to exit\\.$")
         });
     });
-    it("show_prices should move to end on 3", function() {
+    it("show_prices should move to end on 0", function() {
         tester.check_state({
             user: {
                 current_state: "show_prices",
@@ -213,7 +213,7 @@ describe("test menu worker", function() {
                     chosen_crop_name: "Peas"
                }
             },
-            content: "3",
+            content: "0",
             next_state: "end",
             continue_session: false,
             response: ("^Goodbye!")
@@ -273,7 +273,7 @@ describe("test sms sending", function() {
     it("should not sms summary if no prices present", function () {
         tester.check_state({
             user: get_user(),
-            content: "3",
+            content: "0",
             next_state: "end",
             continue_session: false,
             response: ("^Goodbye!"),
@@ -294,7 +294,7 @@ describe("test sms sending", function() {
         };
         tester.check_state({
             user: user,
-            content: "3",
+            content: "0",
             next_state: "end",
             continue_session: false,
             response: ("^Goodbye!"),
