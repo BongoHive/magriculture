@@ -435,7 +435,7 @@ function MagriWorker() {
             });
             var timeouts = self.inc_user_item(event.im.user,
                                               'possible_timeouts');
-            if (timeouts <= 1) {
+            if (timeouts == 1) {
                 p.add_callback(function () {
                     self.send_sms_first_possible_timeout(event.im);
                 });
