@@ -611,7 +611,7 @@ function MagriWorker() {
         var exit = _.gettext("Enter 3 to exit.");
         var footer_text = next_prev + exit;
 
-        function page_changed(bookelt) {
+        function page_changed(booklet) {
             var page = booklet.get_current_page(im.user);
             var market_id = markets[page][0];
             var market_name = markets[page][1];
