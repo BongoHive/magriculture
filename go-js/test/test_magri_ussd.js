@@ -14,7 +14,7 @@ describe("test menu worker", function() {
     var assert_summary_equal = function(summary) {
         function teardown(api, saved_user) {
             assert.deepEqual(saved_user.custom.summary, summary);
-        };
+        }
         return teardown;
     };
 
@@ -106,15 +106,15 @@ describe("test menu worker", function() {
                         ["market2", "Ndola"]
                     ],
                     chosen_crop_name: "Peas"
-                },
+                }
             },
             content: "1",
             next_state: "show_prices",
             response: ("^Prices of Peas in Kitwe:[^]" +
                        "  boxes: 1.27[^]" +
                        "  crates: 1.70[^]" +
-                       "Enter 1 for next market, 2 for previous market\.[^]" +
-                       "Enter 3 to exit\.$"),
+                       "Enter 1 for next market, 2 for previous market\\.[^]" +
+                       "Enter 3 to exit\\.$"),
             teardown: assert_summary_equal({
                 "Peas, boxes": { "Kitwe": "1.27" },
                 "Peas, crates": { "Kitwe": "1.70" }
@@ -134,14 +134,14 @@ describe("test menu worker", function() {
                         ["market2", "Ndola"]
                     ],
                     chosen_crop_name: "Carrots"
-                },
+                }
             },
             content: "1",
             next_state: "show_prices",
             response: ("^Prices of Carrots in Kitwe:[^]" +
-                       "  No prices available\.[^]" +
-                       "Enter 1 for next market, 2 for previous market\.[^]" +
-                       "Enter 3 to exit\.$"),
+                       "  No prices available\\.[^]" +
+                       "Enter 1 for next market, 2 for previous market\\.[^]" +
+                       "Enter 3 to exit\\.$"),
             teardown: assert_summary_equal(undefined)
         });
     });
@@ -168,8 +168,8 @@ describe("test menu worker", function() {
             next_state: "show_prices",
             response: ("^Prices of Peas in Ndola:[^]" +
                        "  boxes: -[^]" +
-                       "Enter 1 for next market, 2 for previous market\.[^]" +
-                       "Enter 3 to exit\.$")
+                       "Enter 1 for next market, 2 for previous market\\.[^]" +
+                       "Enter 3 to exit\\.$")
         });
     });
     it("show_prices should move to next market on 2", function() {
@@ -196,8 +196,8 @@ describe("test menu worker", function() {
             response: ("^Prices of Peas in Kitwe:[^]" +
                        "  boxes: 1.27[^]" +
                        "  crates: 1.70[^]" +
-                       "Enter 1 for next market, 2 for previous market\.[^]" +
-                       "Enter 3 to exit\.$")
+                       "Enter 1 for next market, 2 for previous market\\.[^]" +
+                       "Enter 3 to exit\\.$")
         });
     });
     it("show_prices should move to end on 3", function() {
@@ -286,10 +286,10 @@ describe("test sms sending", function() {
         user.custom.summary = {
             "Peas, boxes": {
                 "Kitwe": "15000",
-                "Ndola": "15500",
+                "Ndola": "15500"
             },
             "Peas, crates": {
-                "Kitwe": "16000",
+                "Kitwe": "16000"
             }
         };
         tester.check_state({

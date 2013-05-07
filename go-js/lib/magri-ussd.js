@@ -69,8 +69,8 @@ function DummyLimaLinksApi(im) {
             markets: [
                 ["market1", "Kitwe"],
                 ["market2", "Ndola"]
-            ],
-        },
+            ]
+        }
     };
 
     self.PRICES = {
@@ -99,17 +99,17 @@ function DummyLimaLinksApi(im) {
     self.HIGHEST_MARKETS = {
         "crop1": [
             ["market1", "Kitwe"],
-            ["market2", "Ndola"],
+            ["market2", "Ndola"]
         ],
         "crop2": [
-            ["market2", "Ndola"],
-        ],
+            ["market2", "Ndola"]
+        ]
     };
 
     self.ALL_MARKETS = [
         ["market1", "Kitwe"],
         ["market2", "Ndola"],
-        ["market3", "Masala"],
+        ["market3", "Masala"]
     ];
 
     self.get_farmer = function(msisdn) {
@@ -121,7 +121,7 @@ function DummyLimaLinksApi(im) {
 
     self.price_history = function(market_id, crop_id, limit) {
         var p = new Promise();
-        var limit = limit || 10;
+        limit = limit || 10;
 
         var market = self.PRICES[market_id] || {};
         var crop = market[crop_id] || {};
@@ -130,7 +130,7 @@ function DummyLimaLinksApi(im) {
         for (var unit in crop) {
             price_data[unit] = {
                 unit_name: crop[unit].unit_name,
-                prices: crop[unit].prices,
+                prices: crop[unit].prices
             };
         }
         p.callback(price_data);
@@ -139,7 +139,7 @@ function DummyLimaLinksApi(im) {
 
     self.highest_markets = function(crop_id, limit) {
         var p = new Promise();
-        var limit = limit || 10;
+        limit = limit || 10;
         var markets = self.HIGHEST_MARKETS[crop_id] || [];
         p.callback(markets.slice(0, limit));
         return p;
@@ -147,7 +147,7 @@ function DummyLimaLinksApi(im) {
 
     self.all_markets = function(limit) {
         var p = new Promise();
-        var limit = limit || 10;
+        limit = limit || 10;
         var markets = self.ALL_MARKETS;
         p.callback(markets.slice(0, limit));
         return p;
@@ -213,7 +213,7 @@ function BookletState(name, opts) {
     self.buttons = opts.buttons || {"1": -1, "2": +1, "3": "exit"};
     self.footer_text = opts.footer_text || "1 for prev, 2 for next, 3 to end.";
 
-    self.page_text = "No page."
+    self.page_text = "No page.";
 
     var orig_on_enter = self.on_enter;
     self.on_enter = function() {
@@ -333,7 +333,7 @@ function MagriWorker() {
                 }
             });
         return p;
-    }
+    };
 
     // SMSes
 
@@ -364,7 +364,7 @@ function MagriWorker() {
         var keys = [];
         for (var k in obj) {
             keys.push(k);
-        };
+        }
         keys.sort(cmp);
         return keys;
     };
@@ -374,7 +374,7 @@ function MagriWorker() {
         var section_names = self.sorted_keys(summary);
         if (section_names.length === 0) {
             return success(false);
-        };
+        }
         var lines = [];
         for (var k in section_names) {
             var section_name = section_names[k];
@@ -383,9 +383,9 @@ function MagriWorker() {
                 return section[i2] - section[i1];
             });
             var items = item_names.slice(0, 3).map(function (item_name) {
-                return item_name + " K" + section[item_name]; })
+                return item_name + " K" + section[item_name]; });
             lines.push(section_name + ": " + items.join(", "));
-        };
+        }
         var msg = lines.join("\n");
         return self.send_sms(im, msg);
     };
@@ -604,8 +604,8 @@ function MagriWorker() {
         var initial_market_idx = self.get_user_item(im.user, "chosen_market_idx");
         var markets = self.get_user_item(im.user, "chosen_markets");
 
-        var next_prev = (markets.length > 1
-                         ? _.gettext("Enter 1 for next market," +
+        var next_prev = (markets.length > 1 ?
+                         _.gettext("Enter 1 for next market," +
                                      " 2 for previous market.") + "\n"
                          : "");
         var exit = _.gettext("Enter 3 to exit.");
@@ -615,30 +615,32 @@ function MagriWorker() {
             var page = booklet.get_current_page(im.user);
             var market_id = markets[page][0];
             var market_name = markets[page][1];
-            var p = lima_links_api.price_history(market_id, crop_id, 5)
+            var p = lima_links_api.price_history(market_id, crop_id, 5);
             p.add_callback(function(prices) {
                 var title = _.translate("Prices of %1$s in %2$s:"
                                        ).fetch(crop_name, market_name);
                 var unit_ids = [];
-                for (var unit_id in prices) {
+                var unit_id;
+                for (unit_id in prices) {
                     unit_ids.push(unit_id);
                 }
                 unit_ids.sort();
 
                 var price_lines = [];
                 for (var idx in unit_ids) {
-                    var unit_id = unit_ids[idx];
+                    unit_id = unit_ids[idx];
                     var unit_info = prices[unit_id];
                     var unit_prices = unit_info.prices;
+                    var avg_text;
                     if (unit_prices.length) {
                         var sum = unit_prices.reduce(function (x, y) {
                             return x + y; });
-                        var avg_text = (sum / unit_prices.length).toFixed(2);
+                        avg_text = (sum / unit_prices.length).toFixed(2);
                         self.add_summary_item(im.user, crop_name + ", " + unit_info.unit_name,
                                               market_name, avg_text);
                     }
                     else {
-                        var avg_text = "-";
+                        avg_text = "-";
                     }
                     price_lines.push("  " + unit_info.unit_name + ": " + avg_text);
                 }
