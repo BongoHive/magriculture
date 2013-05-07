@@ -603,8 +603,8 @@ function MagriWorker() {
         var exit = _.gettext("Enter 0 to exit.");
         var footer_text = next_prev + exit;
 
-        function page_changed(booklet) {
-            var page = booklet.get_current_page(im.user);
+        function page_changed(booklet, page) {
+            page = (typeof page !== 'undefined') ? page : booklet.get_current_page(im.user);
             var market_id = markets[page][0];
             var market_name = markets[page][1];
             var p = lima_links_api.price_history(market_id, crop_id, 5);
@@ -656,7 +656,9 @@ function MagriWorker() {
             footer_text: footer_text
         });
 
-        var p = page_changed(booklet);
+        // manually calling page_changed here is a hack around
+        // state.display() not being able to return a promise.
+        var p = page_changed(booklet, initial_market_idx);
         p.add_callback(function () { return booklet; });
         return p;
     });
