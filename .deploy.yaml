@@ -1,0 +1,15 @@
+buildscript: scripts/buildpackage.sh
+postinstall: scripts/postinstall.sh
+pip:
+ - gunicorn
+ - django
+dependencies:
+ - nginx
+ - haproxy
+ - libpq-dev
+ - libjpeg62-dev
+ - zlib1g-dev
+ - libxml2-dev
+ - libxslt1-dev
+ - libtidy-dev
+ - rabbitmq-server
