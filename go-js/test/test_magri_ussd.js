@@ -20,10 +20,47 @@ describe("test_api", function() {
     });
 });
 
+var tester;
+
+var test_fixtures_full = [
+];
 
 describe("test menu worker", function() {
-    var tester = new test_utils.ImTester(app.api, {
-        max_response_length: 160
+    // var tester = new test_utils.ImTester(app.api, {
+    //     max_response_length: 160
+    // });
+
+    var fixtures = test_fixtures_full;
+    beforeEach(function() {
+        tester = new vumigo.test_utils.ImTester(app.api, {
+            custom_setup: function (api) {
+                api.config_store.config = JSON.stringify({
+                });
+
+                var dummy_contact = {
+                    key: "f953710a2472447591bd59e906dc2c26",
+                    surname: "Trotter",
+                    user_account: "test-0-user",
+                    bbm_pin: null,
+                    msisdn: "+1234567",
+                    created_at: "2013-04-24 14:01:41.803693",
+                    gtalk_id: null,
+                    dob: null,
+                    groups: null,
+                    facebook_id: null,
+                    twitter_handle: null,
+                    email_address: null,
+                    name: "Rodney"
+                };
+
+                api.add_contact(dummy_contact);
+
+                fixtures.forEach(function (f) {
+                    api.load_http_fixture(f);
+                });
+            },
+            async: true
+        });
     });
 
     var assert_summary_equal = function(summary) {
