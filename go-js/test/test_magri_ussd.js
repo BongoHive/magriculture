@@ -26,9 +26,6 @@ var test_fixtures_full = [
 ];
 
 describe("test menu worker", function() {
-    // var tester = new test_utils.ImTester(app.api, {
-    //     max_response_length: 160
-    // });
 
     var fixtures = test_fixtures_full;
     beforeEach(function() {
