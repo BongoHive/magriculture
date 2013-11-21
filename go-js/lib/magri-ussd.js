@@ -51,6 +51,7 @@ var EndState = vumigo.states.EndState;
 var InteractionMachine = vumigo.state_machine.InteractionMachine;
 var StateCreator = vumigo.state_machine.StateCreator;
 var JsonApi = vumigo.http_api.JsonApi;
+var BookletState = vumigo.states.BookletState;
 
 
 function DummyLimaLinksApi(im) {
@@ -198,91 +199,6 @@ function LimaLinksApi(im, url, opts) {
     };
 }
 
-
-function BookletState(name, opts) {
-
-    var self = this;
-    opts = opts || {};
-    State.call(self, name, opts.handlers);
-
-    self.next = opts.next;
-    self.pages = opts.pages; // pages are from 0 -> pages - 1
-    self.page_changed = opts.page_changed; // page_changed(self) -> promise
-
-    self.initial_page = opts.initial_page || 0;
-    self.buttons = opts.buttons || {"1": -1, "2": +1, "0": "exit"};
-    self.footer_text = opts.footer_text || "1 for prev, 2 for next, 0 to end.";
-
-    self.page_text = "No page.";
-
-    var orig_on_enter = self.on_enter;
-    self.on_enter = function() {
-        self.set_current_page(self.im.user, self.initial_page);
-        return orig_on_enter();
-    };
-
-    self.get_current_page = function(user) {
-        var pages = user.pages || {};
-        return pages[self.name] || 0;
-    };
-
-    self.set_current_page = function(user, page) {
-        if (typeof user.pages == 'undefined') {
-            user.pages = {};
-        }
-        user.pages[self.name] = page;
-    };
-
-    self.inc_current_page = function(user, amount) {
-        var page = self.get_current_page(user) + amount;
-        page = page % self.pages;
-        if (page < 0) {
-            page += self.pages;
-        }
-        self.set_current_page(user, page);
-    };
-
-    self.set_page_text = function(text) {
-        self.page_text = text;
-    };
-
-    self.input_event = function(content, done) {
-        if (!content) { content = ""; }
-        content = content.trim();
-
-        var button = self.buttons[content];
-        if (typeof button === "undefined") {
-            done();
-            return;
-        }
-
-        var amount = Number(button);
-        if (!Number.isNaN(amount)) {
-            self.inc_current_page(self.im.user, amount);
-            var p = self.page_changed(self);
-            p.add_callback(done);
-            return;
-        }
-
-        if (button !== "exit") {
-            done();
-            return;
-        }
-
-        self.call_possible_function(
-            self.next, self, [content],
-            function (next) {
-                self.im.set_user_state(next);
-                self.save_response(content);
-                done();
-            }
-        );
-    };
-
-    self.display = function() {
-        return self.page_text;
-    };
-}
 
 
 function MagriWorker() {
@@ -608,7 +524,7 @@ function MagriWorker() {
         var exit = _.gettext("Enter 0 to exit.");
         var footer_text = next_prev + exit;
 
-        function page_changed(booklet, page) {
+        function page_changed(page) {
             page = (typeof page !== 'undefined') ? page : booklet.get_current_page(im.user);
             var market_id = markets[page][0];
             var market_name = markets[page][1];
@@ -646,26 +562,20 @@ function MagriWorker() {
                 }
 
                 var price_text = price_lines.join("\n");
-                var text = title + "\n" + price_text + "\n" + next_prev + exit;
-                booklet.set_page_text(text);
+                var text = title + "\n" + price_text + "\n";
+                return text;
             });
             return p;
         }
 
-        var booklet = new BookletState(state_name, {
+        return new BookletState(state_name, {
             next: "end",
             pages: markets.length,
-            page_changed: page_changed,
+            page_text: page_changed,
             initial_page: initial_market_idx,
             buttons: {"1": -1, "2": +1, "0": "exit"},
             footer_text: footer_text
         });
-
-        // manually calling page_changed here is a hack around
-        // state.display() not being able to return a promise.
-        var p = page_changed(booklet, initial_market_idx);
-        p.add_callback(function () { return booklet; });
-        return p;
     });
 
     self.add_state(new EndState(
