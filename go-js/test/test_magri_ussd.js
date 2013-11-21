@@ -70,16 +70,17 @@ describe("test menu worker", function() {
         return teardown;
     };
 
-    it("new users should see the select_service state", function () {
-        tester.check_state({
+    it("new users should see the select_service state", function (done) {
+        var p = tester.check_state({
             user: null,
             content: null,
             next_state: "select_service",
             response: "^Hi Farmer Bob."
         });
+        p.then(done, done);
     });
-    it("select_service state should respond", function() {
-        tester.check_state({
+    it("select_service state should respond", function(done) {
+        var p = tester.check_state({
             user: {current_state: "select_service"},
             content: null,
             next_state: "select_service",
@@ -87,9 +88,10 @@ describe("test menu worker", function() {
                        "Select a service:[^]" +
                        "1. Market prices$")
         });
+        p.then(done, done);
     });
-    it("select_crop should respond", function() {
-        tester.check_state({
+    it("select_crop should respond", function(done) {
+        var p = tester.check_state({
             user: {current_state: "select_crop"},
             content: null,
             next_state: "select_crop",
@@ -97,9 +99,10 @@ describe("test menu worker", function() {
                        "1. Peas[^]" +
                        "2. Carrots$")
         });
+        p.then(done, done);
     });
-    it("select_market_list should respond", function() {
-        tester.check_state({
+    it("select_market_list should respond", function(done) {
+        var p = tester.check_state({
             user: {
                 current_state: "select_market_list",
                 custom: {
@@ -112,9 +115,10 @@ describe("test menu worker", function() {
                        "1. All markets[^]" +
                        "2. Best markets for Peas$")
         });
+        p.then(done, done);
     });
-    it("select_market should respond (best_markets)", function() {
-        tester.check_state({
+    it("select_market should respond (best_markets)", function(done) {
+        var p = tester.check_state({
             user: {
                 current_state: "select_market",
                 answers: {
@@ -128,9 +132,10 @@ describe("test menu worker", function() {
                        "1. Kitwe[^]" +
                        "2. Ndola$")
         });
+        p.then(done, done);
     });
-    it("select_market should respond (all_markets)", function() {
-        tester.check_state({
+    it("select_market should respond (all_markets)", function(done) {
+        var p = tester.check_state({
             user: {
                 current_state: "select_market",
                 answers: {
@@ -144,9 +149,10 @@ describe("test menu worker", function() {
                        "2. Ndola[^]" +
                        "3. Masala$")
         });
+        p.then(done, done);
     });
-    it("select_market should show_prices for selected market", function() {
-        tester.check_state({
+    it("select_market should show_prices for selected market", function(done) {
+        var p = tester.check_state({
             user: {
                 current_state: "select_market",
                 answers: {
@@ -172,9 +178,10 @@ describe("test menu worker", function() {
                 "Peas, crates": { "Kitwe": "1.70" }
             })
         });
+        p.then(done, done);
     });
-    it("select_market should explain if selected market has no prices", function() {
-        tester.check_state({
+    it("select_market should explain if selected market has no prices", function(done) {
+        var p = tester.check_state({
             user: {
                 current_state: "select_market",
                 answers: {
@@ -196,9 +203,10 @@ describe("test menu worker", function() {
                        "Enter 0 to exit\\.$"),
             teardown: assert_summary_equal(undefined)
         });
+        p.then(done, done);
     });
-    it("show_prices should move to previous market on 1", function() {
-        tester.check_state({
+    it("show_prices should move to previous market on 1", function(done) {
+        var p = tester.check_state({
             user: {
                 current_state: "show_prices",
                 answers: {
@@ -223,9 +231,10 @@ describe("test menu worker", function() {
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$")
         });
+        p.then(done, done);
     });
-    it("show_prices should move to next market on 2", function() {
-        tester.check_state({
+    it("show_prices should move to next market on 2", function(done) {
+        var p = tester.check_state({
             user: {
                 current_state: "show_prices",
                 answers: {
@@ -251,9 +260,10 @@ describe("test menu worker", function() {
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$")
         });
+        p.then(done, done);
     });
-    it("show_prices should move to end on 0", function() {
-        tester.check_state({
+    it("show_prices should move to end on 0", function(done) {
+        var p = tester.check_state({
             user: {
                 current_state: "show_prices",
                 custom: {
@@ -270,26 +280,52 @@ describe("test menu worker", function() {
             continue_session: false,
             response: ("^Goodbye!")
         });
+        p.then(done, done);
     });
 });
 
 describe("test sms sending", function() {
-    var tester = new test_utils.ImTester(app.api, {
-        max_response_length: 160,
-        custom_setup: function (api) {
-            api.config_store.config = JSON.stringify({
-                sms_tag: ["pool", "tag123"]
-            });
-        },
-        custom_teardown: function (api) {
-            assert.ok(api.outbound_sends.every(
-                function (send) {
-                    return (send.tagpool == "pool" &&
-                            send.tag == "tag123" &&
-                            send.to_addr == "1234567");
-                }
-            ));
-        }
+    var fixtures = test_fixtures_full;
+    beforeEach(function() {
+        tester = new vumigo.test_utils.ImTester(app.api, {
+            custom_setup: function (api) {
+                api.config_store.config = JSON.stringify({
+                    sms_tag: ["pool", "tag123"]
+                });
+
+                var dummy_contact = {
+                    key: "f953710a2472447591bd59e906dc2c26",
+                    surname: "Trotter",
+                    user_account: "test-0-user",
+                    bbm_pin: null,
+                    msisdn: "+1234567",
+                    created_at: "2013-04-24 14:01:41.803693",
+                    gtalk_id: null,
+                    dob: null,
+                    groups: null,
+                    facebook_id: null,
+                    twitter_handle: null,
+                    email_address: null,
+                    name: "Rodney"
+                };
+
+                api.add_contact(dummy_contact);
+
+                fixtures.forEach(function (f) {
+                    api.load_http_fixture(f);
+                });
+            },
+            custom_teardown: function (api) {
+                assert.ok(api.outbound_sends.every(
+                    function (send) {
+                        return (send.tagpool == "pool" &&
+                                send.tag == "tag123" &&
+                                send.to_addr == "1234567");
+                    }
+                ));
+            },
+            async: true
+        });
     });
 
     var assert_single_sms = function(content) {
@@ -322,8 +358,8 @@ describe("test sms sending", function() {
         };
     };
 
-    it("should not sms summary if no prices present", function () {
-        tester.check_state({
+    it("should not sms summary if no prices present", function (done) {
+        var p = tester.check_state({
             user: get_user(),
             content: "0",
             next_state: "end",
@@ -331,9 +367,10 @@ describe("test sms sending", function() {
             response: ("^Goodbye!"),
             teardown: assert_no_sms()
         });
+        p.then(done, done);
     });
 
-    it("should sms summary if prices present", function () {
+    it("should sms summary if prices present", function (done) {
         var user = get_user();
         user.custom.summary = {
             "Peas, boxes": {
@@ -344,7 +381,7 @@ describe("test sms sending", function() {
                 "Kitwe": "16000"
             }
         };
-        tester.check_state({
+        var p = tester.check_state({
             user: user,
             content: "0",
             next_state: "end",
@@ -355,5 +392,6 @@ describe("test sms sending", function() {
                 "Peas, crates: Kitwe K16000"
             )
         });
+        p.then(done, done);
     });
 });
