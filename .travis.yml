@@ -10,6 +10,6 @@ before_script:
   - "psql -c \"create user magriculture with createdb password 'magriculture';\" -U postgres"
   - "psql -c 'create database magriculture owner magriculture;' -U postgres"
   - "export PYTHONPATH=."
-  - "./manage.py syncdb --migrate --noinput --settings=magriculture.testsettings"
+  - "manage.py syncdb --migrate --noinput --settings=magriculture.testsettings"
 script:
     - ./run-tests-base.sh
