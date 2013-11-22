@@ -7,7 +7,7 @@ find ./magriculture -name '*.pyc' -delete
 # use fast tests (i.e. sqlite in-memory db) by default
 export MAGRICULTURE_FAST_TESTS=1
 
-eval python manage.py test
+eval python manage.py test --settings=magriculture.testsettings
 r1=$?
 eval cd go-js && npm install . && npm test
 r2=$?
