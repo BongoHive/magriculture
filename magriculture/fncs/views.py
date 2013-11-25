@@ -63,6 +63,7 @@ def farmer_new(request):
             id_number = form.cleaned_data['id_number']
             markets = form.cleaned_data['markets']
             matched_farmer = form.cleaned_data['matched_farmer']
+            gender = form.cleaned_data["gender"]
 
             if matched_farmer:
                 messages.info(request, 'Farmer added.')
@@ -83,7 +84,7 @@ def farmer_new(request):
                               "avoid double registrations")
             else:
                 farmer = Farmer.create(msisdn1, name, surname, farmergroup,
-                                       id_number=id_number)
+                                       id_number=id_number, gender=gender)
                 farmer.actor.update_msisdns(msisdns)
                 if agent:
                     for market in markets:
@@ -445,6 +446,7 @@ def farmer_edit(request, farmer_pk):
                 form.cleaned_data['markets'])
             farmer.farmergroup = form.cleaned_data['farmergroup']
             farmer.id_number = form.cleaned_data['id_number']
+            farmer.gender = form.cleaned_data['gender']
 
             farmer.actor.update_msisdns([
                 form.cleaned_data['msisdn1'],
@@ -468,6 +470,7 @@ def farmer_edit(request, farmer_pk):
             'farmergroup': farmer.farmergroup,
             'markets': farmer.markets.all(),
             'id_number': farmer.id_number,
+            'gender': farmer.gender,
         })
     return render_to_response('farmers/edit.html', {
         'form': form,
