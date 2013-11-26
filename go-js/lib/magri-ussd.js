@@ -328,6 +328,13 @@ function MagriWorker() {
         return p;
     });
 
+    self.add_state(new FreeText(
+        "registration_name_first",
+        "registration_name_last",
+        "Please enter your first name"
+    ));
+
+
     self.add_creator("select_crop", function(state_name, im) {
         var _ = im.i18n;
         var lima_links_api = self.lima_links_api(im);

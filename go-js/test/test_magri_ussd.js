@@ -95,6 +95,16 @@ describe("as an unregistered farmer", function() {
         });
         p.then(done, done);
     });
+
+    it("I should be asked for first name", function (done) {
+        var p = tester.check_state({
+            user: {current_state: "registration_start"},
+            content: "1",
+            next_state: "registration_name_first",
+            response: "^Please enter your first name$"
+        });
+        p.then(done, done);
+    });
 });
 
 
