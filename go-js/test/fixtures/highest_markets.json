@@ -1,0 +1,17 @@
+{
+    "url": "http://qa/api/v1/highest_markets/?crop=crop1&limit=5",
+    "method": "GET",
+    "body": {
+        "meta": {
+            "limit": 20,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total_count": 1
+        },
+        "objects": [
+            ["market1", "Kitwe"],
+            ["market2", "Ndola"]
+        ]
+    }
+}

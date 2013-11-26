@@ -1,0 +1,16 @@
+{
+    "url": "http://qa/api/v1/price_history/?market=market1&crop=crop2&limit=5",
+    "method": "GET",
+    "body": {
+        "meta": {
+            "limit": 20,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total_count": 1
+        },
+        "objects": [
+            {}
+        ]
+    }
+}
