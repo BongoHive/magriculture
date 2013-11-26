@@ -131,6 +131,24 @@ describe("as an unregistered farmer", function() {
         p.then(done, done);
     });
 
+    it("I should be asked for gender", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_name_last",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob"
+                }
+            },
+            content: "1",
+            next_state: "registration_gender",
+            response: "^What is your gender\\?[^]" +
+            "1. Male[^]" +
+            "2. Female$"
+        });
+        p.then(done, done);
+    });
+
 });
 
 

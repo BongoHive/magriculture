@@ -340,6 +340,15 @@ function MagriWorker() {
         "Please enter your last name"
     ));
 
+    self.add_state(new ChoiceState(
+        'registration_gender',
+        'registration_town',
+        "What is your gender?",
+        [
+            new Choice("male", "Male"),
+            new Choice("female", "Female")
+        ]
+    ));
 
     self.add_creator("select_crop", function(state_name, im) {
         var _ = im.i18n;
