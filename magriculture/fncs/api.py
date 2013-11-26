@@ -196,7 +196,7 @@ class FarmerResource(ModelResource):
                 "markets": "",
                 "participant_type": "",
                 "resource_uri": "",
-                "wards": ["/api/v1/actor/%s/" % json_item_ward["objects"][0]["id"]]
+                "wards": ["/api/v1/ward/%s/" % json_item_ward["objects"][0]["id"]]
             }
 
     """
