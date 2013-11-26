@@ -32,6 +32,72 @@ var test_fixtures_full = [
     "test/fixtures/price_history_none.json",
 ];
 
+var test_fixtures_registration = [
+    "test/fixtures/farmer_404.json",
+];
+
+
+describe("as an unregistered farmer", function() {
+
+    var fixtures = test_fixtures_registration;
+    beforeEach(function() {
+        tester = new vumigo.test_utils.ImTester(app.api, {
+            custom_setup: function (api) {
+                api.config_store.config = JSON.stringify({
+                    lima_links_api: {
+                        url: "http://qa/api/v1/",
+                        username: "test",
+                        password: "password",
+                    }
+                });
+
+                var dummy_contact = {
+                    key: "f953710a2472447591bd59e906dc2c26",
+                    surname: "Trotter",
+                    user_account: "test-0-user",
+                    bbm_pin: null,
+                    msisdn: +1111111,
+                    created_at: "2013-04-24 14:01:41.803693",
+                    gtalk_id: null,
+                    dob: null,
+                    groups: null,
+                    facebook_id: null,
+                    twitter_handle: null,
+                    email_address: null,
+                    name: "Rodney"
+                };
+
+                api.add_contact(dummy_contact);
+
+                fixtures.forEach(function (f) {
+                    api.load_http_fixture(f);
+                });
+            },
+            async: true
+        });
+    });
+
+    var assert_summary_equal = function(summary) {
+        function teardown(api, saved_user) {
+            assert.deepEqual(saved_user.custom.summary, summary);
+        }
+        return teardown;
+    };
+
+    it("I should be asked to register", function (done) {
+        var p = tester.check_state({
+            user: null,
+            content: null,
+            next_state: "registration_start",
+            response: "^Welcome to LimaLinks.[^]" +
+                "In order to use this system we need to register you with a few short questions.[^]" +
+                "1. Register for LimaLinks$"
+        });
+        p.then(done, done);
+    });
+});
+
+
 describe("test menu worker", function() {
 
     var fixtures = test_fixtures_full;

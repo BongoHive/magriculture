@@ -74,7 +74,11 @@ function LimaLinksApi(im, url, opts) {
             msisdn: msisdn
         });
         p.add_callback(function(result){
-            return result.objects[0];
+            if (result.objects.length == 1) {
+                return result.objects[0];
+            } else {
+                return null;
+            }
         });
         return p;
     };
@@ -295,11 +299,14 @@ function MagriWorker() {
         var p = lima_links_api.get_farmer(im.user_addr);
         p.add_callback(function (farmer) {
             if (farmer === null) {
-                return new EndState(
-                    state_name,
-                    _.gettext("You are not registered. Please register" +
-                              " your phone with a market agent."),
-                    "select_service"
+                return new ChoiceState(
+                    "registration_start",
+                    function (choice) {
+                        return choice.value;
+                    },
+                    _.gettext("Welcome to LimaLinks.\nIn order to use this system we " +
+                        "need to register you with a few short questions."),
+                    [new Choice("registration_name_first", "Register for LimaLinks")]
                 );
             }
 
