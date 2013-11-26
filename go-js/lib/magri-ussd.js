@@ -334,6 +334,12 @@ function MagriWorker() {
         "Please enter your first name"
     ));
 
+    self.add_state(new FreeText(
+        "registration_name_last",
+        "registration_gender",
+        "Please enter your last name"
+    ));
+
 
     self.add_creator("select_crop", function(state_name, im) {
         var _ = im.i18n;
