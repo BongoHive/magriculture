@@ -98,6 +98,8 @@ class UserResource(ModelResource):
     """
     Creating the basic user profile before creating the Farmer and actor
     """
+    actor = fields.ToOneField("magriculture.fncs.api.ActorResource",
+                             'actor')
     class Meta:
         queryset = User.objects.all()
         resource_name = "user"
@@ -249,8 +251,9 @@ class ActorResource(ModelResource):
     """
 
     """
-    user = fields.ForeignKey("magriculture.fncs.api.UserResource",
-                             'user',
+    users = fields.ToOneField("magriculture.fncs.api.UserResource",
+                             'users',
+                             related_name='actor_user',
                              full=True)
     class Meta:
         queryset = Actor.objects.all()
