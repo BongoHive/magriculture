@@ -54,108 +54,6 @@ var JsonApi = vumigo.http_api.JsonApi;
 var BookletState = vumigo.states.BookletState;
 
 
-function DummyLimaLinksApi(im) {
-
-    var self = this;
-
-    self.im = im;
-
-    self.FARMERS = {
-        '+27885557777': {
-            farmer_name: "Farmer Bob",
-            crops: [
-                ["crop1", "Peas"],
-                ["crop2", "Carrots"]
-            ],
-            markets: [
-                ["market1", "Kitwe"],
-                ["market2", "Ndola"]
-            ]
-        }
-    };
-
-    self.PRICES = {
-        "market1": {
-            "crop1": {
-                "unit1": {
-                    unit_name: "boxes",
-                    prices: [1.2, 1.1, 1.5]
-                },
-                "unit2": {
-                    unit_name: "crates",
-                    prices: [1.6, 1.7, 1.8]
-                }
-            }
-        },
-        "market2": {
-            "crop1": {
-                "unit1": {
-                    unit_name: "boxes",
-                    prices: []
-                }
-            }
-        }
-    };
-
-    self.HIGHEST_MARKETS = {
-        "crop1": [
-            ["market1", "Kitwe"],
-            ["market2", "Ndola"]
-        ],
-        "crop2": [
-            ["market2", "Ndola"]
-        ]
-    };
-
-    self.ALL_MARKETS = [
-        ["market1", "Kitwe"],
-        ["market2", "Ndola"],
-        ["market3", "Masala"]
-    ];
-
-    self.get_farmer = function(msisdn) {
-        var p = new Promise();
-        // ignore msisdn and always return the example farmer for testing
-        p.callback(self.FARMERS['+27885557777']);
-        return p;
-    };
-
-    self.price_history = function(market_id, crop_id, limit) {
-        var p = new Promise();
-        limit = limit || 10;
-
-        var market = self.PRICES[market_id] || {};
-        var crop = market[crop_id] || {};
-        var price_data = {};
-
-        for (var unit in crop) {
-            price_data[unit] = {
-                unit_name: crop[unit].unit_name,
-                prices: crop[unit].prices
-            };
-        }
-        p.callback(price_data);
-        return p;
-    };
-
-    self.highest_markets = function(crop_id, limit) {
-        var p = new Promise();
-        limit = limit || 10;
-        var markets = self.HIGHEST_MARKETS[crop_id] || [];
-        p.callback(markets.slice(0, limit));
-        return p;
-    };
-
-    self.all_markets = function(limit) {
-        var p = new Promise();
-        limit = limit || 10;
-        var markets = self.ALL_MARKETS;
-        p.callback(markets.slice(0, limit));
-        return p;
-    };
-}
-
-
 function LimaLinksApi(im, url, opts) {
 
     var self = this;
@@ -172,30 +70,46 @@ function LimaLinksApi(im, url, opts) {
     };
 
     self.get_farmer = function(msisdn) {
-        return self.api_call("farmer", {
+        var p = self.api_call("farmer/", {
             msisdn: msisdn
         });
+        p.add_callback(function(result){
+            return result.objects[0];
+        });
+        return p;
     };
 
     self.price_history = function(market_id, crop_id, limit) {
-        return self.api_call("price_history", {
+        var p =  self.api_call("price_history/", {
             market: market_id,
             crop: crop_id,
             limit: limit
         });
+        p.add_callback(function(result){
+            return result.objects[0];
+        });
+        return p;
     };
 
     self.highest_markets = function(crop_id, limit) {
-        return self.api_call("highest_markets", {
+        var p =  self.api_call("highest_markets/", {
             crop: crop_id,
             limit: limit
         });
+        p.add_callback(function(result){
+            return result.objects;
+        });
+        return p;
     };
 
     self.all_markets = function(limit) {
-        return self.api_call("markets", {
+        var p = self.api_call("markets/", {
             limit: limit
         });
+        p.add_callback(function(result){
+            return result.objects;
+        });
+        return p;
     };
 }
 
@@ -209,11 +123,11 @@ function MagriWorker() {
 
     self.lima_links_api = function(im) {
         var cfg = im.config.lima_links_api;
-        if (!cfg) {
-            im.log("Using dummy Lima Links API.");
-            return new DummyLimaLinksApi(im);
-        }
-        im.log("Using real Lima Links API.");
+        // if (!cfg) {
+        //     im.log("Using dummy Lima Links API.");
+        //     return new DummyLimaLinksApi(im);
+        // }
+        // im.log("Using real Lima Links API.");
         var opts = {};
         if (cfg.username) {
             opts.auth = {username: cfg.username, password: cfg.password};
@@ -377,6 +291,8 @@ function MagriWorker() {
     };
 
     // States
+
+
 
     self.add_creator("select_service", function(state_name, im) {
         var _ = im.i18n;

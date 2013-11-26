@@ -1,0 +1,23 @@
+{
+    "url": "http://qa/api/v1/price_history/?market=market1&crop=crop1&limit=5",
+    "method": "GET",
+    "body": {
+        "meta": {
+            "limit": 20,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total_count": 1
+        },
+        "objects": [
+            {
+                "unit1": { 
+                    "unit_name": "boxes", "prices": [ 1.2, 1.1, 1.5 ] 
+                },
+                "unit2": { 
+                    "unit_name": "crates", "prices": [ 1.6, 1.7, 1.8 ] 
+                } 
+            }
+        ]
+    }
+}

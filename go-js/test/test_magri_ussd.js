@@ -23,6 +23,13 @@ describe("test_api", function() {
 var tester;
 
 var test_fixtures_full = [
+    "test/fixtures/farmer.json",
+    "test/fixtures/highest_markets.json",
+    "test/fixtures/markets.json",
+    "test/fixtures/markets_1.json",
+    "test/fixtures/price_history.json",
+    "test/fixtures/price_history_market2.json",
+    "test/fixtures/price_history_none.json",
 ];
 
 describe("test menu worker", function() {
@@ -32,6 +39,11 @@ describe("test menu worker", function() {
         tester = new vumigo.test_utils.ImTester(app.api, {
             custom_setup: function (api) {
                 api.config_store.config = JSON.stringify({
+                    lima_links_api: {
+                        url: "http://qa/api/v1/",
+                        username: "test",
+                        password: "password",
+                    }
                 });
 
                 var dummy_contact = {
@@ -287,7 +299,12 @@ describe("test sms sending", function() {
         tester = new vumigo.test_utils.ImTester(app.api, {
             custom_setup: function (api) {
                 api.config_store.config = JSON.stringify({
-                    sms_tag: ["pool", "tag123"]
+                    sms_tag: ["pool", "tag123"],
+                    lima_links_api: {
+                        url: "http://qa/api/v1/",
+                        username: "test",
+                        password: "password",
+                    }
                 });
 
                 var dummy_contact = {
