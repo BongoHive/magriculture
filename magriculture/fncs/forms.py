@@ -86,15 +86,13 @@ class AgentForm(forms.Form):
 
 
 class FarmerForm(forms.Form):
-    GENDER = (('U', 'Unknown'), ('M', 'Male'), ('F', 'Female'))
-
     name = forms.CharField(label='Name', required=True)
     surname = forms.CharField(label='Surname', required=True)
     msisdn1 = forms.CharField(label='Mobile Number 1', required=True)
     msisdn2 = forms.CharField(label='Mobile Number 2', required=False)
     msisdn3 = forms.CharField(label='Mobile Number 3', required=False)
     id_number = forms.CharField(label='National ID Number', required=False)
-    gender = forms.ChoiceField(label="Gender of Farmer", choices=GENDER)
+    gender = forms.ChoiceField(label="Gender of Farmer", choices=Farmer.GENDER)
     farmergroup = forms.ModelChoiceField(
         label='Farmer Group', required=True,
         empty_label=None, queryset=FarmerGroup.objects.all())
