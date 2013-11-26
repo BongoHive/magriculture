@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 # From http://djangosnippets.org/snippets/2712/
 def export_select_fields_csv_action(description="Export selected objects as CSV file",
-                         fields=None, exclude=None, header=True):
+                                    fields=None, exclude=None, header=True):
     """
     This function returns an export csv action
 
