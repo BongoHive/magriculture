@@ -123,11 +123,6 @@ function MagriWorker() {
 
     self.lima_links_api = function(im) {
         var cfg = im.config.lima_links_api;
-        // if (!cfg) {
-        //     im.log("Using dummy Lima Links API.");
-        //     return new DummyLimaLinksApi(im);
-        // }
-        // im.log("Using real Lima Links API.");
         var opts = {};
         if (cfg.username) {
             opts.auth = {username: cfg.username, password: cfg.password};
