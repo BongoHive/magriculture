@@ -123,6 +123,14 @@ function LimaLinksApi(im, url, opts) {
         });
         return p;
     };
+
+    self.all_crops = function() {
+        var p = self.api_call("crop/");
+        p.add_callback(function(result){
+            return result.objects;
+        });
+        return p;
+    };
 }
 
 
@@ -416,7 +424,7 @@ function MagriWorker() {
                     }
                     return new ChoiceState(
                         state_name,
-                        "registration_crop",
+                        "registration_end",
                         _.gettext("Do you mean:"),
                         choices
                     );
@@ -433,9 +441,17 @@ function MagriWorker() {
         }
     });
 
-    
+    self.add_state(new EndState(
+        "registration_end",
+        "Thank you for registering with LimaLinks!",
+        "select_service",
+        {
+            on_enter: function(){
+                // save user
+            }
+        }
+    ));
 
-    
 
     self.add_creator("select_crop", function(state_name, im) {
         var _ = im.i18n;

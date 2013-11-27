@@ -31,11 +31,13 @@ var test_fixtures_full = [
     "test/fixtures/price_history_market2.json",
     "test/fixtures/price_history_none.json",
     "test/fixtures/district.json",
+    "test/fixtures/crop.json",
 ];
 
 var test_fixtures_registration = [
     "test/fixtures/farmer_404.json",
     "test/fixtures/district.json",
+    "test/fixtures/crop.json",
 ];
 
 
@@ -238,6 +240,51 @@ describe("as an unregistered farmer", function() {
         });
         p.then(done, done);
     });
+
+    it.skip("Confirming district I should be asked for crop", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_district_confirm",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one",
+                    registration_district: "one"
+                }
+            },
+            content: "1",
+            next_state: "registration_crop",
+            response: "^What crops do you grow\\?[^]" +
+                        "1. Tomato[^]" +
+                        "2. Rape[^]" +
+                        "3. Onions$"
+        });
+        p.then(done, done);
+    });
+
+    it("Confirming district I should be thanked and exit", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_district_confirm",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one",
+                    registration_district: "one"
+                }
+            },
+            content: "1",
+            next_state: "registration_end",
+            response: "^Thank you for registering with LimaLinks!$",
+            continue_session: false
+        });
+        p.then(done, done);
+    });
+
 
 });
 
