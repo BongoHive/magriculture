@@ -240,6 +240,10 @@ class Actor(models.Model):
 
 
 class Farmer(models.Model):
+    UNKNOWN = 'U'
+    MALE = 'M'
+    FEMALE = 'F'
+    GENDER = ((UNKNOWN, 'Unknown'), (MALE, 'Male'), (FEMALE, 'Female'))
     """
     A farmer is an actor that provides goods to be sold in a market
     """
@@ -261,6 +265,8 @@ class Farmer(models.Model):
     ))
     number_of_males = models.IntegerField(blank=True, null=True)
     number_of_females = models.IntegerField(blank=True, null=True)
+    gender = models.CharField(blank=True, max_length=100, choices=GENDER, default=UNKNOWN)
+
 
     class Meta:
         app_label = 'fncs'
@@ -358,7 +364,7 @@ class Farmer(models.Model):
         self.markets.add(*markets)
 
     @classmethod
-    def create(cls, msisdn, name, surname, farmergroup, id_number=None):
+    def create(cls, msisdn, name, surname, farmergroup, id_number=None, gender=UNKNOWN):
         """
         Create a new Farmer.
 
@@ -385,7 +391,10 @@ class Farmer(models.Model):
         if actor.farmer_set.exists():
             return actor.as_farmer()
 
-        farmer = cls(actor=actor, farmergroup=farmergroup, id_number=id_number)
+        farmer = cls(actor=actor,
+                     farmergroup=farmergroup,
+                     id_number=id_number,
+                     gender=gender)
         farmer.save()
 
         return farmer

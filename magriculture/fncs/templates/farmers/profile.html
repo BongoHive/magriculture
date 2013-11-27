@@ -5,15 +5,16 @@
 <div class="content">
 
     <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; {{farmer.actor.name}}</div>
-    
+
     <div class="meta">
         {% include "includes/farmer_header.html" %}
     </div> <!-- /.meta -->
-    
+
     <div class="h2">Farmer Profile</div>
-    
+
     <div class="list">
         <div class="item"><label>Farmer:</label> {{farmer.actor.name}}</div>
+        <div class="item"><label>Gender:</label> {{farmer.gender}}</div>
         <div class="item"><label>Agents:</label> {{farmer.agents.all|join:", "}}</div>
         <div class="item"><label>Markets:</label> {{farmer.markets.all|join:", "}}</div>
         <div class="item"><label>Districts:</label> {{farmer.market_districts.all|join:", "}}</div>

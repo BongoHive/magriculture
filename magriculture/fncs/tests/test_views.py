@@ -116,7 +116,13 @@ class FarmersTestCase(FNCSTestCase):
             'surname': 'surname',
             'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
+            'gender': "M",
         })
+        farmer = Farmer.objects.get(actor__user__username=self.test_msisdn)
+        self.assertEqual(farmer.actor.user.first_name, 'name')
+        self.assertEqual(farmer.actor.user.last_name, 'surname')
+        self.assertEqual(farmer.gender, 'M')
+
         self.assertEqual(response.status_code, 302)
         self.assertTrue(utils.is_farmer(self.test_msisdn))
 
@@ -161,10 +167,12 @@ class FarmersTestCase(FNCSTestCase):
             'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
             'id_number': '123456789',
+            'gender': 'M',
             })
         self.assertRedirects(response, self.farmer_url('crops'))
         farmer = Farmer.objects.get(pk=self.farmer.pk)
         self.assertEqual(farmer.id_number, '123456789')
+        self.assertEqual(farmer.gender, 'M')
 
     def test_farmer_id_number_uniqueness(self):
 
@@ -273,6 +281,7 @@ class FarmersTestCase(FNCSTestCase):
             'msisdn1': '1',
             'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
+            'gender': 'M',
         })
         self.assertRedirects(response, self.farmer_url('crops'))
         farmer = Farmer.objects.get(pk=self.farmer.pk)
@@ -280,6 +289,7 @@ class FarmersTestCase(FNCSTestCase):
         self.assertEqual(user.first_name, 'n')
         self.assertEqual(user.last_name, 'sn')
         self.assertEqual(user.username, '1')
+        self.assertEqual(farmer.gender, 'M')
         self.assertEqual([market.pk for market in farmer.markets.all()],
             [market.pk for market in Market.objects.filter(pk=self.market.pk)])
 
@@ -295,6 +305,7 @@ class FarmersTestCase(FNCSTestCase):
             'surname': 'surname',
             'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
+            'gender': 'M',
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, farmer.actor.name)
@@ -312,6 +323,7 @@ class FarmersTestCase(FNCSTestCase):
             'surname': 'surname',
             'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
+            'gender': 'M',
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, farmer.actor.name)
@@ -329,6 +341,7 @@ class FarmersTestCase(FNCSTestCase):
             'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
             'matched_farmer': farmer.pk,
+            'gender': 'M',
             })
         self.assertRedirects(response, reverse('fncs:farmer_edit', kwargs={
             'farmer_pk': farmer.pk,
