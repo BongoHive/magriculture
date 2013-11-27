@@ -142,6 +142,12 @@ class UserResource(ModelResource):
         return bundle
 
     def dehydrate(self, bundle):
+        """
+        - Removing password from here and not exclude inorder to manually create
+        a random password
+        - removing is_staff and is_superuser as tasypie returns the result status
+        of the original post item so if included returns their status.
+        """
         if "password" in bundle.data:
             del bundle.data["password"]
 
