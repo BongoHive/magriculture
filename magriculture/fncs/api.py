@@ -116,7 +116,7 @@ class UserResource(ModelResource):
         always_return_data = True
         excludes = ['is_active', 'is_staff', 'is_superuser',
                     'date_joined', 'last_login']
-        filtering = {"id" : ALL,
+        filtering = {"id": ALL,
                      "username": ALL}
 
     def get_object_list(self, request):
@@ -160,9 +160,9 @@ class FarmerResource(ModelResource):
 
     1. Create a User
     2. On created user filter for Actor based on user.id or msisdn
-    3. Get crop data, can filter by name based on user input
-    4. Get ward, can filter by name
-    5. Get district, can filter by name
+    3. Get crop data (as crop), can filter by name based on user input
+    4. Get ward (as ward), can filter by name
+    5. Get district (as district), can filter by name
     6. Create the farmer using above responses
     ::
 
@@ -170,16 +170,16 @@ class FarmerResource(ModelResource):
         method: POST
         content_type: application/json
         body: {
-                    "actor": "/api/v1/actor/%s/" % response_for_actor["objects"][0]["id"],
+                    "actor": "/api/v1/actor/%s/" % actor["objects"][0]["id"],
                     "agents": "",
-                    "crops": ["/api/v1/crop/%s/" % response_for_crop["objects"][0]["id"]],
-                    "districts": ["/api/v1/district/%s/" % response_for_district["objects"][0]["id"]],
+                    "crops": ["/api/v1/crop/%s/" % crop["objects"][0]["id"]],
+                    "districts": ["/api/v1/district/%s/" % district["objects"][0]["id"]],
                     "hh_id": "",
                     "id_number": "123456789",
                     "markets": "",
                     "participant_type": "",
                     "resource_uri": "",
-                    "wards": ["/api/v1/ward/%s/" % response_for_ward["objects"][0]["id"]]
+                    "wards": ["/api/v1/ward/%s/" % ward["objects"][0]["id"]]
                 }
 
     """
@@ -187,8 +187,8 @@ class FarmerResource(ModelResource):
                                     'agents',
                                     full=True)
     actor = fields.ForeignKey('magriculture.fncs.api.ActorResource',
-                                    'actor',
-                                    full=True)
+                              'actor',
+                               full=True)
 
     markets = fields.ManyToManyField('magriculture.fncs.api.MarketResource',
                                     'markets',
@@ -199,12 +199,12 @@ class FarmerResource(ModelResource):
                                     full=True)
 
     districts = fields.ManyToManyField('magriculture.fncs.api.DistrictResource',
-                                    'districts',
-                                    full=True)
+                                       'districts',
+                                       full=True)
 
     crops = fields.ManyToManyField('magriculture.fncs.api.CropResource',
-                                    'crops',
-                                    full=True)
+                                   'crops',
+                                   full=True)
 
     class Meta:
         queryset = Farmer.objects.all()
@@ -246,6 +246,7 @@ class ActorResource(ModelResource):
     user = fields.ToOneField("magriculture.fncs.api.UserResource",
                              'user',
                              full=True)
+
     class Meta:
         queryset = Actor.objects.all()
         resource_name = "actor"
@@ -253,7 +254,7 @@ class ActorResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"user" : ALL_WITH_RELATIONS}
+        filtering = {"user": ALL_WITH_RELATIONS}
 
 
 class MarketResource(ModelResource):
@@ -272,7 +273,7 @@ class MarketResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL}
+        filtering = {"name": ALL}
 
 
 class WardResource(ModelResource):
@@ -292,7 +293,7 @@ class WardResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL}
+        filtering = {"name": ALL}
 
 
 class DistrictResource(ModelResource):
@@ -312,7 +313,7 @@ class DistrictResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL}
+        filtering = {"name": ALL}
 
 
 class CropResource(ModelResource):
@@ -331,4 +332,4 @@ class CropResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL_WITH_RELATIONS}
+        filtering = {"name": ALL_WITH_RELATIONS}
