@@ -97,6 +97,20 @@ def get_markets(request):
 class UserResource(ModelResource):
     """
     Creating the basic user profile before creating the Farmer and actor
+
+     Step 1 - Create a User
+    ================================
+    "url": "<base_url>/api/v1/user/",,
+    "method": "POST",
+    "content_type": "application/json",
+    "body": {
+                "username": "27721231234",
+                "first_name": "test_first_name",
+                "last_name": "test_last_name"
+            }
+
+
+    :return: json_item_user
     """
     class Meta:
         queryset = User.objects.all()
