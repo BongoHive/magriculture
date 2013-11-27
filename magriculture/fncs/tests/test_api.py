@@ -260,7 +260,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual(True, created_user.is_active)
         self.assertEqual(False, created_user.is_staff)
         self.assertEqual(False, created_user.is_superuser)
-        self.assertGreater(len(created_user.password), 5)
+        self.assertEqual('!', created_user.password)
 
         # Test if Actor has been created
         created_actor = Actor.objects.get(user__username="27721231234")
@@ -369,7 +369,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual(True, created_user.is_active)
         self.assertEqual(False, created_user.is_staff)
         self.assertEqual(False, created_user.is_superuser)
-        self.assertGreater(len(created_user.password), 5)
+        self.assertEqual('!', created_user.password)
 
         # Test if Actor has been created
         created_actor = Actor.objects.get(user__username="27721231234")
