@@ -137,6 +137,13 @@ class UserResource(ModelResource):
     def dehydrate(self, bundle):
         if "password" in bundle.data:
             del bundle.data["password"]
+
+        if "is_staff" in bundle.data:
+            del bundle.data["is_staff"]
+
+        if "is_superuser" in bundle.data:
+            del bundle.data["is_superuser"]
+
         return bundle
 
 
