@@ -1,6 +1,12 @@
-from django.conf.urls.defaults import patterns, url
+# Django
+from django.conf.urls.defaults import patterns, url, include
+
+# Project
 from magriculture.fncs import views
 from magriculture.fncs import api
+
+# Third Party
+from tastypie.api import Api
 
 urlpatterns = patterns('',
     url(r'^$', views.home, name='home'),
@@ -48,14 +54,31 @@ urlpatterns = patterns('',
     url(r'^agents/new/$', views.agent_new, name='agent_new'),
     url(r'^agents/(?P<agent_pk>\d+)/$', views.agent, name='agent'),
     url(r'^todo/.*', views.todo, name='todo'),
-    url(r'^api/v1/farmer', api.get_farmer, name='api_get_farmer'),
+
+
+
+    # url(r'^api/v1/farmer', api.get_farmer, name='api_get_farmer'),
     url(r'^api/v1/price_history', api.get_price_history, name='api_get_price_history'),
     url(r'^api/v1/highest_markets', api.get_highest_markets, name='api_get_highest_markets'),
     url(r'^api/v1/markets', api.get_markets, name='api_get_markets'),
 )
 
+# ==========================================================
+#   API
+# ==========================================================
+api_resources = Api(api_name='v1')
+api_resources.register(api.FarmerResource())
+api_resources.register(api.AgentsResource())
+api_resources.register(api.ActorResource())
+api_resources.register(api.MarketResource())
+api_resources.register(api.WardResource())
+api_resources.register(api.DistrictResource())
+api_resources.register(api.CropResource())
+api_resources.register(api.UserResource())
+
 # for HAProxy
 urlpatterns += patterns('',
     url(r'^health/$', views.health, name='health'),
+    url(r'^api/', include(api_resources.urls)),
 )
 
