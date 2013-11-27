@@ -335,7 +335,6 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual("27721231234", json_item["actor"]['user']["username"])
         self.assertEqual("test_first_name test_last_name", json_item["actor"]["name"])
 
-
     def test_create_malicious_user(self):
         """
         Test the actual create farmer functionality works
