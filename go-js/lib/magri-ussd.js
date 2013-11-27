@@ -334,7 +334,7 @@ function MagriWorker() {
                     },
                     _.gettext("Welcome to LimaLinks.\nIn order to use this system we " +
                         "need to register you with a few short questions."),
-                    [new Choice("registration_name_first", "Register for LimaLinks")]
+                    [new Choice("registration_name_first", _.gettext("Register for LimaLinks"))]
                 );
             }
 
@@ -359,35 +359,35 @@ function MagriWorker() {
     self.add_state(new FreeText(
         "registration_name_first",
         "registration_name_last",
-        "Please enter your first name"
+        _.gettext("Please enter your first name")
     ));
 
     self.add_state(new FreeText(
         "registration_name_last",
         "registration_gender",
-        "Please enter your last name"
+        _.gettext("Please enter your last name")
     ));
 
     self.add_state(new ChoiceState(
         'registration_gender',
         'registration_town',
-        "What is your gender?",
+        _.gettext("What is your gender?"),
         [
-            new Choice("M", "Male"),
-            new Choice("F", "Female")
+            new Choice("M", _.gettext("Male")),
+            new Choice("F", _.gettext("Female"))
         ]
     ));
 
     self.add_state(new FreeText(
         "registration_town",
         "registration_district",
-        "What is the town your farm is in?"
+        _.gettext("What is the town your farm is in?")
     ));
 
     self.add_state(new FreeText(
         "registration_district",
         "registration_district_confirm",
-        "What is the district your farm is in?"
+        _.gettext("What is the district your farm is in?")
     ));
 
     self.add_creator('registration_district_confirm', function(state_name, im) {
@@ -405,8 +405,8 @@ function MagriWorker() {
                     return new FreeText(
                         "registration_district",
                         "registration_district_confirm",
-                        "Sorry we could not find a matching district. Please retry entering " +
-                            "what district your farm is in:"
+                        _.gettext("Sorry we could not find a matching district. Please retry entering " +
+                            "what district your farm is in:")
                     );
                 } else {
                     var choices = [];
@@ -416,7 +416,7 @@ function MagriWorker() {
                     return new ChoiceState(
                         state_name,
                         "registration_crop",
-                        "Do you mean:",
+                        _.gettext("Do you mean:"),
                         choices
                     );
                 }
@@ -427,7 +427,7 @@ function MagriWorker() {
             return new FreeText(
                 "registration_district",
                 "registration_district_confirm",
-                "What is the district your farm is in?"
+                _.gettext("What is the district your farm is in?")
             );
         }
     });
