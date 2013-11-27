@@ -30,10 +30,12 @@ var test_fixtures_full = [
     "test/fixtures/price_history.json",
     "test/fixtures/price_history_market2.json",
     "test/fixtures/price_history_none.json",
+    "test/fixtures/district.json",
 ];
 
 var test_fixtures_registration = [
     "test/fixtures/farmer_404.json",
+    "test/fixtures/district.json",
 ];
 
 
@@ -106,17 +108,8 @@ describe("as an unregistered farmer", function() {
         p.then(done, done);
     });
 
-    it("I should be asked for first name", function (done) {
-        var p = tester.check_state({
-            user: {current_state: "registration_start"},
-            content: "1",
-            next_state: "registration_name_first",
-            response: "^Please enter your first name$"
-        });
-        p.then(done, done);
-    });
 
-    it("I should be asked for last name", function (done) {
+    it("Entering first name I should be asked for last name", function (done) {
         var p = tester.check_state({
             user: {
                 current_state: "registration_name_first",
@@ -124,14 +117,14 @@ describe("as an unregistered farmer", function() {
                     registration_start: "registration_name_first"
                 }
             },
-            content: "1",
+            content: "Bob",
             next_state: "registration_name_last",
             response: "^Please enter your last name$"
         });
         p.then(done, done);
     });
 
-    it("I should be asked for gender", function (done) {
+    it("Entering last name I should be asked for gender", function (done) {
         var p = tester.check_state({
             user: {
                 current_state: "registration_name_last",
@@ -140,11 +133,108 @@ describe("as an unregistered farmer", function() {
                     registration_name_first: "Bob"
                 }
             },
-            content: "1",
+            content: "Marley",
             next_state: "registration_gender",
             response: "^What is your gender\\?[^]" +
             "1. Male[^]" +
             "2. Female$"
+        });
+        p.then(done, done);
+    });
+
+    it("Entering gender I should be asked for location", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_gender",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley"
+                }
+            },
+            content: "1",
+            next_state: "registration_town",
+            response: "^What is the town your farm is in\\?$"
+        });
+        p.then(done, done);
+    });
+
+    it("Entering town I should be asked for district", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_town",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M"
+                }
+            },
+            content: "Choma",
+            next_state: "registration_district",
+            response: "^What is the district your farm is in\\?$"
+        });
+        p.then(done, done);
+    });
+
+    it("Entering bad district I should be asked for district again", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_district",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one"
+                }
+            },
+            content: "four",
+            next_state: "registration_district",
+            response: "^Sorry we could not find a matching district. Please retry entering " +
+                            "what district your farm is in:$"
+        });
+        p.then(done, done);
+    });
+
+    it("Entering good district I should be asked for confirmation", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_district",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one"
+                }
+            },
+            content: "three",
+            next_state: "registration_district_confirm",
+            response: "^Do you mean:[^]" +
+                        "1. district three$"
+        });
+        p.then(done, done);
+    });
+
+    it("Entering good district but not unique district I should be asked for confirmation", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_district",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one"
+                }
+            },
+            content: "district",
+            next_state: "registration_district_confirm",
+            response: "^Do you mean:[^]" +
+                        "1. district one[^]" +
+                        "2. district two[^]" +
+                        "3. district three$"
         });
         p.then(done, done);
     });

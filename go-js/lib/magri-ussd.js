@@ -115,6 +115,14 @@ function LimaLinksApi(im, url, opts) {
         });
         return p;
     };
+
+    self.all_districts = function() {
+        var p = self.api_call("district/");
+        p.add_callback(function(result){
+            return result.objects;
+        });
+        return p;
+    };
 }
 
 
@@ -132,6 +140,26 @@ function MagriWorker() {
             opts.auth = {username: cfg.username, password: cfg.password};
         }
         return new LimaLinksApi(im, cfg.url, opts);
+    };
+
+    self.findInArray = function(array, what) {
+        var indexes = [], what = what.toLowerCase();
+        if (!what.length)
+            return indexes;
+        array.forEach(function(el, index) {
+            if (typeof(el) == "string" && el.toLowerCase().indexOf(what)!=-1)
+                indexes.push(index);
+        });
+        return indexes;
+    };
+
+    self.extractFieldFromArray = function(arr, field) {
+        var extracted = [];
+        arr.forEach(function(el, index) {
+            if (el[field])
+                extracted.push(el[field]);
+        });
+        return extracted;
     };
 
     // Session metrics helper
@@ -345,10 +373,68 @@ function MagriWorker() {
         'registration_town',
         "What is your gender?",
         [
-            new Choice("male", "Male"),
-            new Choice("female", "Female")
+            new Choice("M", "Male"),
+            new Choice("F", "Female")
         ]
     ));
+
+    self.add_state(new FreeText(
+        "registration_town",
+        "registration_district",
+        "What is the town your farm is in?"
+    ));
+
+    self.add_state(new FreeText(
+        "registration_district",
+        "registration_district_confirm",
+        "What is the district your farm is in?"
+    ));
+
+    self.add_creator('registration_district_confirm', function(state_name, im) {
+        // Get the users input if they've made any
+        var district = im.get_user_answer('registration_district');
+
+        if (district) {
+            // find maps
+            var lima_links_api = self.lima_links_api(im);
+            var p = lima_links_api.all_districts();
+            p.add_callback(function(districts) {
+                var matches = self.findInArray(self.extractFieldFromArray(districts, "name"), district);
+                if (matches.length === 0) {
+                    // No districts similar
+                    return new FreeText(
+                        "registration_district",
+                        "registration_district_confirm",
+                        "Sorry we could not find a matching district. Please retry entering " +
+                            "what district your farm is in:"
+                    );
+                } else {
+                    var choices = [];
+                    for (var i=0; i<matches.length; i++){
+                        choices[choices.length] = new Choice(districts[matches[i]].id, districts[matches[i]].name);
+                    }
+                    return new ChoiceState(
+                        state_name,
+                        "registration_crop",
+                        "Do you mean:",
+                        choices
+                    );
+                }
+            });
+            return p;
+        } else {
+            // Blank or missing district
+            return new FreeText(
+                "registration_district",
+                "registration_district_confirm",
+                "What is the district your farm is in?"
+            );
+        }
+    });
+
+    
+
+    
 
     self.add_creator("select_crop", function(state_name, im) {
         var _ = im.i18n;
@@ -456,7 +542,6 @@ function MagriWorker() {
 
         var initial_market_idx = self.get_user_item(im.user, "chosen_market_idx");
         var markets = self.get_user_item(im.user, "chosen_markets");
-
         var next_prev = (markets.length > 1 ?
                          _.gettext("Enter 1 for next market," +
                                      " 2 for previous market.") + "\n"
