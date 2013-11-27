@@ -98,8 +98,6 @@ class UserResource(ModelResource):
     """
     Creating the basic user profile before creating the Farmer and actor
     """
-    actor = fields.ToOneField("magriculture.fncs.api.ActorResource",
-                             'actor')
     class Meta:
         queryset = User.objects.all()
         resource_name = "user"
@@ -107,6 +105,10 @@ class UserResource(ModelResource):
         authorization = Authorization()
         include_resource_uri = True
         always_return_data = True
+        excludes = ['is_active', 'is_staff', 'is_superuser',
+                    'date_joined', 'last_login']
+        filtering = {"id" : ALL,
+                     "username": ALL}
 
     def get_object_list(self, request):
         """
@@ -154,7 +156,7 @@ class FarmerResource(ModelResource):
             }
 
 
-    :return: user_json_response
+    :return: json_item_user
 
 
 
@@ -162,24 +164,31 @@ class FarmerResource(ModelResource):
     ================================
     Get a Crop
     ---------------------------------
-    "url": "<base_url>/api/v1/crop/?name=Crop",,
+    "url": "<base_url>/api/v1/crop/?name=Crop",
     "method": "GET",
 
-    :return: crop_json_response
+    :return: json_item_crop
 
     Get a ward
     ---------------------------------
-    "url": "<base_url>/api/v1/ward/?name=Ward",,
+    "url": "<base_url>/api/v1/ward/?name=Ward",
     "method": "GET",
 
-    :return: ward_json_response
+    :return: json_item_ward
 
     Get a district
     ---------------------------------
-    "url": "<base_url>/api/v1/district/?name=District",,
+    "url": "<base_url>/api/v1/district/?name=District",
     "method": "GET",
 
-    :return: district_json_response
+    :return: json_item_district
+
+    Get a actor
+    ---------------------------------
+    "url": "<base_url>/api/v1/actor/?user__username=27721231234,
+    "method": "GET",
+
+    :return: json_item_actor
 
 
 
@@ -189,7 +198,7 @@ class FarmerResource(ModelResource):
     "method": "POST",
     "content_type": "application/json",
     "body": {
-                "actor": "/api/v1/actor/%s/" % json_item_actor["id"],
+                "actor": "/api/v1/actor/%s/" % json_item_actor["objects"][0]["id"],
                 "agents": "",
                 "crops": ["/api/v1/crop/%s/" % json_item_crop["objects"][0]["id"]],
                 "districts": ["/api/v1/district/%s/" % json_item_district["objects"][0]["id"]],
@@ -236,7 +245,14 @@ class FarmerResource(ModelResource):
 
 class AgentsResource(ModelResource):
     """
+    Returns the agents in the system
 
+    Get an agent
+    ---------------------------------
+    "url": "<base_url>/api/v1/agent/",
+    "method": "GET",
+
+    :return: json_item_agent
     """
     class Meta:
         queryset = Agent.objects.all()
@@ -249,11 +265,20 @@ class AgentsResource(ModelResource):
 
 class ActorResource(ModelResource):
     """
+    Returns the agents in the system
+
+    Get an actor
+    ---------------------------------
+    "url": "<base_url>/api/v1/actor/",
+    "url": "<base_url>/api/v1/actor/?user__username=123456789",
+    "url": "<base_url>/api/v1/actor/?user__id=1",
+    "method": "GET",
+
+    :return: json_item_actor
 
     """
-    users = fields.ToOneField("magriculture.fncs.api.UserResource",
-                             'users',
-                             related_name='actor_user',
+    user = fields.ToOneField("magriculture.fncs.api.UserResource",
+                             'user',
                              full=True)
     class Meta:
         queryset = Actor.objects.all()
@@ -267,6 +292,16 @@ class ActorResource(ModelResource):
 
 class MarketResource(ModelResource):
     """
+    Returns the market in the system
+
+    Get a market
+    ---------------------------------
+    "url": "<base_url>/api/v1/market/",
+    "url": "<base_url>/api/v1/market/?name=TheName",
+
+    "method": "GET",
+
+    :return: json_item_market
 
     """
     class Meta:
@@ -276,10 +311,21 @@ class MarketResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
+        filtering = {"name" : ALL}
 
 
 class WardResource(ModelResource):
     """
+    Returns the ward in the system
+
+    Get a ward
+    ---------------------------------
+    "url": "<base_url>/api/v1/ward/",
+    "url": "<base_url>/api/v1/ward/?name=TheName",
+
+    "method": "GET",
+
+    :return: json_item_ward
 
     """
     class Meta:
@@ -294,6 +340,16 @@ class WardResource(ModelResource):
 
 class DistrictResource(ModelResource):
     """
+    Returns the district in the system
+
+    Get a district
+    ---------------------------------
+    "url": "<base_url>/api/v1/district/",
+    "url": "<base_url>/api/v1/district/?name=TheName",
+
+    "method": "GET",`
+
+    :return: json_item_district
 
     """
     class Meta:
@@ -308,6 +364,16 @@ class DistrictResource(ModelResource):
 
 class CropResource(ModelResource):
     """
+    Returns the Crop in the system
+
+    Get a ward
+    ---------------------------------
+    "url": "<base_url>/api/v1/crop/",
+    "url": "<base_url>/api/v1/crop/?name=TheName",
+
+    "method": "GET",
+
+    :return: json_item_crop
 
     """
     class Meta:
