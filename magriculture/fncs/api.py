@@ -97,21 +97,18 @@ def get_markets(request):
 # ==========================================================
 class UserResource(ModelResource):
     """
-    Creating the basic user profile before creating the Farmer and actor
+    Creating a user
+    ::
 
-     Step 1 - Create a User
-    ================================
-    "url": "<base_url>/api/v1/user/",,
-    "method": "POST",
-    "content_type": "application/json",
-    "body": {
-                "username": "27721231234",
-                "first_name": "test_first_name",
-                "last_name": "test_last_name"
-            }
-
-
-    :return: json_item_user
+         url: <base_url>/api/v1/user/
+         method: POST
+         content_type: "application/json"
+         body: {
+                    Paragrapth title..
+                    username": "27721231234",
+                    "first_name": "test_first_name",
+                    "last_name": "test_last_name"
+         }
     """
     class Meta:
         queryset = User.objects.all()
@@ -162,73 +159,31 @@ class UserResource(ModelResource):
 
 class FarmerResource(ModelResource):
     """
-    Creating a new farmer requires 3 steps:
+    Creating a new farmer requires several:
 
-    Step 1 - Create a User
-    ================================
-    "url": "<base_url>/api/v1/user/",,
-    "method": "POST",
-    "content_type": "application/json",
-    "body": {
-                "username": "27721231234",
-                "first_name": "test_first_name",
-                "last_name": "test_last_name"
-            }
+    1. Create a User
+    2. On created user filter for Actor based on user.id or msisdn
+    3. Get crop data, can filter by name based on user input
+    4. Get ward, can filter by name
+    5. Get district, can filter by name
+    6. Create the farmer using above responses
+    ::
 
-
-    :return: json_item_user
-
-
-
-    step 2 - Get post data for foriegn key associations
-    ================================
-    Get a Crop
-    ---------------------------------
-    "url": "<base_url>/api/v1/crop/?name=Crop",
-    "method": "GET",
-
-    :return: json_item_crop
-
-    Get a ward
-    ---------------------------------
-    "url": "<base_url>/api/v1/ward/?name=Ward",
-    "method": "GET",
-
-    :return: json_item_ward
-
-    Get a district
-    ---------------------------------
-    "url": "<base_url>/api/v1/district/?name=District",
-    "method": "GET",
-
-    :return: json_item_district
-
-    Get a actor
-    ---------------------------------
-    "url": "<base_url>/api/v1/actor/?user__username=27721231234,
-    "method": "GET",
-
-    :return: json_item_actor
-
-
-
-    step 3 - Create Farmer
-    =============================================
-    "url": "<base_url>/api/v1/farmer/",,
-    "method": "POST",
-    "content_type": "application/json",
-    "body": {
-                "actor": "/api/v1/actor/%s/" % json_item_actor["objects"][0]["id"],
-                "agents": "",
-                "crops": ["/api/v1/crop/%s/" % json_item_crop["objects"][0]["id"]],
-                "districts": ["/api/v1/district/%s/" % json_item_district["objects"][0]["id"]],
-                "hh_id": "",
-                "id_number": "123456789",
-                "markets": "",
-                "participant_type": "",
-                "resource_uri": "",
-                "wards": ["/api/v1/ward/%s/" % json_item_ward["objects"][0]["id"]]
-            }
+        url: <base_url>/api/v1/farmer/
+        method: POST
+        content_type: application/json
+        body: {
+                    "actor": "/api/v1/actor/%s/" % response_for_actor["objects"][0]["id"],
+                    "agents": "",
+                    "crops": ["/api/v1/crop/%s/" % response_for_crop["objects"][0]["id"]],
+                    "districts": ["/api/v1/district/%s/" % response_for_district["objects"][0]["id"]],
+                    "hh_id": "",
+                    "id_number": "123456789",
+                    "markets": "",
+                    "participant_type": "",
+                    "resource_uri": "",
+                    "wards": ["/api/v1/ward/%s/" % response_for_ward["objects"][0]["id"]]
+                }
 
     """
     agents = fields.ManyToManyField('magriculture.fncs.api.AgentsResource',
@@ -265,14 +220,11 @@ class FarmerResource(ModelResource):
 
 class AgentsResource(ModelResource):
     """
-    Returns the agents in the system
+    Get the agents in the system
+    ::
 
-    Get an agent
-    ---------------------------------
-    "url": "<base_url>/api/v1/agent/",
-    "method": "GET",
-
-    :return: json_item_agent
+        url: <base_url>/api/v1/agent/
+        method: GET
     """
     class Meta:
         queryset = Agent.objects.all()
@@ -285,16 +237,13 @@ class AgentsResource(ModelResource):
 
 class ActorResource(ModelResource):
     """
-    Returns the agents in the system
+    Returns the actors in the system and can filter on id or msisdn as username
+    ::
 
-    Get an actor
-    ---------------------------------
-    "url": "<base_url>/api/v1/actor/",
-    "url": "<base_url>/api/v1/actor/?user__username=123456789",
-    "url": "<base_url>/api/v1/actor/?user__id=1",
-    "method": "GET",
-
-    :return: json_item_actor
+        url: <base_url>/api/v1/actor/
+        url: <base_url>/api/v1/actor/?user__username=123456789
+        url: <base_url>/api/v1/actor/?user__id=1
+        method": GET
 
     """
     user = fields.ToOneField("magriculture.fncs.api.UserResource",
@@ -312,17 +261,12 @@ class ActorResource(ModelResource):
 
 class MarketResource(ModelResource):
     """
-    Returns the market in the system
+    Returns the market in the system and can filter by name
+    ::
 
-    Get a market
-    ---------------------------------
-    "url": "<base_url>/api/v1/market/",
-    "url": "<base_url>/api/v1/market/?name=TheName",
-
-    "method": "GET",
-
-    :return: json_item_market
-
+        url: <base_url>/api/v1/market/
+        url: <base_url>/api/v1/market/?name=TheName
+        method: GET
     """
     class Meta:
         queryset = Market.objects.all()
@@ -336,17 +280,13 @@ class MarketResource(ModelResource):
 
 class WardResource(ModelResource):
     """
-    Returns the ward in the system
+    Returns the ward in the system and can filter by name
+    ::
 
-    Get a ward
-    ---------------------------------
-    "url": "<base_url>/api/v1/ward/",
-    "url": "<base_url>/api/v1/ward/?name=TheName",
+        url: <base_url>/api/v1/ward/
+        url: <base_url>/api/v1/ward/?name=TheName
 
-    "method": "GET",
-
-    :return: json_item_ward
-
+        method: GET
     """
     class Meta:
         queryset = Ward.objects.all()
@@ -360,16 +300,12 @@ class WardResource(ModelResource):
 
 class DistrictResource(ModelResource):
     """
-    Returns the district in the system
+    Returns the districts in the system and can filter by name
+    ::
 
-    Get a district
-    ---------------------------------
-    "url": "<base_url>/api/v1/district/",
-    "url": "<base_url>/api/v1/district/?name=TheName",
-
-    "method": "GET",`
-
-    :return: json_item_district
+        url: <base_url>/api/v1/district/
+        url: <base_url>/api/v1/district/?name=TheName
+        method: GET
 
     """
     class Meta:
@@ -384,17 +320,12 @@ class DistrictResource(ModelResource):
 
 class CropResource(ModelResource):
     """
-    Returns the Crop in the system
+    Returns the Crops in the system and can filter by name
+    ::
 
-    Get a ward
-    ---------------------------------
-    "url": "<base_url>/api/v1/crop/",
-    "url": "<base_url>/api/v1/crop/?name=TheName",
-
-    "method": "GET",
-
-    :return: json_item_crop
-
+        url: <base_url>/api/v1/crop/
+        url: <base_url>/api/v1/crop/?name=TheName
+        method: GET
     """
     class Meta:
         queryset = Crop.objects.all()
