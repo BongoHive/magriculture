@@ -359,38 +359,39 @@ function MagriWorker() {
     self.add_state(new FreeText(
         "registration_name_first",
         "registration_name_last",
-        _.gettext("Please enter your first name")
+        "Please enter your first name"
     ));
 
     self.add_state(new FreeText(
         "registration_name_last",
         "registration_gender",
-        _.gettext("Please enter your last name")
+        "Please enter your last name"
     ));
 
     self.add_state(new ChoiceState(
         'registration_gender',
         'registration_town',
-        _.gettext("What is your gender?"),
+        "What is your gender?",
         [
-            new Choice("M", _.gettext("Male")),
-            new Choice("F", _.gettext("Female"))
+            new Choice("M", "Male"),
+            new Choice("F", "Female")
         ]
     ));
 
     self.add_state(new FreeText(
         "registration_town",
         "registration_district",
-        _.gettext("What is the town your farm is in?")
+        "What is the town your farm is in?"
     ));
 
     self.add_state(new FreeText(
         "registration_district",
         "registration_district_confirm",
-        _.gettext("What is the district your farm is in?")
+        "What is the district your farm is in?"
     ));
 
     self.add_creator('registration_district_confirm', function(state_name, im) {
+        var _ = im.i18n;
         // Get the users input if they've made any
         var district = im.get_user_answer('registration_district');
 
