@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 # Project
 from magriculture.fncs.models.actors import Actor, Farmer, Agent
@@ -134,7 +135,7 @@ class UserResource(ModelResource):
 
     def hydrate(self, bundle):
         """
-        - Hashing the password to a random value to prevent user login
+        - Setting password to None on make_password so as to prevent user login
         - Setting is_staff and is_superuser to False for extra security
         """
         if "is_superuser" in bundle.data:
@@ -143,9 +144,7 @@ class UserResource(ModelResource):
         if "is_staff" in bundle.data:
             bundle.data["is_staff"] = False
 
-        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        password_hash = hashlib.sha1(salt+bundle.data["first_name"]+bundle.data["last_name"]).hexdigest()
-        bundle.data["password"] = password_hash
+        bundle.data["password"] = make_password(None)
         return bundle
 
     def dehydrate(self, bundle):
