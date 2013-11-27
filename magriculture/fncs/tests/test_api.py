@@ -245,10 +245,12 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual("test_first_name", json_item_user["first_name"])
         self.assertEqual("test_last_name", json_item_user["last_name"])
         self.assertEqual("27721231234", json_item_user["username"])
-        self.assertEqual(True, json_item_user["is_active"])
-        self.assertEqual(False, json_item_user["is_staff"])
-        self.assertEqual(False, json_item_user["is_superuser"])
         self.assertNotIn("password", json_item_user)
+        self.assertNotIn("is_active", json_item_user)
+        self.assertNotIn("is_staff", json_item_user)
+        self.assertNotIn("is_superuser", json_item_user)
+        self.assertNotIn("date_joined", json_item_user)
+        self.assertNotIn("last_login", json_item_user)
 
         # Test if User has been created
         created_user = User.objects.get(username="27721231234")
@@ -270,6 +272,7 @@ class TestCreateFarmerApi(ResourceTestCase):
                       'api_name': 'v1'})
         response_ward = self.api_client.get("%s?name=test_ward" % url_ward)
         json_item_ward = json.loads(response_ward.content)
+        self.assertEqual(1, len(json_item_ward["objects"]))
 
         # Get Crop
         url_crop = reverse('fncs:api_dispatch_list',
@@ -277,16 +280,26 @@ class TestCreateFarmerApi(ResourceTestCase):
                       'api_name': 'v1'})
         response_crop = self.api_client.get("%s?name=Cassava" % url_crop)
         json_item_crop = json.loads(response_crop.content)
+        self.assertEqual(1, len(json_item_crop["objects"]))
 
-        # Get Crop
+        # Get District
         url_district = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'district',
                       'api_name': 'v1'})
         response_district = self.api_client.get("%s?name=Zambezi" % url_district)
         json_item_district = json.loads(response_district.content)
+        self.assertEqual(1, len(json_item_district["objects"]))
+
+        # Get District
+        url_actor = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'actor',
+                      'api_name': 'v1'})
+        response_actor = self.api_client.get("%s?user__username=27721231234" % url_actor)
+        json_item_actor = json.loads(response_actor.content)
+        self.assertEqual(1, len(json_item_actor["objects"]))
 
         farmer_data = {
-                        "actor": "/api/v1/actor/%s/" % json_item_user["id"],
+                        "actor": "/api/v1/actor/%s/" % json_item_actor["objects"][0]["id"],
                         "agents": "",
                         "crops": ["/api/v1/crop/%s/" % json_item_crop["objects"][0]["id"]],
                         "districts": ["/api/v1/district/%s/" % json_item_district["objects"][0]["id"]],
@@ -309,9 +322,6 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual("test_first_name", json_item["actor"]["user"]["first_name"])
         self.assertEqual("test_last_name", json_item["actor"]["user"]["last_name"])
         self.assertEqual("27721231234", json_item["actor"]["user"]["username"])
-        self.assertEqual(True, json_item["actor"]["user"]["is_active"])
-        self.assertEqual(False, json_item["actor"]["user"]["is_staff"])
-        self.assertEqual(False, json_item["actor"]["user"]["is_superuser"])
 
         self.assertEqual("Cassava", json_item["crops"][0]["name"])
         self.assertEqual(1, len(json_item["crops"]))
@@ -321,3 +331,46 @@ class TestCreateFarmerApi(ResourceTestCase):
 
         self.assertEqual("Zambezi", json_item["districts"][0]["name"])
         self.assertEqual(1, len(json_item["districts"]))
+
+        self.assertEqual("27721231234", json_item["actor"]['user']["username"])
+        self.assertEqual("test_first_name test_last_name", json_item["actor"]["name"])
+
+
+    def test_create_malicious_user(self):
+        """
+        Test the actual create farmer functionality works
+        """
+        # Creating the initial user
+        user_data = {"username": "27721231234",
+                     "first_name": "test_first_name",
+                     "last_name": "test_last_name",
+                     "is_staff": True,
+                     "is_superuser": True}
+        url = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'user',
+                      'api_name': 'v1'})
+        response = self.api_client.post(url, data=user_data, format="json")
+        json_item_user = json.loads(response.content)
+        self.assertEqual("test_first_name", json_item_user["first_name"])
+        self.assertEqual("test_last_name", json_item_user["last_name"])
+        self.assertEqual("27721231234", json_item_user["username"])
+        self.assertNotIn("password", json_item_user)
+        self.assertNotIn("is_active", json_item_user)
+        self.assertNotIn("is_staff", json_item_user)
+        self.assertNotIn("is_superuser", json_item_user)
+        self.assertNotIn("date_joined", json_item_user)
+        self.assertNotIn("last_login", json_item_user)
+
+        # Test if User has been created
+        created_user = User.objects.get(username="27721231234")
+        self.assertEqual("test_first_name", created_user.first_name)
+        self.assertEqual("test_last_name", created_user.last_name)
+        self.assertEqual("27721231234", created_user.username)
+        self.assertEqual(True, created_user.is_active)
+        self.assertEqual(False, created_user.is_staff)
+        self.assertEqual(False, created_user.is_superuser)
+        self.assertGreater(len(created_user.password), 5)
+
+        # Test if Actor has been created
+        created_actor = Actor.objects.get(user__username="27721231234")
+        self.assertEqual(created_actor.name, "test_first_name test_last_name")
