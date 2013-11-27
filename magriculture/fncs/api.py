@@ -92,9 +92,6 @@ def get_markets(request):
     return HttpResponse(json.dumps(markets))
 
 
-# ==========================================================
-# Tastypie APIs
-# ==========================================================
 class UserResource(ModelResource):
     """
     Creating a user
