@@ -1,5 +1,5 @@
 {
-    "url": "http://qa/api/v1/crop/",
+    "url": "http://qa/api/v1/crop/?limit=0",
     "method": "GET",
     "body": {
         "meta": {

@@ -117,7 +117,9 @@ function LimaLinksApi(im, url, opts) {
     };
 
     self.all_districts = function() {
-        var p = self.api_call("district/");
+        var p = self.api_call("district/", {
+            limit: 0
+        });
         p.add_callback(function(result){
             return result.objects;
         });
@@ -125,7 +127,9 @@ function LimaLinksApi(im, url, opts) {
     };
 
     self.all_crops = function() {
-        var p = self.api_call("crop/");
+        var p = self.api_call("crop/", {
+            limit: 0
+        });
         p.add_callback(function(result){
             return result.objects;
         });
