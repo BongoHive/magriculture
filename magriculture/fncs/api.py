@@ -35,29 +35,6 @@ def strip_in_country_codes(msisdn):
     return msisdn
 
 
-def get_farmer(request):
-    msisdn = request.GET.get('msisdn')
-    if msisdn is None:
-        return HttpResponse(json.dumps({"reason": "No msisdn given."}),
-                            status=400)
-    msisdn = strip_in_country_codes(msisdn)
-    # Something's wrong with our db, we've got multiple
-    # farmers for the same actor.
-    try:
-        farmer = Actor.find(msisdn).as_farmer()
-    except ObjectDoesNotExist:
-        return HttpResponse(json.dumps({"reason": "No farmer found."}),
-                            status=404)
-    crops = [(crop.pk, crop.name) for crop in farmer.crops.all()]
-    markets = [(market.pk, market.name) for market in farmer.markets.all()]
-    farmer_data = {
-        "farmer_name": farmer.actor.name,
-        "crops": crops,
-        "markets": markets,
-    }
-    return HttpResponse(json.dumps(farmer_data))
-
-
 def get_price_history(request):
     market_pk = request.GET.get('market')
     crop_pk = request.GET.get('crop')
