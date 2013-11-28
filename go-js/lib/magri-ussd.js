@@ -513,7 +513,6 @@ function MagriWorker() {
                     return lima_links_api.post_farmer(farmer);
                 });
                 p.add_callback(function(result){
-                    console.log(result);
                     return true;
                 })
                 return p;
