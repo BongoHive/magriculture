@@ -38,6 +38,8 @@ var test_fixtures_registration = [
     "test/fixtures/farmer_404.json",
     "test/fixtures/district.json",
     "test/fixtures/crop.json",
+    "test/fixtures/farmer_post.json",
+    "test/fixtures/user_post.json",
 ];
 
 

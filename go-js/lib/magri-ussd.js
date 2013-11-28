@@ -64,9 +64,18 @@ function LimaLinksApi(im, url, opts) {
     // in case we need to translate content from the API later
     self.lang = im.user.lang || im.config.default_lang || "en";
 
+    self.headers = {
+        'Content-Type': ['application/json']
+    };
+
     self.api_call = function(method, params) {
         var url = self.url + method;
         return self.json_api.get(url, {params: params});
+    };
+
+    self.api_post = function(method, data) {
+        var url = self.url + method;
+        return self.json_api.post(url, {data: data, headers: self.headers});
     };
 
     self.get_farmer = function(msisdn) {
@@ -79,6 +88,24 @@ function LimaLinksApi(im, url, opts) {
             } else {
                 return null;
             }
+        });
+        return p;
+    };
+
+    self.post_user = function(data) {
+        var p = self.api_post("user/", data);
+        p.add_callback(function(result){
+            // TODO: error checking
+            return result;
+        });
+        return p;
+    };
+
+    self.post_farmer = function(data) {
+        var p = self.api_post("farmer/", data);
+        p.add_callback(function(result){
+            // TODO: error checking
+            return result;
         });
         return p;
     };
@@ -172,6 +199,29 @@ function MagriWorker() {
                 extracted.push(el[field]);
         });
         return extracted;
+    };
+
+    self.registration_data_collect = function(){
+        var data = {
+            user: {
+                "username": im.user_addr,
+                "first_name": im.get_user_answer('registration_name_first'),
+                "last_name": im.get_user_answer('registration_name_last')
+            },
+            farmer: {
+                "actor": "/api/v1/actor/",
+                "agents": "",
+                "crops": ["/api/v1/crop/1/"],
+                "districts": ["/api/v1/district/" + im.get_user_answer('registration_district_confirm') + "/"],
+                "hh_id": "",
+                "id_number": null,
+                "markets": "",
+                "participant_type": "",
+                "resource_uri": "",
+                "wards": ["/api/v1/ward/268/"]
+            }
+        };
+        return data;
     };
 
     // Session metrics helper
@@ -452,6 +502,21 @@ function MagriWorker() {
         {
             on_enter: function(){
                 // save user
+                var lima_links_api = self.lima_links_api(im);
+                var data = self.registration_data_collect();
+                var p = lima_links_api.post_user(data.user);
+                p.add_callback(function (user) {
+                    data.farmer.actor += user.id + "/";
+                    return data.farmer;
+                });
+                p.add_callback(function(farmer){
+                    return lima_links_api.post_farmer(farmer);
+                });
+                p.add_callback(function(result){
+                    console.log(result);
+                    return true;
+                })
+                return p;
             }
         }
     ));

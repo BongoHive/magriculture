@@ -1,0 +1,18 @@
+{
+    "url": "http://qa/api/v1/farmer/",
+    "method": "POST",
+    "content_type": "application/json",
+    "data": {
+        "actor": "/api/v1/actor/20/",
+        "agents": "",
+        "crops": ["/api/v1/crop/1/"],
+        "districts": ["/api/v1/district/1/"],
+        "hh_id": "",
+        "id_number": null,
+        "markets": "",
+        "participant_type": "",
+        "resource_uri": "",
+        "wards": ["/api/v1/ward/268/"]
+    },
+    "body": {}
+}
