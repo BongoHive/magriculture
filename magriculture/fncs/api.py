@@ -231,6 +231,11 @@ class FarmerResource(ModelResource):
                 "wards": ["/api/v1/ward/%s/" % json_item_ward["objects"][0]["id"]]
             }
 
+    **Get specific Farmer based on msisdn**
+    ::
+
+        url: <base_url>/api/v1/farmer/?actor__user__username=123456789
+        method: GET
     """
     agents = fields.ManyToManyField('magriculture.fncs.api.AgentsResource',
                                     'agents',
@@ -262,6 +267,7 @@ class FarmerResource(ModelResource):
         authorization = Authorization()
         include_resource_uri = True
         always_return_data = True
+        filtering = {"actor" : ALL_WITH_RELATIONS}
 
 
 class AgentsResource(ModelResource):
