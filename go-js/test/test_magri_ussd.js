@@ -266,7 +266,7 @@ describe("as an unregistered farmer", function() {
         p.then(done, done);
     });
 
-    it("Confirming district I should be thanked and exit", function (done) {
+    it.only("Confirming district I should be thanked and exit", function (done) {
         var p = tester.check_state({
             user: {
                 current_state: "registration_district_confirm",

@@ -14,5 +14,45 @@
         "resource_uri": "",
         "wards": ["/api/v1/ward/268/"]
     },
-    "body": {}
+    "body": {
+        "actor": {
+            "gender": "",
+            "id": 20,
+            "name": "QA Farmer",
+            "resource_uri": "",
+            "user": {
+                "email": "",
+                "first_name": "Farmer",
+                "id": 20,
+                "last_name": "Bob",
+                "resource_uri": "",
+                "username": "27738590053"
+            }
+        },
+        "agents": [
+            {
+                "id": 43,
+                "resource_uri": ""
+            }
+        ],
+        "crops": [],
+        "districts": [],
+        "gender": "M",
+        "hh_id": "",
+        "id": 20,
+        "id_number": "",
+        "markets": [],
+        "number_of_females": null,
+        "number_of_males": null,
+        "participant_type": "",
+        "resource_uri": "",
+        "wards": [
+            {
+                "code": "10224.0",
+                "id": 39,
+                "name": "Waya",
+                "resource_uri": ""
+            }
+        ]
+    }
 }

@@ -1,25 +1,44 @@
 {
-    "url": "http://qa/api/v1/farmer/?msisdn=1234567",
+    "url": "http://qa/api/v1/farmer/?username=1234567",
     "method": "GET",
     "body": {
-        "meta": {
-            "limit": 20,
-            "next": null,
-            "offset": 0,
-            "previous": null,
-            "total_count": 1
+        "actor": {
+            "gender": "",
+            "id": 1234567,
+            "name": "QA Farmer",
+            "resource_uri": "",
+            "user": {
+                "email": "",
+                "first_name": "Farmer",
+                "id": 1234567,
+                "last_name": "Bob",
+                "resource_uri": "",
+                "username": "27738590053"
+            }
         },
-        "objects": [
+        "agents": [
             {
-                "farmer_name": "Farmer Bob",
-                "crops": [
-                    ["crop1", "Peas"],
-                    ["crop2", "Carrots"]
-                ],
-                "markets": [
-                    ["market1", "Kitwe"],
-                    ["market2", "Ndola"]
-                ]
+                "id": 43,
+                "resource_uri": ""
+            }
+        ],
+        "crops": [],
+        "districts": [],
+        "gender": "M",
+        "hh_id": "",
+        "id": 1234567,
+        "id_number": "",
+        "markets": [],
+        "number_of_females": null,
+        "number_of_males": null,
+        "participant_type": "",
+        "resource_uri": "",
+        "wards": [
+            {
+                "code": "10224.0",
+                "id": 39,
+                "name": "Waya",
+                "resource_uri": ""
             }
         ]
     }

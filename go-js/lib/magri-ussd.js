@@ -78,9 +78,9 @@ function LimaLinksApi(im, url, opts) {
         return self.json_api.post(url, {data: data, headers: self.headers});
     };
 
-    self.get_farmer = function(msisdn) {
+    self.get_farmer = function(username) {
         var p = self.api_call("farmer/", {
-            msisdn: msisdn
+            username: username
         });
         p.add_callback(function(result){
             if (result.objects.length == 1) {
@@ -199,6 +199,14 @@ function MagriWorker() {
                 extracted.push(el[field]);
         });
         return extracted;
+    };
+
+    self.get_contact = function(){
+        var p = im.api_request('contacts.get_or_create', {
+            delivery_class: 'ussd',
+            addr: im.user_addr
+        });
+        return p;
     };
 
     self.registration_data_collect = function(){
@@ -386,9 +394,10 @@ function MagriWorker() {
     self.add_creator("select_service", function(state_name, im) {
         var _ = im.i18n;
         var lima_links_api = self.lima_links_api(im);
-        var p = lima_links_api.get_farmer(im.user_addr);
-        p.add_callback(function (farmer) {
-            if (farmer === null) {
+        var p = self.get_contact(im);
+
+        p.add_callback(function(result) {
+            if (result.contact["extras-magri_id"] === undefined){
                 return new ChoiceState(
                     "registration_start",
                     function (choice) {
@@ -398,22 +407,33 @@ function MagriWorker() {
                         "need to register you with a few short questions."),
                     [new Choice("registration_name_first", _.gettext("Register for LimaLinks"))]
                 );
+            } else {
+                var p_farmer = lima_links_api.get_farmer(result.contact["extras-magri_id"]);
+                p_farmer.add_callback(function (farmer) {
+                    if (farmer === null) {
+                        return new EndState(
+                            "error_deleted",
+                            "Sorry - your LimaLinks is no longer active",
+                            "select_service");
+                    } else {
+                        var choices = [
+                            new Choice("select_crop", _.gettext("Market prices"))
+                        ];
+                        return new ChoiceState(
+                            state_name,
+                            function (choice) {
+                                return choice.value;
+                            },
+                            _.translate("Hi %1$s.\n" +
+                                        "Select a service:"
+                                       ).fetch(farmer.actor.user.first_name),
+                            choices,
+                            _.gettext("Please enter the number of the service.")
+                        );
+                    }
+                });
+                return p_farmer;
             }
-
-            var choices = [
-                new Choice("select_crop", _.gettext("Market prices"))
-            ];
-            return new ChoiceState(
-                state_name,
-                function (choice) {
-                    return choice.value;
-                },
-                _.translate("Hi %1$s.\n" +
-                            "Select a service:"
-                           ).fetch(farmer.farmer_name),
-                choices,
-                _.gettext("Please enter the number of the service.")
-            );
         });
         return p;
     });
@@ -505,6 +525,7 @@ function MagriWorker() {
                 var lima_links_api = self.lima_links_api(im);
                 var data = self.registration_data_collect();
                 var p = lima_links_api.post_user(data.user);
+                var farmer_id;
                 p.add_callback(function (user) {
                     data.farmer.actor += user.id + "/";
                     return data.farmer;
@@ -512,9 +533,23 @@ function MagriWorker() {
                 p.add_callback(function(farmer){
                     return lima_links_api.post_farmer(farmer);
                 });
+                p.add_callback(function(farmer){
+                    // update contact
+                    farmer_id = farmer.id;
+                    return self.get_contact();
+                });
+                p.add_callback(function(contact){
+                    var fields = {
+                        "magri_id": JSON.stringify(farmer_id)
+                    };
+                    return im.api_request('contacts.update_extras', {
+                        key: contact.key,
+                        fields: fields
+                    });
+                });
                 p.add_callback(function(result){
                     return true;
-                })
+                });
                 return p;
             }
         }
