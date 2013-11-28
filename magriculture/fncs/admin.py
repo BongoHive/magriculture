@@ -3,7 +3,7 @@ from django.contrib import admin
 
 # Project
 from magriculture.fncs.models import actors, props, geo
-from magriculture.fncs.actions import export_as_csv
+from magriculture.fncs.actions import ExportAsCSV
 
 # ==========================================================================
 # Actors
@@ -52,4 +52,5 @@ admin.site.register(geo.District)
 admin.site.register(geo.Ward)
 admin.site.register(geo.Market)
 
-admin.site.add_action(export_as_csv, "Export Selected as CSV")
+export_records_as_csv = ExportAsCSV()
+admin.site.add_action(export_records_as_csv, "Export selected records as CSV file")
