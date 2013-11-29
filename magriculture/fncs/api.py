@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 
 # Project
 from magriculture.fncs.models.actors import Actor, Farmer, Agent
-from magriculture.fncs.models.props import Transaction, Crop
+from magriculture.fncs.models.props import Transaction, Crop, CropReceipt, CropUnit
 from magriculture.fncs.models.geo import Market, Ward, District
 
 # Thirdparty
@@ -82,6 +82,65 @@ def get_highest_markets(request):
     highest_markets = [(market.pk, market.name) for market
                        in Market.highest_markets_for(crop)[:limit]]
     return HttpResponse(json.dumps(highest_markets))
+
+
+
+class CropUnitResource(ModelResource):
+
+    class Meta:
+        queryset = CropUnit.objects.all()
+        resource_name = "cropunit"
+        list_allowed_methods = ['get']
+        authorization = Authorization()
+        include_resource_uri = True
+        always_return_data = True
+        filtering = {"name" : ALL,
+                     "id": ALL}
+        excludes = ["created_at"]
+
+
+class CropReceiptResource(ModelResource):
+    crop = fields.ForeignKey('magriculture.fncs.api.CropResource',
+                            'crop',
+                            full=True)
+
+    unit = fields.ForeignKey('magriculture.fncs.api.CropUnitResource',
+                                    'unit',
+                                    full=True)
+
+    market = fields.ForeignKey('magriculture.fncs.api.MarketResource',
+                                'market',
+                                full=True)
+
+    class Meta:
+        queryset = CropReceipt.objects.all()
+        resource_name = "cropreceipt"
+        list_allowed_methods = ['get', 'put']
+        authorization = Authorization()
+        include_resource_uri = True
+        always_return_data = True
+        filtering = {"crop" : ALL_WITH_RELATIONS,
+                     "unit": ALL_WITH_RELATIONS,
+                     "market": ALL_WITH_RELATIONS}
+        excludes = ["created_at"]
+
+
+
+class TransactionResource(ModelResource):
+    crop_receipt = fields.ForeignKey('magriculture.fncs.api.CropReceiptResource',
+                                    'crop_receipt',
+                                    full=True)
+
+    class Meta:
+        queryset = Transaction.objects.all()
+        resource_name = "transaction"
+        list_allowed_methods = ['get', 'put']
+        authorization = Authorization()
+        include_resource_uri = True
+        always_return_data = True
+        filtering = {"crop_receipt" : ALL_WITH_RELATIONS}
+        excludes = ["created_at"]
+        limit = 5
 
 
 # ==========================================================
@@ -397,4 +456,5 @@ class CropResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL_WITH_RELATIONS}
+        filtering = {"name" : ALL,
+                    "id": ALL}
