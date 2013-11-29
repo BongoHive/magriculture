@@ -56,9 +56,6 @@ urlpatterns = patterns('',
     url(r'^todo/.*', views.todo, name='todo'),
 
 
-
-    # url(r'^api/v1/farmer', api.get_farmer, name='api_get_farmer'),
-    url(r'^api/v1/price_history', api.get_price_history, name='api_get_price_history'),
     url(r'^api/v1/highest_markets', api.get_highest_markets, name='api_get_highest_markets'),
 )
 
@@ -74,6 +71,10 @@ api_resources.register(api.WardResource())
 api_resources.register(api.DistrictResource())
 api_resources.register(api.CropResource())
 api_resources.register(api.UserResource())
+
+api_resources.register(api.CropUnitResource())
+api_resources.register(api.CropReceiptResource())
+api_resources.register(api.TransactionResource())
 
 # for HAProxy
 urlpatterns += patterns('',
