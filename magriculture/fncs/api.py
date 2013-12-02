@@ -7,8 +7,6 @@ import random
 # Django
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 
 # Project
