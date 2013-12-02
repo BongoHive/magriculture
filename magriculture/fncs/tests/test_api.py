@@ -12,6 +12,7 @@ from django.test.client import Client
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.props import Transaction
 from magriculture.fncs.models.actors import Actor, Farmer
+from magriculture.fncs.models.geo import Market
 
 
 # Third Party
@@ -40,18 +41,6 @@ class ApiTestCase(TestCase):
 
         return crop, markets
 
-    def create_farmer(self, msisdn):
-        province = utils.create_province('province')
-        district = utils.create_district('district', province)
-        market = utils.create_market("market", district)
-        agent = utils.create_agent()
-        identity = agent.actor.get_identity(agent.actor.user.username)
-        identity.set_pin('1234')
-        identity.save()
-        farmer = utils.create_farmer(msisdn=msisdn)
-        farmer.operates_at(market, agent)
-        return farmer
-
     def test_get_highest_markets(self):
         crop, markets = self.create_highest_markets(prices=[50, 100, 200])
         response = self.client.get(reverse('fncs:api_get_highest_markets'), {
@@ -75,25 +64,6 @@ class ApiTestCase(TestCase):
             [market.pk, market.name] for market in markets[:2]
             ])
 
-    # def test_get_markets(self):
-    #     _crop, markets = self.create_highest_markets(prices=[50, 100, 200])
-    #     response = self.client.get(reverse('fncs:api_get_markets'), {})
-    #     self.assertEqual(response.status_code, 200)
-    #     all_markets = json.loads(response.content)
-    #     self.assertEqual(all_markets, [
-    #         [market.pk, market.name] for market in markets
-    #         ])
-
-    # def test_get_markets_with_limit(self):
-    #     _crop, markets = self.create_highest_markets(prices=[50, 100, 200])
-    #     response = self.client.get(reverse('fncs:api_get_markets'), {
-    #         'limit': '2',
-    #         })
-    #     self.assertEqual(response.status_code, 200)
-    #     all_markets = json.loads(response.content)
-    #     self.assertEqual(all_markets, [
-    #         [market.pk, market.name] for market in markets[:2]
-    #         ])
 
 class TestCreateFarmerApi(ResourceTestCase):
     fixtures = ["test_province.json",
@@ -180,9 +150,9 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual("Rice", json_item["objects"][0]["name"])
         self.assertEqual(len(json_item["objects"]), 1)
 
-    def test_get_empty_crop(self):
+    def test_get_crop_which_not_exists(self):
         """
-        get a specific crop
+        get a DoesNotExist crop
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'crop',
@@ -401,3 +371,58 @@ class TestGetPriceHistory(ResourceTestCase):
         history_in_db = Transaction.objects.filter(crop_receipt__crop=1, crop_receipt__market=1).all().count()
         self.assertEqual(len(history),
                          history_in_db)
+
+
+    def test_get_market(self):
+        """
+        Test for get all markets
+        """
+        url = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'market',
+                      'api_name': 'v1'})
+        response = self.api_client.get(url)
+        self.assertEqual("application/json", response["Content-Type"])
+        self.assertEqual(response.status_code, 200)
+        json_item = json.loads(response.content)
+        self.assertIn("meta", json_item)
+        self.assertIn("objects", json_item)
+
+        market = json_item["objects"]
+        self.assertEqual(len(market),
+                         Market.objects.all().count())
+
+
+    def test_get_specific_market(self):
+        """
+        Test for get all markets
+        """
+        url = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'market',
+                      'api_name': 'v1'})
+        response = self.api_client.get("%s?name=Kafue Market" % url)
+        self.assertEqual("application/json", response["Content-Type"])
+        self.assertEqual(response.status_code, 200)
+        json_item = json.loads(response.content)
+        self.assertIn("meta", json_item)
+        self.assertIn("objects", json_item)
+        self.assertEqual(json_item["objects"][0]["name"], "Kafue Market")
+        market = json_item["objects"]
+        self.assertEqual(len(market), 1,
+                         Market.objects.filter(name="Kafue Market").all().count())
+
+
+    def test_get_non_existent_market(self):
+        """
+        Test for DoesNotExist Market
+        """
+        url = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'market',
+                      'api_name': 'v1'})
+        response = self.api_client.get("%s?name=Kafue Market Market" % url)
+        self.assertEqual("application/json", response["Content-Type"])
+        self.assertEqual(response.status_code, 200)
+        json_item = json.loads(response.content)
+        self.assertIn("meta", json_item)
+        self.assertIn("objects", json_item)
+        market = json_item["objects"]
+        self.assertEqual(len(market), 0)
