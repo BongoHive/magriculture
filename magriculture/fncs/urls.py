@@ -54,8 +54,6 @@ urlpatterns = patterns('',
     url(r'^agents/new/$', views.agent_new, name='agent_new'),
     url(r'^agents/(?P<agent_pk>\d+)/$', views.agent, name='agent'),
     url(r'^todo/.*', views.todo, name='todo'),
-
-
     url(r'^api/v1/highest_markets', api.get_highest_markets, name='api_get_highest_markets'),
 )
 
