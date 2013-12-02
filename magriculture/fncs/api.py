@@ -86,7 +86,14 @@ def get_highest_markets(request):
 
 
 class CropUnitResource(ModelResource):
+    """
+    Get the Crop Unit
+    ::
 
+         url: <base_url>/api/v1/cropunit/
+         url: <base_url>/api/v1/cropunit/?name=TheName
+         method: GET
+    """
     class Meta:
         queryset = CropUnit.objects.all()
         resource_name = "cropunit"
@@ -100,6 +107,18 @@ class CropUnitResource(ModelResource):
 
 
 class CropReceiptResource(ModelResource):
+    """
+    Get the Crop reciept
+    ::
+
+         url: <base_url>/api/v1/cropreceipt/
+         url: <base_url>/api/v1/cropreceipt/?crop=TheCrop
+         url: <base_url>/api/v1/cropreceipt/?unit=TheUnit
+         url: <base_url>/api/v1/cropreceipt/?market=TheMarket
+         url: <base_url>/api/v1/cropreceipt/?market=TheMarket&unit=TheUnit&crop=TheCrop
+         method: GET
+    """
+
     crop = fields.ForeignKey('magriculture.fncs.api.CropResource',
                             'crop',
                             full=True)
@@ -127,6 +146,16 @@ class CropReceiptResource(ModelResource):
 
 
 class TransactionResource(ModelResource):
+    """
+    Get Price History
+    ::
+
+         url: <base_url>/api/v1/transaction/
+         url: <base_url>/api/v1/transaction/?crop_receipt__crop=<id>
+         url: <base_url>/api/v1/transaction/?crop_receipt__crop=<id>
+         url: <base_url>/api/v1/transaction/?crop_receipt__crop=<id>&crop_receipt__crop=<id>
+         method: GET
+    """
     crop_receipt = fields.ForeignKey('magriculture.fncs.api.CropReceiptResource',
                                     'crop_receipt',
                                     full=True)
