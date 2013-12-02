@@ -22,21 +22,6 @@ class ApiTestCase(TestCase):
     def setUp(self):
         self.client = Client()
 
-    def create_price_history(self):
-        farmer = utils.create_farmer()
-        market = utils.create_market("market", farmer.farmergroup.district)
-        crop = utils.create_crop("potatoes")
-        unit = utils.create_crop_unit("boxes")
-
-        amount, price = 10, 20
-        agent = utils.create_agent()
-
-        for i in range(100):
-            receipt = agent.take_in_crop(market, farmer, amount, unit, crop)
-            agent.register_sale(receipt, amount, price)
-
-        return crop, market, unit
-
     def create_highest_markets(self, prices):
         farmer = utils.create_farmer()
         markets = [
@@ -67,39 +52,6 @@ class ApiTestCase(TestCase):
         farmer.operates_at(market, agent)
         return farmer
 
-    def test_get_price_history(self):
-        crop, market, unit = self.create_price_history()
-        response = self.client.get(reverse('fncs:api_get_price_history'), {
-            'crop': crop.pk,
-            'market': market.pk,
-            })
-        self.assertEqual(response.status_code, 200)
-        price_data = json.loads(response.content)
-        self.assertEqual(price_data, {
-            unicode(unit.pk): {
-                "unit_name": "boxes",
-                "prices": list(Transaction.price_history_for(
-                                             market, crop, unit)[:10]),
-                }
-            })
-
-    def test_get_price_history_with_limit(self):
-        crop, market, unit = self.create_price_history()
-        response = self.client.get(reverse('fncs:api_get_price_history'), {
-            'crop': crop.pk,
-            'market': market.pk,
-            'limit': '2',
-            })
-        self.assertEqual(response.status_code, 200)
-        price_data = json.loads(response.content)
-        self.assertEqual(price_data, {
-            unicode(unit.pk): {
-                "unit_name": "boxes",
-                "prices": list(Transaction.price_history_for(
-                                             market, crop, unit)[:2]),
-                }
-            })
-
     def test_get_highest_markets(self):
         crop, markets = self.create_highest_markets(prices=[50, 100, 200])
         response = self.client.get(reverse('fncs:api_get_highest_markets'), {
@@ -123,25 +75,25 @@ class ApiTestCase(TestCase):
             [market.pk, market.name] for market in markets[:2]
             ])
 
-    def test_get_markets(self):
-        _crop, markets = self.create_highest_markets(prices=[50, 100, 200])
-        response = self.client.get(reverse('fncs:api_get_markets'), {})
-        self.assertEqual(response.status_code, 200)
-        all_markets = json.loads(response.content)
-        self.assertEqual(all_markets, [
-            [market.pk, market.name] for market in markets
-            ])
+    # def test_get_markets(self):
+    #     _crop, markets = self.create_highest_markets(prices=[50, 100, 200])
+    #     response = self.client.get(reverse('fncs:api_get_markets'), {})
+    #     self.assertEqual(response.status_code, 200)
+    #     all_markets = json.loads(response.content)
+    #     self.assertEqual(all_markets, [
+    #         [market.pk, market.name] for market in markets
+    #         ])
 
-    def test_get_markets_with_limit(self):
-        _crop, markets = self.create_highest_markets(prices=[50, 100, 200])
-        response = self.client.get(reverse('fncs:api_get_markets'), {
-            'limit': '2',
-            })
-        self.assertEqual(response.status_code, 200)
-        all_markets = json.loads(response.content)
-        self.assertEqual(all_markets, [
-            [market.pk, market.name] for market in markets[:2]
-            ])
+    # def test_get_markets_with_limit(self):
+    #     _crop, markets = self.create_highest_markets(prices=[50, 100, 200])
+    #     response = self.client.get(reverse('fncs:api_get_markets'), {
+    #         'limit': '2',
+    #         })
+    #     self.assertEqual(response.status_code, 200)
+    #     all_markets = json.loads(response.content)
+    #     self.assertEqual(all_markets, [
+    #         [market.pk, market.name] for market in markets[:2]
+    #         ])
 
 class TestCreateFarmerApi(ResourceTestCase):
     fixtures = ["test_province.json",
@@ -219,14 +171,29 @@ class TestCreateFarmerApi(ResourceTestCase):
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'crop',
                       'api_name': 'v1'})
-        response = self.api_client.get("%s?name=Cassava" % url)
+        response = self.api_client.get("%s?name=Rice" % url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
         json_item = json.loads(response.content)
         self.assertIn("meta", json_item)
         self.assertIn("objects", json_item)
-        self.assertEqual("Cassava", json_item["objects"][0]["name"])
+        self.assertEqual("Rice", json_item["objects"][0]["name"])
         self.assertEqual(len(json_item["objects"]), 1)
+
+    def test_get_empty_crop(self):
+        """
+        get a specific crop
+        """
+        url = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'crop',
+                      'api_name': 'v1'})
+        response = self.api_client.get("%s?name=RiceRice" % url)
+        self.assertEqual("application/json", response["Content-Type"])
+        self.assertEqual(response.status_code, 200)
+        json_item = json.loads(response.content)
+        self.assertIn("meta", json_item)
+        self.assertIn("objects", json_item)
+        self.assertEqual(len(json_item["objects"]), 0)
 
 
     def test_create_farmer(self):
@@ -278,7 +245,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         url_crop = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'crop',
                       'api_name': 'v1'})
-        response_crop = self.api_client.get("%s?name=Cassava" % url_crop)
+        response_crop = self.api_client.get("%s?name=Rice" % url_crop)
         json_item_crop = json.loads(response_crop.content)
         self.assertEqual(1, len(json_item_crop["objects"]))
 
@@ -323,7 +290,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual("test_last_name", json_item["actor"]["user"]["last_name"])
         self.assertEqual("27721231234", json_item["actor"]["user"]["username"])
 
-        self.assertEqual("Cassava", json_item["crops"][0]["name"])
+        self.assertEqual("Rice", json_item["crops"][0]["name"])
         self.assertEqual(1, len(json_item["crops"]))
 
         self.assertEqual("test_ward", json_item["wards"][0]["name"])
@@ -374,3 +341,63 @@ class TestCreateFarmerApi(ResourceTestCase):
         # Test if Actor has been created
         created_actor = Actor.objects.get(user__username="27721231234")
         self.assertEqual(created_actor.name, "test_first_name test_last_name")
+
+
+class TestGetPriceHistory(ResourceTestCase):
+    """
+    Testing the get price model.
+    """
+    fixtures = ["test_province.json",
+                "test_district.json",
+                "test_ward.json",
+                "test_zone.json",
+                "test_rpiarea.json",
+                "test_auth_user.json",
+                "test_actor.json",
+                "test_agent",
+                "test_farmergroup.json",
+                "test_farmer.json",
+                "test_crop_unit.json",
+                "test_crop.json",
+                "test_market.json",
+                "test_crop_receipt.json",
+                "test_transaction.json"]
+
+    def test_get_price_history_all(self):
+        """
+        Get a all price history
+        """
+        url = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'transaction',
+                      'api_name': 'v1'})
+        response = self.client.get(url)
+        self.assertEqual("application/json", response["Content-Type"])
+        self.assertEqual(response.status_code, 200)
+        json_item = json.loads(response.content)
+
+        self.assertIn("meta", json_item)
+        self.assertIn("objects", json_item)
+
+        history = json_item["objects"]
+        self.assertEqual(len(history),
+                         Transaction.objects.all().count())
+
+
+    def test_get_price_history_filtered(self):
+        """
+        Get filtered price history
+        """
+        url = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'transaction',
+                      'api_name': 'v1'})
+        response = self.client.get("%s?crop_receipt__crop=1&crop_receipt__market=1" % url)
+        self.assertEqual("application/json", response["Content-Type"])
+        self.assertEqual(response.status_code, 200)
+        json_item = json.loads(response.content)
+        self.assertIn("meta", json_item)
+        self.assertIn("objects", json_item)
+
+        history = json_item["objects"]
+        history_in_db = Transaction.objects.filter(crop_receipt__crop=1, crop_receipt__market=1).all().count()
+        self.assertEqual(len(history),
+                         history_in_db)
