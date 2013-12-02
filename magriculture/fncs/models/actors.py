@@ -17,6 +17,12 @@ def create_actor(sender, instance, created, **kwargs):
     Signal handler for Django, creates a new blank actor for
     every user created.
     """
+    if kwargs.get('raw'):
+        # When loading fixtures, post save is automatically triggered and leads
+        # to duplicate entry errors, thus to overcome this ther undocumented `raw`
+        # key word need sto be used (https://code.djangoproject.com/ticket/12610)
+        return
+
     if created:
         # Update the name
         actor = Actor.objects.create(user=instance)
