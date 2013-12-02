@@ -140,7 +140,6 @@ class TransactionResource(ModelResource):
         always_return_data = True
         filtering = {"crop_receipt" : ALL_WITH_RELATIONS}
         excludes = ["created_at"]
-        limit = 5
 
 
 # ==========================================================
