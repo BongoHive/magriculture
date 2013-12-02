@@ -1,0 +1,128 @@
+[
+    {
+        "pk": 2,
+        "model": "auth.user",
+        "fields": {
+            "username": "2776123462",
+            "first_name": "Abebi",
+            "last_name": "Okpara",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2013-11-30T21:14:17.100",
+            "groups": [],
+            "user_permissions": [],
+            "password": "",
+            "email": "",
+            "date_joined": "2013-11-30T21:14:17.100"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "auth.user",
+        "fields": {
+            "username": "2776123456",
+            "first_name": "Deion",
+            "last_name": "Okpara",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2013-11-30T21:14:17.217",
+            "groups": [],
+            "user_permissions": [],
+            "password": "",
+            "email": "",
+            "date_joined": "2013-11-30T21:14:17.217"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "auth.user",
+        "fields": {
+            "username": "2776123457",
+            "first_name": "Amari",
+            "last_name": "Ojukwu",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2013-11-30T21:14:17.474",
+            "groups": [],
+            "user_permissions": [],
+            "password": "",
+            "email": "",
+            "date_joined": "2013-11-30T21:14:17.474"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "auth.user",
+        "fields": {
+            "username": "2776123458",
+            "first_name": "Abiola",
+            "last_name": "Bankole",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2013-11-30T21:14:17.720",
+            "groups": [],
+            "user_permissions": [],
+            "password": "",
+            "email": "",
+            "date_joined": "2013-11-30T21:14:17.720"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "auth.user",
+        "fields": {
+            "username": "2776123459",
+            "first_name": "Amari",
+            "last_name": "Diya",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2013-11-30T21:14:17.952",
+            "groups": [],
+            "user_permissions": [],
+            "password": "",
+            "email": "",
+            "date_joined": "2013-11-30T21:14:17.952"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "auth.user",
+        "fields": {
+            "username": "2776123460",
+            "first_name": "Amari",
+            "last_name": "Okeke",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2013-11-30T21:14:18.095",
+            "groups": [],
+            "user_permissions": [],
+            "password": "",
+            "email": "",
+            "date_joined": "2013-11-30T21:14:18.095"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "auth.user",
+        "fields": {
+            "username": "m",
+            "first_name": "",
+            "last_name": "",
+            "is_active": true,
+            "is_superuser": true,
+            "is_staff": true,
+            "last_login": "2013-11-30T21:15:00.519",
+            "groups": [],
+            "user_permissions": [],
+            "password": "pbkdf2_sha256$10000$FAsrPYQD50eh$zGa3PbAxIiXXVekVNFDBm7C5HEcNNpjGjKcSqwCUpXA=",
+            "email": "m@mail.com",
+            "date_joined": "2013-11-30T21:13:34.419"
+        }
+    }
+]

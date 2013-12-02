@@ -1,1 +1,20 @@
-[{"pk": 1, "model": "fncs.ward", "fields": {"code": "", "name": "Ward in district", "district": 2}}, {"pk": 2, "model": "fncs.ward", "fields": {"code": "", "name": "test_ward", "district": 19}}]
+[
+    {
+        "pk": 1,
+        "model": "fncs.ward",
+        "fields": {
+            "code": "",
+            "name": "Ward in district",
+            "district": 2
+        }
+    },
+    {
+        "pk": 2,
+        "model": "fncs.ward",
+        "fields": {
+            "code": "",
+            "name": "test_ward",
+            "district": 19
+        }
+    }
+]
