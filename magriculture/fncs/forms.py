@@ -235,3 +235,20 @@ class CropReceiptSaleStep2Form(forms.Form):
     amount = forms.FloatField(required=True, min_value=0.1, label='How many?')
     price = forms.FloatField(required=True, min_value=0.1,
                              label='At what price?')
+
+
+class FarmerGroupCreateFilterForm(forms.Form):
+    crop = forms.ModelChoiceField(queryset=Crop.objects.all(), required=False,
+                                  empty_label="----", label='Which crop?')
+    district = forms.ModelChoiceField(queryset=District.objects.all(), required=False,
+                                  empty_label="----", label='District?')
+    ward = forms.ModelChoiceField(queryset=Ward.objects.all(), required=False,
+                                  empty_label="----", label='Ward?')
+
+
+    def clean(self):
+        data = super(FarmerGroupCreateFilterForm, self).clean()
+        if (data["crop"] and data["district"] and data["ward"]) is None:
+            raise forms.ValidationError("You need to choose at least one filter")
+        return data
+
