@@ -26,7 +26,7 @@ class ApiTestCase(TestCase):
     def create_highest_markets(self, prices):
         farmer = utils.create_farmer()
         markets = [
-            utils.create_market("market %d" % i, farmer.farmergroup.district)
+            utils.create_market("market %d" % i, farmer.districts.all()[0])
             for i in range(len(prices))]
         crop = utils.create_crop("potatoes")
         unit = utils.create_crop_unit("boxes")

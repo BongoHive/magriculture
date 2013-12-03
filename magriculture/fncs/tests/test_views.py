@@ -40,7 +40,6 @@ class FNCSTestCase(TestCase):
         self.login_url = '%s?next=%s' % (reverse('login'), reverse('fncs:home'))
         self.farmers = list(create_random_farmers(10, self.agent, self.market))
         self.farmer = self.farmers[0]
-        self.farmergroup = self.farmer.farmergroup
 
     def farmer_url(self, *args, **kwargs):
         return utils.farmer_url(self.farmer.pk, *args, **kwargs)
@@ -114,7 +113,6 @@ class FarmersTestCase(FNCSTestCase):
             'msisdn1': self.test_msisdn,
             'name': 'name',
             'surname': 'surname',
-            'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
             'gender': "M",
         })
@@ -149,14 +147,19 @@ class FarmersTestCase(FNCSTestCase):
         response = self.client.post(self.farmer_url('location_save'), {
             'search': self.ward.name.lower(),
             'location': 'ward:%d' % self.ward.pk}, follow=True)
-        self.assertEqual(list(self.farmer.wards.all()), [self.ward])
+        wards = self.farmer.wards.all()
+        self.assertEqual(wards.count(), 2)
+        self.assertTrue(wards.get(name=self.ward.name))
         self.assertRedirects(response, self.farmer_url('sales'))
 
     def test_farmer_location_save_district(self):
         response = self.client.post(self.farmer_url('location_save'), {
             'search': self.district.name.lower(),
             'location': 'district:%d' % self.district.pk}, follow=True)
-        self.assertEqual(list(self.farmer.districts.all()), [self.district])
+
+        districts = self.farmer.districts.all()
+        self.assertEqual(districts.count(), 2)
+        self.assertTrue(districts.get(name=self.district.name))
         self.assertRedirects(response, self.farmer_url('sales'))
 
     def test_farmer_id_number(self):
@@ -164,7 +167,6 @@ class FarmersTestCase(FNCSTestCase):
             'msisdn1': self.test_msisdn,
             'name': 'name',
             'surname': 'surname',
-            'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
             'id_number': '123456789',
             'gender': 'M',
@@ -279,7 +281,6 @@ class FarmersTestCase(FNCSTestCase):
             'name': 'n',
             'surname': 'sn',
             'msisdn1': '1',
-            'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
             'gender': 'M',
         })
@@ -303,7 +304,6 @@ class FarmersTestCase(FNCSTestCase):
             'msisdn1': msisdn,
             'name': 'name',
             'surname': 'surname',
-            'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
             'gender': 'M',
         })
@@ -321,7 +321,6 @@ class FarmersTestCase(FNCSTestCase):
             'id_number': farmer.id_number, # same as previous farmer
             'name': 'name',
             'surname': 'surname',
-            'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
             'gender': 'M',
         })
@@ -338,7 +337,6 @@ class FarmersTestCase(FNCSTestCase):
             'msisdn1': msisdn,
             'name': 'name',
             'surname': 'surname',
-            'farmergroup': self.farmergroup.pk,
             'markets': [self.market.pk],
             'matched_farmer': farmer.pk,
             'gender': 'M',
