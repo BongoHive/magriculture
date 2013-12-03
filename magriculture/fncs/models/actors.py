@@ -363,7 +363,7 @@ class Farmer(models.Model):
         self.markets.add(*markets)
 
     @classmethod
-    def create(cls, msisdn, name, surname, farmergroup, id_number=None, gender=UNKNOWN):
+    def create(cls, msisdn, name, surname, id_number=None, gender=UNKNOWN):
         """
         Create a new Farmer.
 
@@ -374,8 +374,6 @@ class Farmer(models.Model):
         :type msisdn: str
         :type name: str
         :type surname: str
-        :param farmergroup: the group this farmer belongs so.
-        :type farmergroup: magriculture.fncs.models.actors.FarmerGroup
         :type id_number: str
         :returns: a farmer
         :rtype: magriculture.fncs.models.actors.Farmer
@@ -391,7 +389,6 @@ class Farmer(models.Model):
             return actor.as_farmer()
 
         farmer = cls(actor=actor,
-                     farmergroup=farmergroup,
                      id_number=id_number,
                      gender=gender)
         farmer.save()
