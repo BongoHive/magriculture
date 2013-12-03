@@ -14,7 +14,7 @@ from magriculture.fncs.models.actors import Farmer, FarmerGroup, Agent
 from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
                                             CropUnit, Offer, CropReceipt,
                                             DirectSale)
-from magriculture.fncs.models.geo import Market
+from magriculture.fncs.models.geo import Market, Ward
 from magriculture.fncs import forms
 
 
@@ -328,20 +328,33 @@ def group_messages(request):
 def group_message_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
-    farmergroups = FarmerGroup.objects.distinct().filter(
-        farmer__in=agent.farmers.all())
+    # farmergroups = FarmerGroup.objects.distinct().filter(
+    #     farmer__in=agent.farmers.all())
+    form = forms.FarmerGroupCreateFilterForm()
     if request.method == "POST":
         if 'cancel' in request.POST:
             messages.success(request, 'Message Cancelled')
             return HttpResponseRedirect(reverse('fncs:messages'))
         else:
-            return HttpResponseRedirect('%s?%s' % (
-                reverse('fncs:group_message_write'),
-                urllib.urlencode([('fg', fg_id) for fg_id
-                                  in request.POST.getlist('fg')])
-            ))
+            form = forms.FarmerGroupCreateFilterForm(request.POST)
+            if form.is_valid():
+                data = form.cleaned_data
+                farmergroup = FarmerGroup(district=data["district"],
+                                          crop=data["crop"],
+                                          agent=agent
+                                          )
+                farmergroup.save()
+                farmergroup.wards.add(data["ward"])
+                return HttpResponseRedirect('%s?%s' % (
+                    reverse('fncs:group_message_write'),
+                    urllib.urlencode([('fg', fg_id) for fg_id
+                                      in request.POST.getlist('fg')])
+                ))
+            else:
+                messages.error(request, 'There are some errors on the form')
+
     return render_to_response('group_messages_new.html', {
-        'farmergroups': farmergroups
+        'form': form
     }, context_instance=RequestContext(request))
 
 
