@@ -1,12 +1,18 @@
+# Python
+from datetime import datetime, timedelta
+
+# Django
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+
+# Project
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import (Actor, Farmer, FarmerGroup,
                                              Identity)
-from magriculture.fncs.models.props import Message, GroupMessage, Note
+from magriculture.fncs.models.props import Message, GroupMessage, Note, Crop
 from magriculture.fncs.errors import ActorException
-from datetime import datetime, timedelta
-
+from magriculture.fncs.models.geo import District, Ward
 
 class ActorTestCase(TestCase):
 
@@ -20,6 +26,54 @@ class ActorTestCase(TestCase):
         user = User.objects.create_user('username', 'email@domain.com')
         actor = user.get_profile()
         self.assertTrue(isinstance(actor, Actor))
+
+
+class TestSendMessage(TestCase):
+    """
+    Test Send Message to Farmer Groups
+    """
+    fixtures = ["test_province.json",
+                "test_district.json",
+                "test_ward.json",
+                "test_zone.json",
+                "test_rpiarea.json",
+                "test_auth_user.json",
+                "test_actor.json",
+                "test_agent",
+                # "test_farmergroup.json",
+                "test_farmer.json",
+                "test_crop_unit.json",
+                "test_crop.json",
+                "test_market.json",
+                "test_crop_receipt.json",
+                "test_transaction.json"]
+
+    def setUp(self):
+        self.client.login(username="m", password="m")
+
+    def test_send_farmer_group_message_final_screen_empty_data(self):
+        url = reverse("fncs:group_message_new")
+        response = self.client.post(url, follow=True)
+        self.assertEquals(response.context["form"].errors["__all__"],
+                          [u'You need to choose at least one filter'])
+
+    def test_send_farmer_group_message_final_screen_good_data(self):
+        crop = Crop.objects.get(pk=1)
+        district = District.objects.get(pk=1)
+        ward = Ward.objects.get(pk=1)
+
+        data={"crop": crop.pk,
+              "district": district.pk,
+              "ward": ward.pk}
+        url = reverse("fncs:group_message_new")
+        response = self.client.post(url, data=data, follow=True)
+        farmergrp = FarmerGroup.objects.all()
+        self.assertEquals(farmergrp.count(), 1)
+        self.assertEquals(farmergrp[0].crop, crop)
+        self.assertEquals(farmergrp[0].district, district)
+        self.assertEquals(farmergrp[0].wards.all()[0], ward)
+        self.assertEquals(farmergrp[0].agent,
+                          response.context["user"].actor.as_agent())
 
 
 class AgentTestCase(TestCase):
