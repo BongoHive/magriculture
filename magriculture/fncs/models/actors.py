@@ -249,7 +249,6 @@ class Farmer(models.Model):
     """
     #: the :class:`Actor` this farmer is linked to
     actor = models.ForeignKey('fncs.Actor')
-    farmergroup = models.ForeignKey('fncs.FarmerGroup', null=True)
     agents = models.ManyToManyField('fncs.Agent')
     id_number = models.CharField(blank=True, null=True, max_length=255,
                                  unique=True)
