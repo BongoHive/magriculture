@@ -429,10 +429,15 @@ class FarmerGroup(models.Model):
     district = models.ForeignKey('fncs.District', null=True)
     #: Which :class:`magriculture.fncs.models.geo.Ward` this group is
     #: active in, a M2M relationship.
-    wards = models.ManyToManyField('fncs.Ward')
+    wards = models.ManyToManyField('fncs.Ward', null=True)
     #: The :class:`ExtensionOfficer` assigned to
     #: this FarmerGroup
     extensionofficer = models.ForeignKey('fncs.ExtensionOfficer', null=True)
+    #: The :class:`Actor` assigned to
+    #: this FarmerGroup
+    #: Each dynamic group must have an actor for specific filtering
+    agent = models.ForeignKey('fncs.Agent')
+    crop = models.ForeignKey('fncs.Crop', null=True)
 
     def members(self):
         """
