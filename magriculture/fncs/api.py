@@ -126,8 +126,7 @@ class UserResource(ModelResource):
          method: POST
          content_type: "application/json"
          body: {
-                    Paragrapth title..
-                    username": "27721231234",
+                    "username": "27721231234",
                     "first_name": "test_first_name",
                     "last_name": "test_last_name"
          }
