@@ -7,50 +7,18 @@ import random
 # Django
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 
 # Project
 from magriculture.fncs.models.actors import Actor, Farmer, Agent
-from magriculture.fncs.models.props import Transaction, Crop
+from magriculture.fncs.models.props import Transaction, Crop, CropReceipt, CropUnit
 from magriculture.fncs.models.geo import Market, Ward, District
 
 # Thirdparty
 from tastypie.resources import ModelResource, ALL_WITH_RELATIONS, ALL
 from tastypie.authorization import Authorization
 from tastypie import fields
-
-
-def strip_in_country_codes(msisdn):
-    """Strips the country code for numbers that are considered to
-       be in-country for this deployment. Other numbers are left
-       as-is.
-       """
-    for (code, prefix) in settings.MAGRICULTURE_IN_COUNTRY_CODES:
-        if msisdn.startswith(code):
-            msisdn = prefix + msisdn[len(code):]
-            break
-    return msisdn
-
-
-def get_price_history(request):
-    market_pk = request.GET.get('market')
-    crop_pk = request.GET.get('crop')
-    limit = int(request.GET.get('limit', '10'))
-    market = get_object_or_404(Market, pk=market_pk)
-    crop = get_object_or_404(Crop, pk=crop_pk)
-    prices = {}
-    for unit in crop.units.all():
-        unit_prices = Transaction.price_history_for(market, crop, unit)[:limit]
-        unit_prices = list(unit_prices)
-        if unit_prices:
-            prices[unit.pk] = {
-                "unit_name": unit.name,
-                "prices": unit_prices,
-            }
-    return HttpResponse(json.dumps(prices))
 
 
 def get_highest_markets(request):
@@ -62,13 +30,93 @@ def get_highest_markets(request):
     return HttpResponse(json.dumps(highest_markets))
 
 
-def get_markets(request):
-    limit = int(request.GET.get('limit', '10'))
-    markets = [(market.pk, market.name) for market
-               in Market.objects.all()[:limit]]
-    return HttpResponse(json.dumps(markets))
+class CropUnitResource(ModelResource):
+    """
+    Get the Crop Unit
+    ::
+
+         url: <base_url>/api/v1/cropunit/
+         url: <base_url>/api/v1/cropunit/?name=TheName
+         method: GET
+    """
+    class Meta:
+        queryset = CropUnit.objects.all()
+        resource_name = "cropunit"
+        list_allowed_methods = ['get']
+        authorization = Authorization()
+        include_resource_uri = True
+        always_return_data = True
+        filtering = {"name": ALL,
+                     "id": ALL}
+        excludes = ["created_at"]
 
 
+class CropReceiptResource(ModelResource):
+    """
+    Get the Crop reciept
+    ::
+
+         url: <base_url>/api/v1/cropreceipt/
+         url: <base_url>/api/v1/cropreceipt/?crop=TheCrop
+         url: <base_url>/api/v1/cropreceipt/?unit=TheUnit
+         url: <base_url>/api/v1/cropreceipt/?market=TheMarket
+         url: <base_url>/api/v1/cropreceipt/?market=TheMarket&unit=TheUnit&crop=TheCrop
+         method: GET
+    """
+
+    crop = fields.ForeignKey('magriculture.fncs.api.CropResource',
+                             'crop',
+                             full=True)
+
+    unit = fields.ForeignKey('magriculture.fncs.api.CropUnitResource',
+                             'unit',
+                             full=True)
+
+    market = fields.ForeignKey('magriculture.fncs.api.MarketResource',
+                               'market',
+                                full=True)
+
+    class Meta:
+        queryset = CropReceipt.objects.all()
+        resource_name = "cropreceipt"
+        list_allowed_methods = ['get', 'put']
+        authorization = Authorization()
+        include_resource_uri = True
+        always_return_data = True
+        filtering = {"crop": ALL_WITH_RELATIONS,
+                     "unit": ALL_WITH_RELATIONS,
+                     "market": ALL_WITH_RELATIONS}
+        excludes = ["created_at"]
+
+
+class TransactionResource(ModelResource):
+    """
+    Get Price History
+    ::
+
+         url: <base_url>/api/v1/transaction/
+         url: <base_url>/api/v1/transaction/?crop_receipt__crop=<id>
+         url: <base_url>/api/v1/transaction/?crop_receipt__crop=<id>
+         url: <base_url>/api/v1/transaction/?crop_receipt__crop=<id>&crop_receipt__crop=<id>
+         method: GET
+    """
+    crop_receipt = fields.ForeignKey(
+        'magriculture.fncs.api.CropReceiptResource', 'crop_receipt', full=True)
+
+    class Meta:
+        queryset = Transaction.objects.all()
+        resource_name = "transaction"
+        list_allowed_methods = ['get', 'put']
+        authorization = Authorization()
+        include_resource_uri = True
+        always_return_data = True
+        filtering = {"crop_receipt": ALL_WITH_RELATIONS}
+        excludes = ["created_at"]
+
+
+# ==========================================================
+# Tastypie APIs
+# ==========================================================
 class UserResource(ModelResource):
     """
     Creating a user
@@ -115,7 +163,10 @@ class UserResource(ModelResource):
         if "is_staff" in bundle.data:
             bundle.data["is_staff"] = False
 
-        bundle.data["password"] = make_password(None)
+        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
+        password_hash = hashlib.sha1(salt+bundle.data["first_name"] +
+                                     bundle.data["last_name"]).hexdigest()
+        bundle.data["password"] = password_hash
         return bundle
 
     def dehydrate(self, bundle):
@@ -165,25 +216,83 @@ class FarmerResource(ModelResource):
                     "wards": ["/api/v1/ward/%s/" % ward["objects"][0]["id"]]
                 }
 
+    :return: json_item_user
+
+
+
+    step 2 - Get post data for foriegn key associations
+    ================================
+    Get a Crop
+    ---------------------------------
+    "url": "<base_url>/api/v1/crop/?name=Crop",
+    "method": "GET",
+
+    :return: json_item_crop
+
+    Get a ward
+    ---------------------------------
+    "url": "<base_url>/api/v1/ward/?name=Ward",
+    "method": "GET",
+
+    :return: json_item_ward
+
+    Get a district
+    ---------------------------------
+    "url": "<base_url>/api/v1/district/?name=District",
+    "method": "GET",
+
+    :return: json_item_district
+
+    Get a actor
+    ---------------------------------
+    "url": "<base_url>/api/v1/actor/?user__username=27721231234,
+    "method": "GET",
+
+    :return: json_item_actor
+
+
+
+    step 3 - Create Farmer
+    =============================================
+    "url": "<base_url>/api/v1/farmer/",,
+    "method": "POST",
+    "content_type": "application/json",
+    "body": {
+                "actor": "/api/v1/actor/%s/" % json_item_actor["objects"][0]["id"],
+                "agents": "",
+                "crops": ["/api/v1/crop/%s/" % json_item_crop["objects"][0]["id"]],
+                "districts": ["/api/v1/district/%s/" % json_item_district["objects"][0]["id"]],
+                "hh_id": "",
+                "id_number": "123456789",
+                "markets": "",
+                "participant_type": "",
+                "resource_uri": "",
+                "wards": ["/api/v1/ward/%s/" % json_item_ward["objects"][0]["id"]]
+            }
+
+    **Get specific Farmer based on msisdn**
+    ::
+
+        url: <base_url>/api/v1/farmer/?actor__user__username=123456789
+        method: GET
     """
     agents = fields.ManyToManyField('magriculture.fncs.api.AgentsResource',
                                     'agents',
                                     full=True)
     actor = fields.ForeignKey('magriculture.fncs.api.ActorResource',
                               'actor',
-                               full=True)
+                              full=True)
 
     markets = fields.ManyToManyField('magriculture.fncs.api.MarketResource',
-                                    'markets',
-                                    full=True)
+                                     'markets',
+                                     full=True)
 
     wards = fields.ManyToManyField('magriculture.fncs.api.WardResource',
-                                    'wards',
-                                    full=True)
+                                   'wards',
+                                   full=True)
 
-    districts = fields.ManyToManyField('magriculture.fncs.api.DistrictResource',
-                                       'districts',
-                                       full=True)
+    districts = fields.ManyToManyField(
+        'magriculture.fncs.api.DistrictResource', 'districts', full=True)
 
     crops = fields.ManyToManyField('magriculture.fncs.api.CropResource',
                                    'crops',
@@ -196,6 +305,7 @@ class FarmerResource(ModelResource):
         authorization = Authorization()
         include_resource_uri = True
         always_return_data = True
+        filtering = {"actor" : ALL_WITH_RELATIONS}
 
 
 class AgentsResource(ModelResource):
@@ -315,4 +425,5 @@ class CropResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name": ALL_WITH_RELATIONS}
+        filtering = {"name": ALL,
+                     "id": ALL}
