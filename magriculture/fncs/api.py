@@ -163,10 +163,7 @@ class UserResource(ModelResource):
         if "is_staff" in bundle.data:
             bundle.data["is_staff"] = False
 
-        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        password_hash = hashlib.sha1(salt+bundle.data["first_name"] +
-                                     bundle.data["last_name"]).hexdigest()
-        bundle.data["password"] = password_hash
+        bundle.data["password"] = make_password(None)
         return bundle
 
     def dehydrate(self, bundle):
