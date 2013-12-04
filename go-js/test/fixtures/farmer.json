@@ -1,16 +1,16 @@
 {
-    "url": "http://qa/api/v1/farmer/?username=1234567",
+    "url": "http://qa/api/v1/farmer/?username=2",
     "method": "GET",
     "body": {
         "actor": {
             "gender": "",
-            "id": 1234567,
+            "id": 20,
             "name": "QA Farmer",
             "resource_uri": "",
             "user": {
                 "email": "",
                 "first_name": "Farmer",
-                "id": 1234567,
+                "id": 20,
                 "last_name": "Bob",
                 "resource_uri": "",
                 "username": "27738590053"
@@ -22,11 +22,28 @@
                 "resource_uri": ""
             }
         ],
-        "crops": [],
+        "crops": [ {
+            "description": "",
+            "id": 1,
+            "name": "Beans",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 2,
+            "name": "Cabbage",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 3,
+            "name": "Carrots",
+            "resource_uri": ""
+        }],
         "districts": [],
         "gender": "M",
         "hh_id": "",
-        "id": 1234567,
+        "id": 20,
         "id_number": "",
         "markets": [],
         "number_of_females": null,

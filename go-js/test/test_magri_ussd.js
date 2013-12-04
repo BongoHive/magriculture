@@ -266,7 +266,7 @@ describe("as an unregistered farmer", function() {
         p.then(done, done);
     });
 
-    it.only("Confirming district I should be thanked and exit", function (done) {
+    it("Confirming district I should be thanked and exit", function (done) {
         var p = tester.check_state({
             user: {
                 current_state: "registration_district_confirm",
@@ -322,6 +322,9 @@ describe("test menu worker", function() {
                 };
 
                 api.add_contact(dummy_contact);
+                api.update_contact_extras(dummy_contact, {
+                    magri_id: 2
+                });
 
                 fixtures.forEach(function (f) {
                     api.load_http_fixture(f);
@@ -338,15 +341,6 @@ describe("test menu worker", function() {
         return teardown;
     };
 
-    it("new users should see the select_service state", function (done) {
-        var p = tester.check_state({
-            user: null,
-            content: null,
-            next_state: "select_service",
-            response: "^Hi Farmer Bob."
-        });
-        p.then(done, done);
-    });
     it("select_service state should respond", function(done) {
         var p = tester.check_state({
             user: {current_state: "select_service"},
@@ -364,8 +358,9 @@ describe("test menu worker", function() {
             content: null,
             next_state: "select_crop",
             response: ("^Select a crop:[^]" +
-                       "1. Peas[^]" +
-                       "2. Carrots$")
+                       "1. Beans[^]" +
+                       "2. Cabbage[^]" +
+                       "3. Carrots$")
         });
         p.then(done, done);
     });

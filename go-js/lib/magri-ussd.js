@@ -83,11 +83,7 @@ function LimaLinksApi(im, url, opts) {
             username: username
         });
         p.add_callback(function(result){
-            if (result.objects.length == 1) {
-                return result.objects[0];
-            } else {
-                return null;
-            }
+            return result;
         });
         return p;
     };
@@ -426,7 +422,7 @@ function MagriWorker() {
                             },
                             _.translate("Hi %1$s.\n" +
                                         "Select a service:"
-                                       ).fetch(farmer.actor.user.first_name),
+                                       ).fetch(farmer.actor.user.first_name + " " + farmer.actor.user.last_name),
                             choices,
                             _.gettext("Please enter the number of the service.")
                         );
@@ -559,12 +555,13 @@ function MagriWorker() {
     self.add_creator("select_crop", function(state_name, im) {
         var _ = im.i18n;
         var lima_links_api = self.lima_links_api(im);
-        var p = lima_links_api.get_farmer(im.user_addr);
+        var p = self.get_contact();
+        p.add_callback(function(result){
+            return lima_links_api.get_farmer(result.contact["extras-magri_id"]);
+        });
         p.add_callback(function (farmer) {
             var choices = farmer.crops.map(function (crop) {
-                var crop_id = crop[0];
-                var crop_name = crop[1];
-                return new Choice(crop_id, crop_name);
+                return new Choice(crop.id, crop.name);
             });
             return new ChoiceState(
                 state_name,
