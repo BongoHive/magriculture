@@ -42,6 +42,7 @@ admin.site.register(props.Transaction, DownloadAsCSVActionAdmin)
 admin.site.register(props.Offer, DownloadAsCSVActionAdmin)
 admin.site.register(props.Message, DownloadAsCSVActionAdmin)
 admin.site.register(props.GroupMessage, DownloadAsCSVActionAdmin)
+admin.site.register(props.CropReceipt, DownloadAsCSVActionAdmin)
 
 # ==========================================================================
 # Geo

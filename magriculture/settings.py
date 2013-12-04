@@ -175,3 +175,5 @@ SMS_CONFIG = {
     "sender_type": "logging",
     "logger": "magriculture.sms",
 }
+
+API_LIMIT_PER_PAGE = 0
