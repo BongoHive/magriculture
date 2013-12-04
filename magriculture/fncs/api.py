@@ -8,6 +8,7 @@ import random
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 # Project
 from magriculture.fncs.models.actors import Actor, Farmer, Agent
@@ -118,21 +119,17 @@ class TransactionResource(ModelResource):
 # ==========================================================
 class UserResource(ModelResource):
     """
-    Creating the basic user profile before creating the Farmer and actor
+    Creating a user
+    ::
 
-     Step 1 - Create a User
-    ================================
-    "url": "<base_url>/api/v1/user/",,
-    "method": "POST",
-    "content_type": "application/json",
-    "body": {
-                "username": "27721231234",
-                "first_name": "test_first_name",
-                "last_name": "test_last_name"
-            }
-
-
-    :return: json_item_user
+         url: <base_url>/api/v1/user/
+         method: POST
+         content_type: "application/json"
+         body: {
+                    "username": "27721231234",
+                    "first_name": "test_first_name",
+                    "last_name": "test_last_name"
+         }
     """
     class Meta:
         queryset = User.objects.all()
@@ -156,7 +153,7 @@ class UserResource(ModelResource):
 
     def hydrate(self, bundle):
         """
-        - Hashing the password to a random value to prevent user login
+        - Setting password to None on make_password so as to prevent user login
         - Setting is_staff and is_superuser to False for extra security
         """
         if "is_superuser" in bundle.data:
@@ -165,13 +162,16 @@ class UserResource(ModelResource):
         if "is_staff" in bundle.data:
             bundle.data["is_staff"] = False
 
-        salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        password_hash = hashlib.sha1(salt+bundle.data["first_name"] +
-                                     bundle.data["last_name"]).hexdigest()
-        bundle.data["password"] = password_hash
+        bundle.data["password"] = make_password(None)
         return bundle
 
     def dehydrate(self, bundle):
+        """
+        - Removing password from here and not exclude inorder to manually create
+        a random password
+        - removing is_staff and is_superuser as tasypie returns the result status
+        of the original post item so if included returns their status.
+        """
         if "password" in bundle.data:
             del bundle.data["password"]
 
@@ -186,19 +186,31 @@ class UserResource(ModelResource):
 
 class FarmerResource(ModelResource):
     """
-    Creating a new farmer requires 3 steps:
+    Creating a new farmer requires several:
 
-    Step 1 - Create a User
-    ================================
-    "url": "<base_url>/api/v1/user/",,
-    "method": "POST",
-    "content_type": "application/json",
-    "body": {
-                "username": "27721231234",
-                "first_name": "test_first_name",
-                "last_name": "test_last_name"
-            }
+    1. Create a User
+    2. On created user filter for Actor based on user.id or msisdn
+    3. Get crop data (as crop), can filter by name based on user input
+    4. Get ward (as ward), can filter by name
+    5. Get district (as district), can filter by name
+    6. Create the farmer using above responses
+    ::
 
+        url: <base_url>/api/v1/farmer/
+        method: POST
+        content_type: application/json
+        body: {
+                    "actor": "/api/v1/actor/%s/" % actor["objects"][0]["id"],
+                    "agents": "",
+                    "crops": ["/api/v1/crop/%s/" % crop["objects"][0]["id"]],
+                    "districts": ["/api/v1/district/%s/" % district["objects"][0]["id"]],
+                    "hh_id": "",
+                    "id_number": "123456789",
+                    "markets": "",
+                    "participant_type": "",
+                    "resource_uri": "",
+                    "wards": ["/api/v1/ward/%s/" % ward["objects"][0]["id"]]
+                }
 
     :return: json_item_user
 
@@ -294,14 +306,11 @@ class FarmerResource(ModelResource):
 
 class AgentsResource(ModelResource):
     """
-    Returns the agents in the system
+    Get the agents in the system
+    ::
 
-    Get an agent
-    ---------------------------------
-    "url": "<base_url>/api/v1/agent/",
-    "method": "GET",
-
-    :return: json_item_agent
+        url: <base_url>/api/v1/agent/
+        method: GET
     """
     class Meta:
         queryset = Agent.objects.all()
@@ -314,16 +323,13 @@ class AgentsResource(ModelResource):
 
 class ActorResource(ModelResource):
     """
-    Returns the agents in the system
+    Returns the actors in the system and can filter on id or msisdn as username
+    ::
 
-    Get an actor
-    ---------------------------------
-    "url": "<base_url>/api/v1/actor/",
-    "url": "<base_url>/api/v1/actor/?user__username=123456789",
-    "url": "<base_url>/api/v1/actor/?user__id=1",
-    "method": "GET",
-
-    :return: json_item_actor
+        url: <base_url>/api/v1/actor/
+        url: <base_url>/api/v1/actor/?user__username=123456789
+        url: <base_url>/api/v1/actor/?user__id=1
+        method": GET
 
     """
     user = fields.ToOneField("magriculture.fncs.api.UserResource",
@@ -342,17 +348,12 @@ class ActorResource(ModelResource):
 
 class MarketResource(ModelResource):
     """
-    Returns the market in the system
+    Returns the market in the system and can filter by name
+    ::
 
-    Get a market
-    ---------------------------------
-    "url": "<base_url>/api/v1/market/",
-    "url": "<base_url>/api/v1/market/?name=TheName",
-
-    "method": "GET",
-
-    :return: json_item_market
-
+        url: <base_url>/api/v1/market/
+        url: <base_url>/api/v1/market/?name=TheName
+        method: GET
     """
     class Meta:
         queryset = Market.objects.all()
@@ -366,17 +367,13 @@ class MarketResource(ModelResource):
 
 class WardResource(ModelResource):
     """
-    Returns the ward in the system
+    Returns the ward in the system and can filter by name
+    ::
 
-    Get a ward
-    ---------------------------------
-    "url": "<base_url>/api/v1/ward/",
-    "url": "<base_url>/api/v1/ward/?name=TheName",
+        url: <base_url>/api/v1/ward/
+        url: <base_url>/api/v1/ward/?name=TheName
 
-    "method": "GET",
-
-    :return: json_item_ward
-
+        method: GET
     """
     class Meta:
         queryset = Ward.objects.all()
@@ -390,16 +387,12 @@ class WardResource(ModelResource):
 
 class DistrictResource(ModelResource):
     """
-    Returns the district in the system
+    Returns the districts in the system and can filter by name
+    ::
 
-    Get a district
-    ---------------------------------
-    "url": "<base_url>/api/v1/district/",
-    "url": "<base_url>/api/v1/district/?name=TheName",
-
-    "method": "GET",`
-
-    :return: json_item_district
+        url: <base_url>/api/v1/district/
+        url: <base_url>/api/v1/district/?name=TheName
+        method: GET
 
     """
     class Meta:
@@ -414,17 +407,12 @@ class DistrictResource(ModelResource):
 
 class CropResource(ModelResource):
     """
-    Returns the Crop in the system
+    Returns the Crops in the system and can filter by name
+    ::
 
-    Get a ward
-    ---------------------------------
-    "url": "<base_url>/api/v1/crop/",
-    "url": "<base_url>/api/v1/crop/?name=TheName",
-
-    "method": "GET",
-
-    :return: json_item_crop
-
+        url: <base_url>/api/v1/crop/
+        url: <base_url>/api/v1/crop/?name=TheName
+        method: GET
     """
     class Meta:
         queryset = Crop.objects.all()
