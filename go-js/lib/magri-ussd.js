@@ -494,7 +494,7 @@ function MagriWorker() {
                     }
                     return new ChoiceState(
                         state_name,
-                        "registration_end",
+                        "registration_crop",
                         _.gettext("Do you mean:"),
                         choices
                     );
@@ -510,6 +510,30 @@ function MagriWorker() {
             );
         }
     });
+
+    self.add_creator('registration_crop', function(state_name, im) {
+        var _ = im.i18n;
+
+        var lima_links_api = self.lima_links_api(im);
+        var p = lima_links_api.all_crops();
+        p.add_callback(function(crops) {
+            var choices = [];
+            for (var i=0; i<crops.length; i++){
+                choices[choices.length] = new Choice(crops[i].id, crops[i].name);
+            }
+            return new PaginatedChoiceState(
+                state_name,
+                "registration_crop",
+                _.gettext("What crops do you grow?"),
+                choices,
+                null,
+                null,
+                {}
+            );
+        });
+        return p;
+    });
+    
 
     self.add_state(new EndState(
         "registration_end",

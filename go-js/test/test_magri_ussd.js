@@ -243,7 +243,7 @@ describe("as an unregistered farmer", function() {
         p.then(done, done);
     });
 
-    it.skip("Confirming district I should be asked for crop", function (done) {
+    it("Confirming district I should be asked for crop", function (done) {
         var p = tester.check_state({
             user: {
                 current_state: "registration_district_confirm",
@@ -259,14 +259,112 @@ describe("as an unregistered farmer", function() {
             content: "1",
             next_state: "registration_crop",
             response: "^What crops do you grow\\?[^]" +
-                        "1. Tomato[^]" +
-                        "2. Rape[^]" +
-                        "3. Onions$"
+                        "1. Beans[^]" +
+                        "2. Cabbage[^]" +
+                        "3. Carrots[^]" +
+                        "4. Cassava[^]" +
+                        "5. Cauliflower[^]" +
+                        "6. Chinese Cabbage[^]" +
+                        "7. Coffee[^]" +
+                        "8. Eggplant[^]" +
+                        "9. More$"
         });
         p.then(done, done);
     });
 
-    it("Confirming district I should be thanked and exit", function (done) {
+    it("Choosing more option on crop should show more", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_crop",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one",
+                    registration_district: "one"
+                }
+            },
+            content: "9",
+            next_state: "registration_crop",
+            response: "^What crops do you grow\\?[^]" +
+                        "1. Fruit[^]" +
+                        "2. Green Maize[^]" +
+                        "3. Green Pepper[^]" +
+                        "4. Impwa[^]" +
+                        "5. Kalembula[^]" +
+                        "6. Maize[^]" +
+                        "7. Millet[^]" +
+                        "8. Okra[^]" +
+                        "9. More[^]" +
+                        "10. Back$"
+        });
+        p.then(done, done);
+    });
+
+    it("Choosing more again option on crop should show more again", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_crop",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one",
+                    registration_district: "one"
+                },
+                pages: {
+                    registration_crop: 8
+                }
+            },
+            content: "9",
+            next_state: "registration_crop",
+            response: "^What crops do you grow\\?[^]" +
+                        "1. Onion[^]" +
+                        "2. Pumpkin Leaves[^]" +
+                        "3. Rape[^]" +
+                        "4. Rice[^]" +
+                        "5. Soybean[^]" +
+                        "6. Sugar Cane[^]" +
+                        "7. Sunflowers[^]" +
+                        "8. Tobacco[^]" +
+                        "9. More[^]" +
+                        "10. Back$"
+        });
+        p.then(done, done);
+    });
+
+    it("Choosing more again option for the third time on crop should show more again", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_crop",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one",
+                    registration_district: "one"
+                },
+                pages: {
+                    registration_crop: 16
+                }
+            },
+            content: "9",
+            next_state: "registration_crop",
+            response: "^What crops do you grow\\?[^]" +
+                        "1. Tomato[^]" +
+                        "2. Wheat[^]" +
+                        "3. Fruit - Oranges[^]" +
+                        "4. Fruit - Apples[^]" +
+                        "5. Fruit - Bananas[^]" +
+                        "6. Back$"
+        });
+        p.then(done, done);
+    });
+
+    it.skip("Confirming district I should be thanked and exit", function (done) {
         var p = tester.check_state({
             user: {
                 current_state: "registration_district_confirm",
