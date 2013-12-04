@@ -29,7 +29,6 @@ def get_highest_markets(request):
     return HttpResponse(json.dumps(highest_markets))
 
 
-
 class CropUnitResource(ModelResource):
     """
     Get the Crop Unit
@@ -46,7 +45,7 @@ class CropUnitResource(ModelResource):
         authorization = Authorization()
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL,
+        filtering = {"name": ALL,
                      "id": ALL}
         excludes = ["created_at"]
 
@@ -65,15 +64,15 @@ class CropReceiptResource(ModelResource):
     """
 
     crop = fields.ForeignKey('magriculture.fncs.api.CropResource',
-                            'crop',
-                            full=True)
+                             'crop',
+                             full=True)
 
     unit = fields.ForeignKey('magriculture.fncs.api.CropUnitResource',
-                                    'unit',
-                                    full=True)
+                             'unit',
+                             full=True)
 
     market = fields.ForeignKey('magriculture.fncs.api.MarketResource',
-                                'market',
+                               'market',
                                 full=True)
 
     class Meta:
@@ -83,11 +82,10 @@ class CropReceiptResource(ModelResource):
         authorization = Authorization()
         include_resource_uri = True
         always_return_data = True
-        filtering = {"crop" : ALL_WITH_RELATIONS,
+        filtering = {"crop": ALL_WITH_RELATIONS,
                      "unit": ALL_WITH_RELATIONS,
                      "market": ALL_WITH_RELATIONS}
         excludes = ["created_at"]
-
 
 
 class TransactionResource(ModelResource):
@@ -101,9 +99,8 @@ class TransactionResource(ModelResource):
          url: <base_url>/api/v1/transaction/?crop_receipt__crop=<id>&crop_receipt__crop=<id>
          method: GET
     """
-    crop_receipt = fields.ForeignKey('magriculture.fncs.api.CropReceiptResource',
-                                    'crop_receipt',
-                                    full=True)
+    crop_receipt = fields.ForeignKey(
+        'magriculture.fncs.api.CropReceiptResource', 'crop_receipt', full=True)
 
     class Meta:
         queryset = Transaction.objects.all()
@@ -112,7 +109,7 @@ class TransactionResource(ModelResource):
         authorization = Authorization()
         include_resource_uri = True
         always_return_data = True
-        filtering = {"crop_receipt" : ALL_WITH_RELATIONS}
+        filtering = {"crop_receipt": ALL_WITH_RELATIONS}
         excludes = ["created_at"]
 
 
@@ -146,7 +143,7 @@ class UserResource(ModelResource):
         always_return_data = True
         excludes = ['is_active', 'is_staff', 'is_superuser',
                     'date_joined', 'last_login']
-        filtering = {"id" : ALL,
+        filtering = {"id": ALL,
                      "username": ALL}
 
     def get_object_list(self, request):
@@ -169,7 +166,8 @@ class UserResource(ModelResource):
             bundle.data["is_staff"] = False
 
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        password_hash = hashlib.sha1(salt+bundle.data["first_name"]+bundle.data["last_name"]).hexdigest()
+        password_hash = hashlib.sha1(salt+bundle.data["first_name"] +
+                                     bundle.data["last_name"]).hexdigest()
         bundle.data["password"] = password_hash
         return bundle
 
@@ -261,24 +259,23 @@ class FarmerResource(ModelResource):
                                     'agents',
                                     full=True)
     actor = fields.ForeignKey('magriculture.fncs.api.ActorResource',
-                                    'actor',
-                                    full=True)
+                              'actor',
+                              full=True)
 
     markets = fields.ManyToManyField('magriculture.fncs.api.MarketResource',
-                                    'markets',
-                                    full=True)
+                                     'markets',
+                                     full=True)
 
     wards = fields.ManyToManyField('magriculture.fncs.api.WardResource',
-                                    'wards',
-                                    full=True)
+                                   'wards',
+                                   full=True)
 
-    districts = fields.ManyToManyField('magriculture.fncs.api.DistrictResource',
-                                    'districts',
-                                    full=True)
+    districts = fields.ManyToManyField(
+        'magriculture.fncs.api.DistrictResource', 'districts', full=True)
 
     crops = fields.ManyToManyField('magriculture.fncs.api.CropResource',
-                                    'crops',
-                                    full=True)
+                                   'crops',
+                                   full=True)
 
     class Meta:
         queryset = Farmer.objects.all()
@@ -326,6 +323,7 @@ class ActorResource(ModelResource):
     user = fields.ToOneField("magriculture.fncs.api.UserResource",
                              'user',
                              full=True)
+
     class Meta:
         queryset = Actor.objects.all()
         resource_name = "actor"
@@ -333,7 +331,7 @@ class ActorResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"user" : ALL_WITH_RELATIONS}
+        filtering = {"user": ALL_WITH_RELATIONS}
 
 
 class MarketResource(ModelResource):
@@ -357,7 +355,7 @@ class MarketResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL}
+        filtering = {"name": ALL}
 
 
 class WardResource(ModelResource):
@@ -381,7 +379,7 @@ class WardResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL}
+        filtering = {"name": ALL}
 
 
 class DistrictResource(ModelResource):
@@ -405,7 +403,7 @@ class DistrictResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL}
+        filtering = {"name": ALL}
 
 
 class CropResource(ModelResource):
@@ -429,5 +427,5 @@ class CropResource(ModelResource):
         list_allowed_methods = ['get']
         include_resource_uri = True
         always_return_data = True
-        filtering = {"name" : ALL,
-                    "id": ALL}
+        filtering = {"name": ALL,
+                     "id": ALL}
