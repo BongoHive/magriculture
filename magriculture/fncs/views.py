@@ -351,13 +351,14 @@ def group_message_new(request):
                                                 filter(farmer_district__crops=data["crop"]).
                                                 all().
                                                 distinct())
+                form.fields["district"].label_from_instance = lambda obj: "%s (%s)" % (obj.name, obj.get_farmer_count(agent, data["crop"]))
                 form.fields['crop'].widget = HiddenInput()
                 choose_district = True
             else:
                 messages.error(request, 'There are some errors on the form')
     else:
         form = forms.FarmerGroupCreateFilterForm()
-        form.fields["crop"].queryset = Crop.objects.filter(farmer_crop__agent_farmer=agent).all()
+        form.fields["crop"].queryset = Crop.objects.filter(farmer_crop__agent_farmer=agent).all().distinct()
 
     return render_to_response('group_messages_new.html', {
         'form': form,
