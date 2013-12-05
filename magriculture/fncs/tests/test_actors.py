@@ -14,6 +14,7 @@ from magriculture.fncs.models.props import Message, GroupMessage, Note, Crop
 from magriculture.fncs.errors import ActorException
 from magriculture.fncs.models.geo import District, Ward
 
+
 class ActorTestCase(TestCase):
 
     def setUp(self):
@@ -40,7 +41,6 @@ class TestSendMessage(TestCase):
                 "test_auth_user.json",
                 "test_actor.json",
                 "test_agent",
-                # "test_farmergroup.json",
                 "test_farmer.json",
                 "test_crop_unit.json",
                 "test_crop.json",
@@ -64,8 +64,7 @@ class TestSendMessage(TestCase):
                           response.context["form"].fields["crop"].queryset]
         db_crops = [(crop.id, crop.name) for crop in
                     Crop.objects.filter(farmer_crop__agent_farmer=self.agent)]
-        self.assertEquals(sorted(response_crops),
-                                 sorted(db_crops))
+        self.assertEquals(sorted(response_crops), sorted(db_crops))
 
     def test_send_farmer_group_message_new_empty(self):
         url = reverse("fncs:group_message_new")
@@ -74,8 +73,7 @@ class TestSendMessage(TestCase):
                           response.context["form"].fields["crop"].queryset]
         db_crops = [(crop.id, crop.name) for crop in
                     Crop.objects.filter(farmer_crop__agent_farmer=self.agent)]
-        self.assertEquals(sorted(response_crops),
-                                 sorted(db_crops))
+        self.assertEquals(sorted(response_crops), sorted(db_crops))
         self.assertEquals(response.context["form"].errors["crop"],
                           [u'This field is required.'])
 
@@ -83,7 +81,7 @@ class TestSendMessage(TestCase):
         """
         Testing the New group message based on filters
         """
-        data={"crop": self.crop.pk}
+        data = {"crop": self.crop.pk}
 
         url = reverse("fncs:group_message_new")
         response = self.client.post(url, data=data, follow=True)
@@ -95,8 +93,8 @@ class TestSendMessage(TestCase):
                           True)
         self.assertEqual(response.request["PATH_INFO"], url)
 
-        response_district = [(d.id, d.name) for d in
-                             response.context["form"].fields["district"].queryset]
+        dt_queryset = response.context["form"].fields["district"].queryset
+        response_district = [(d.id, d.name) for d in dt_queryset]
         db_district = [(d.id, d.name) for d in
                        (District.
                         objects.
@@ -105,8 +103,7 @@ class TestSendMessage(TestCase):
                         all().
                         distinct())]
 
-        self.assertEquals(sorted(response_district),
-                                 sorted(db_district))
+        self.assertEquals(sorted(response_district), sorted(db_district))
 
         data_2 = {"district": [self.district.pk, self.district_2.pk],
                   "crop": self.crop.pk}
@@ -121,7 +118,6 @@ class TestSendMessage(TestCase):
         self.assertEquals(response_3.request["QUERY_STRING"],
                           "district=5&district=4&crop=1")
 
-
     def test_send_farmer_group_message_write(self):
         """
         Testing the write new message
@@ -129,13 +125,14 @@ class TestSendMessage(TestCase):
         url_write = reverse("fncs:group_message_write")
         data = {"content": "Test Send Message"}
         response = self.client.post("%s?district=5&district=4&crop=1" % url_write,
-                                      data=data,
-                                      follow=True)
+                                    data=data,
+                                    follow=True)
 
         farmergrp = FarmerGroup.objects.all()
         self.assertEquals(farmergrp.count(), 1)
         self.assertEquals(farmergrp[0].crop, self.crop)
-        self.assertEquals(sorted([(d.id, d.name) for d in farmergrp[0].district.all()]),
+        grp_district = [(d.id, d.name) for d in farmergrp[0].district.all()]
+        self.assertEquals(sorted(grp_district),
                           sorted([(self.district.pk, self.district.name),
                                  (self.district_2.pk, self.district_2.name)]))
 
