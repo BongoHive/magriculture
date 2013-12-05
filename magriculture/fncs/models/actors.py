@@ -119,6 +119,8 @@ class Actor(models.Model):
             raise errors.ActorException('More than one agent for an actor')
         if agents.exists():
             return agents[0]
+        else:
+            raise errors.ActorException('You need to be an agent to acces this page')
 
     def as_marketmonitor(self):
         """
