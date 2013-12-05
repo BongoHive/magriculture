@@ -261,7 +261,8 @@ class Farmer(models.Model):
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
     wards = models.ManyToManyField('fncs.Ward')
-    districts = models.ManyToManyField('fncs.District', related_name='farmer_district')
+    districts = models.ManyToManyField('fncs.District',
+                                       related_name='farmer_district')
     crops = models.ManyToManyField('fncs.Crop', related_name='farmer_crop')
     hh_id = models.CharField(blank=True, max_length=100)
     participant_type = models.CharField(blank=True, max_length=100, choices=(
@@ -270,8 +271,10 @@ class Farmer(models.Model):
     ))
     number_of_males = models.IntegerField(blank=True, null=True)
     number_of_females = models.IntegerField(blank=True, null=True)
-    gender = models.CharField(blank=True, max_length=100, choices=GENDER, default=UNKNOWN)
-
+    gender = models.CharField(blank=True,
+                              max_length=100,
+                              choices=GENDER,
+                              default=UNKNOWN)
 
     class Meta:
         app_label = 'fncs'
@@ -444,9 +447,13 @@ class FarmerGroup(models.Model):
         :returns: the farmers member to this group by direct filtering
         :rtype: magriculture.fncs.models.actors.Farmer
         """
-        return Farmer.objects.filter(agent_farmer=self.agent,
+        return (Farmer.objects.
+                filter(agent_farmer=self.agent,
                                      crops=self.crop,
-                                     districts__in=self.district.all()).all().distinct()
+                                     districts__in=self.district.all()).
+                all().
+                distinct())
+
     class Meta:
         ordering = ['-name']
         get_latest_by = 'pk'
