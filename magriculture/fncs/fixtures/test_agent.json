@@ -1,1 +1,1 @@
-[{"pk": 1, "model": "fncs.agent", "fields": {"markets": [3, 1, 2, 4], "actor": 2, "farmers": [1, 2, 3, 4, 5]}}, {"pk": 2, "model": "fncs.agent", "fields": {"markets": [3, 1, 2], "actor": 1, "farmers": [1, 2, 3]}}]
+[{"pk": 1, "model": "fncs.agent", "fields": {"markets": [3, 1], "actor": 2, "farmers": [4, 5]}}, {"pk": 2, "model": "fncs.agent", "fields": {"markets": [3, 1, 2], "actor": 1, "farmers": [3, 1]}}]
