@@ -328,7 +328,7 @@ def group_messages(request):
 def group_message_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
-    choose_district = None
+    choose_district = None  # Used to determine if render district field
 
     if request.method == "POST":
         if 'cancel' in request.POST:
@@ -338,32 +338,41 @@ def group_message_new(request):
             form = forms.FarmerGroupCreateFilterForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
+                # The code below only gets triggered when district has been selected
                 if data["district"]:
+                    # Generating the list for url encode
                     district_list = [("district", d.id) for d in data["district"]]
                     url_list = [("crop", data["crop"].id)] + district_list
                     return HttpResponseRedirect('%s?%s' % (
                             reverse('fncs:group_message_write'),
                             urllib.urlencode(url_list)))
 
+                # Dynamically setting the district Choice field
                 form.fields["district"].queryset = (District.
                                                 objects.
                                                 filter(farmer_district__agent_farmer=agent).
                                                 filter(farmer_district__crops=data["crop"]).
                                                 all().
                                                 distinct())
+
+                # Setting the total cound of farmers in the District
                 form.fields["district"].label_from_instance = (lambda obj: "%s (%s)" %
                                                                (obj.name,
                                                                 obj.get_farmer_count(agent,
                                                                                      data["crop"])))
+
+                # If form.is_valid() first time round, hide the crop widget
                 form.fields['crop'].widget = HiddenInput()
                 choose_district = True
             else:
+                # Dynamically setting the Crop queryset if form.is_invalid()
                 form.fields["crop"].queryset = (Crop.objects.
                                                 filter(farmer_crop__agent_farmer=agent).
                                                 all().
                                                 distinct())
                 messages.error(request, 'There are some errors on the form')
     else:
+        # If a get is done on the form render below
         form = forms.FarmerGroupCreateFilterForm()
         form.fields["crop"].queryset = (Crop.objects.
                                         filter(farmer_crop__agent_farmer=agent).
@@ -397,9 +406,13 @@ def group_message_write(request):
         form = forms.GroupMessageForm(request.POST)
         if form.is_valid():
             content = form.cleaned_data['content']
+
+            # Creating the farmer group model
             farmergroups = FarmerGroup(crop=get_object_or_404(Crop, pk__in=crop),
                                        agent=agent)
             farmergroups.save()
+
+            # Adding District Obj to M2M field as *args
             farmergroups.district.add(*District.objects.filter(pk__in=district).all())
             agent.send_message_to_farmergroups(farmergroups, content)
             messages.success(request, 'The message has been sent to all group'
