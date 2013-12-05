@@ -261,8 +261,8 @@ class Farmer(models.Model):
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
     wards = models.ManyToManyField('fncs.Ward')
-    districts = models.ManyToManyField('fncs.District')
-    crops = models.ManyToManyField('fncs.Crop')
+    districts = models.ManyToManyField('fncs.District', related_name='farmer_district')
+    crops = models.ManyToManyField('fncs.Crop', related_name='farmer_crop')
     hh_id = models.CharField(blank=True, max_length=100)
     participant_type = models.CharField(blank=True, max_length=100, choices=(
         ('Y', 'Y'),
@@ -426,7 +426,7 @@ class FarmerGroup(models.Model):
     zone = models.ForeignKey('fncs.Zone', null=True)
     #: The :class:`magriculture.fncs.models.geo.District` this group
     #: operates in
-    district = models.ForeignKey('fncs.District', null=True)
+    district = models.ManyToManyField('fncs.District', null=True)
     #: Which :class:`magriculture.fncs.models.geo.Ward` this group is
     #: active in, a M2M relationship.
     wards = models.ManyToManyField('fncs.Ward', null=True)
@@ -436,7 +436,7 @@ class FarmerGroup(models.Model):
     #: The :class:`Actor` assigned to
     #: this FarmerGroup
     #: Each dynamic group must have an actor for specific filtering
-    agent = models.ForeignKey('fncs.Agent')
+    agent = models.ForeignKey('fncs.Agent', null=True)
     crop = models.ForeignKey('fncs.Crop', null=True)
 
     def members(self):
@@ -444,8 +444,9 @@ class FarmerGroup(models.Model):
         :returns: the farmers member to this group
         :rtype: magriculture.fncs.models.actors.Farmer
         """
-        return self.farmer_set.all()
-
+        return Farmer.objects.filter(agent_farmer=self.agent,
+                                     crops=self.crop,
+                                     districts__in=self.district.all()).all()
     class Meta:
         ordering = ['-name']
         get_latest_by = 'pk'
@@ -524,7 +525,8 @@ class Agent(models.Model):
     actor = models.ForeignKey('fncs.Actor')
     #: the :class:`Farmer` this agent is doing
     #: business for
-    farmers = models.ManyToManyField('fncs.Farmer')
+    farmers = models.ManyToManyField('fncs.Farmer',
+                                     related_name='agent_farmer')
     #: the :class:`Market` this agent is doing
     #: business at
     markets = models.ManyToManyField('fncs.Market')
@@ -727,10 +729,10 @@ class Agent(models.Model):
         """
         groupmessage = GroupMessage.objects.create(sender=self.actor,
                                                    content=message)
-        for farmergroup in farmergroups:
-            groupmessage.farmergroups.add(farmergroup)
-            for farmer in farmergroup.members():
-                self.send_message_to_farmer(farmer, message, groupmessage)
+
+        groupmessage.farmergroups.add(farmergroups)
+        for farmer in farmergroups.members():
+            self.send_message_to_farmer(farmer, message, groupmessage)
         return groupmessage
 
     def write_note(self, farmer, note):
