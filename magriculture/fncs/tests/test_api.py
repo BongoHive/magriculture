@@ -78,7 +78,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'user',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get(url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -92,7 +92,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'farmer',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get(url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -107,7 +107,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'ward',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get("%s?name=test_ward" % url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -124,7 +124,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'district',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get("%s?name=Kafue" % url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -140,7 +140,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'crop',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get("%s?name=Rice" % url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -156,7 +156,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'crop',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get("%s?name=RiceRice" % url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -178,7 +178,7 @@ class TestCreateFarmerApi(ResourceTestCase):
 
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'farmer',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get("%s?actor__user__username=27721111111" % url)
         json_item = json.loads(response.content)
         self.assertEqual("application/json", response["Content-Type"])
@@ -236,32 +236,32 @@ class TestCreateFarmerApi(ResourceTestCase):
 
         # Get Ward
         url_ward = reverse('fncs:api_dispatch_list',
-                      kwargs={'resource_name': 'ward',
-                      'api_name': 'v1'})
+                           kwargs={'resource_name': 'ward',
+                                   'api_name': 'v1'})
         response_ward = self.api_client.get("%s?name=test_ward" % url_ward)
         json_item_ward = json.loads(response_ward.content)
         self.assertEqual(1, len(json_item_ward["objects"]))
 
         # Get Crop
         url_crop = reverse('fncs:api_dispatch_list',
-                      kwargs={'resource_name': 'crop',
-                      'api_name': 'v1'})
+                           kwargs={'resource_name': 'crop',
+                                   'api_name': 'v1'})
         response_crop = self.api_client.get("%s?name=Rice" % url_crop)
         json_item_crop = json.loads(response_crop.content)
         self.assertEqual(1, len(json_item_crop["objects"]))
 
         # Get District
         url_district = reverse('fncs:api_dispatch_list',
-                      kwargs={'resource_name': 'district',
-                      'api_name': 'v1'})
+                               kwargs={'resource_name': 'district',
+                                       'api_name': 'v1'})
         response_district = self.api_client.get("%s?name=Kafue" % url_district)
         json_item_district = json.loads(response_district.content)
         self.assertEqual(1, len(json_item_district["objects"]))
 
         # Get District
         url_actor = reverse('fncs:api_dispatch_list',
-                      kwargs={'resource_name': 'actor',
-                      'api_name': 'v1'})
+                            kwargs={'resource_name': 'actor',
+                                    'api_name': 'v1'})
         response_actor = self.api_client.get("%s?user__username=27721231234" % url_actor)
         json_item_actor = json.loads(response_actor.content)
         self.assertEqual(1, len(json_item_actor["objects"]))
@@ -280,16 +280,23 @@ class TestCreateFarmerApi(ResourceTestCase):
                     }
 
         url_farmer = reverse('fncs:api_dispatch_list',
-                      kwargs={'resource_name': 'farmer',
-                      'api_name': 'v1'})
-        response = self.api_client.post(url_farmer, data=farmer_data, format="json")
+                             kwargs={'resource_name': 'farmer',
+                                     'api_name': 'v1'})
+        response = self.api_client.post(url_farmer,
+                                        data=farmer_data,
+                                        format="json")
         json_item = json.loads(response.content)
 
-        self.assertEqual("123456789", json_item["id_number"])
-        self.assertEqual("27721231234", json_item["actor"]["user"]["username"])
-        self.assertEqual("test_first_name", json_item["actor"]["user"]["first_name"])
-        self.assertEqual("test_last_name", json_item["actor"]["user"]["last_name"])
-        self.assertEqual("27721231234", json_item["actor"]["user"]["username"])
+        self.assertEqual("123456789",
+                         json_item["id_number"])
+        self.assertEqual("27721231234",
+                         json_item["actor"]["user"]["username"])
+        self.assertEqual("test_first_name",
+                         json_item["actor"]["user"]["first_name"])
+        self.assertEqual("test_last_name",
+                         json_item["actor"]["user"]["last_name"])
+        self.assertEqual("27721231234",
+                         json_item["actor"]["user"]["username"])
 
         self.assertEqual("Rice", json_item["crops"][0]["name"])
         self.assertEqual(1, len(json_item["crops"]))
@@ -301,7 +308,8 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual(1, len(json_item["districts"]))
 
         self.assertEqual("27721231234", json_item["actor"]['user']["username"])
-        self.assertEqual("test_first_name test_last_name", json_item["actor"]["name"])
+        self.assertEqual("test_first_name test_last_name",
+                         json_item["actor"]["name"])
 
     def test_create_malicious_user(self):
         """
@@ -315,7 +323,7 @@ class TestCreateFarmerApi(ResourceTestCase):
                      "is_superuser": True}
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'user',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.post(url, data=user_data, format="json")
         json_item_user = json.loads(response.content)
         self.assertEqual("test_first_name", json_item_user["first_name"])
@@ -368,7 +376,7 @@ class TestGetPriceHistory(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'transaction',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.client.get(url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -381,15 +389,15 @@ class TestGetPriceHistory(ResourceTestCase):
         self.assertEqual(len(history),
                          Transaction.objects.all().count())
 
-
     def test_get_price_history_filtered(self):
         """
         Get filtered price history
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'transaction',
-                      'api_name': 'v1'})
-        response = self.client.get("%s?crop_receipt__crop=1&crop_receipt__market=1" % url)
+                              'api_name': 'v1'})
+        url_filter = "%s?crop_receipt__crop=1&crop_receipt__market=1" % url
+        response = self.client.get(url_filter)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
         json_item = json.loads(response.content)
@@ -397,10 +405,13 @@ class TestGetPriceHistory(ResourceTestCase):
         self.assertIn("objects", json_item)
 
         history = json_item["objects"]
-        history_in_db = Transaction.objects.filter(crop_receipt__crop=1, crop_receipt__market=1).all().count()
+        history_in_db = (Transaction.
+                         objects.
+                         filter(crop_receipt__crop=1, crop_receipt__market=1).
+                         all().
+                         count())
         self.assertEqual(len(history),
                          history_in_db)
-
 
     def test_get_market(self):
         """
@@ -408,7 +419,7 @@ class TestGetPriceHistory(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'market',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get(url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -420,14 +431,14 @@ class TestGetPriceHistory(ResourceTestCase):
         self.assertEqual(len(market),
                          Market.objects.all().count())
 
-
     def test_get_specific_market(self):
         """
         Test for get all markets
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'market',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
+
         response = self.api_client.get("%s?name=Kafue Market" % url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
@@ -437,8 +448,8 @@ class TestGetPriceHistory(ResourceTestCase):
         self.assertEqual(json_item["objects"][0]["name"], "Kafue Market")
         market = json_item["objects"]
         self.assertEqual(len(market), 1,
-                         Market.objects.filter(name="Kafue Market").all().count())
-
+                         (Market.objects.
+                          filter(name="Kafue Market").all().count()))
 
     def test_get_non_existent_market(self):
         """
@@ -446,7 +457,7 @@ class TestGetPriceHistory(ResourceTestCase):
         """
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'market',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.get("%s?name=Kafue Market Market" % url)
         self.assertEqual("application/json", response["Content-Type"])
         self.assertEqual(response.status_code, 200)
