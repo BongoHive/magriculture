@@ -441,12 +441,12 @@ class FarmerGroup(models.Model):
 
     def members(self):
         """
-        :returns: the farmers member to this group
+        :returns: the farmers member to this group by direct filtering
         :rtype: magriculture.fncs.models.actors.Farmer
         """
         return Farmer.objects.filter(agent_farmer=self.agent,
                                      crops=self.crop,
-                                     districts__in=self.district.all()).all()
+                                     districts__in=self.district.all()).all().distinct()
     class Meta:
         ordering = ['-name']
         get_latest_by = 'pk'
@@ -719,7 +719,7 @@ class Agent(models.Model):
 
     def send_message_to_farmergroups(self, farmergroups, message):
         """
-        Send a message to all farmers in the given farmer groups
+        Send a message to all farmers in the given farmer groups filters
 
         :param farmergroups: list of :class:`FarmerGroup`
         :param message: :func:`str`, message to send.
