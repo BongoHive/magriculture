@@ -1,7 +1,6 @@
 from django.db import models
 from magriculture.fncs.models.props import Crop, Transaction
 
-
 class Province(models.Model):
     """
     A province, the normal geographic kind
@@ -88,6 +87,11 @@ class District(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_farmer_count(self, agent, crop):
+        """
+        Get the total farmers based on the agent and crop selection
+        """
+        return self.farmer_district.filter(agent_farmer=agent, crops=crop).count()
 
 class Ward(models.Model):
     """
