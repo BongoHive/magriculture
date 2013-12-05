@@ -16,9 +16,11 @@ def create_farmer_for_agent(agent, market, **kwargs):
     farmer.operates_at(market, agent)
     return farmer
 
+
 def create_random_farmers(amount, agent, market):
     for i in range(amount):
         yield create_farmer_for_agent(agent, market, msisdn=27731234567 + i)
+
 
 class FNCSTestCase(TestCase):
 
@@ -53,6 +55,7 @@ class FNCSTestCase(TestCase):
     def logout(self):
         self.client.logout()
 
+
 class SessionTestCase(FNCSTestCase):
 
     def tearDown(self):
@@ -75,6 +78,7 @@ class SessionTestCase(FNCSTestCase):
         response = self.client.get(reverse('fncs:home'))
         self.assertRedirects(response, self.login_url)
 
+
 def format_timestamp(key, timestamp):
     return {
         '%s_0_year' % key: timestamp.year,
@@ -83,6 +87,7 @@ def format_timestamp(key, timestamp):
         '%s_1_hour' % key: timestamp.hour,
         '%s_1_minute' % key: timestamp.minute,
     }
+
 
 class FarmersTestCase(FNCSTestCase):
 
@@ -189,7 +194,6 @@ class FarmersTestCase(FNCSTestCase):
 
         self.assertRaises(IntegrityError, farmer.save)
 
-
     def test_farmer_view(self):
         response = self.client.get(self.farmer_url())
         self.assertRedirects(response, self.farmer_url('sales'))
@@ -269,7 +273,6 @@ class FarmersTestCase(FNCSTestCase):
         self.assertNotContains(response, receipt2.crop.name)
         self.assertRedirects(response, self.farmer_url('sales'))
 
-
     def test_farmer_edit(self):
         farmer_url = self.farmer_url('edit')
         response = self.client.get(farmer_url)
@@ -327,7 +330,6 @@ class FarmersTestCase(FNCSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, farmer.actor.name)
 
-
     def test_farmer_matching_redirect(self):
         farmer = utils.create_farmer()
         msisdn = farmer.actor.get_msisdns()[0]
@@ -346,7 +348,7 @@ class FarmersTestCase(FNCSTestCase):
             }))
         farmer = Farmer.objects.get(pk=farmer.pk)
         self.assertEqual(set([other_agent, self.agent]),
-            set(farmer.agents.all()))
+                         set(farmer.agents.all()))
 
 
 class AgentTestCase(FNCSTestCase):
@@ -423,6 +425,7 @@ class AgentTestCase(FNCSTestCase):
         response = self.client.get(reverse('fncs:sales_agent_breakdown'))
         self.assertEqual(response.status_code, 200)
 
+
 class PricesTestCase(FNCSTestCase):
 
     def setUp(self):
@@ -445,7 +448,7 @@ class PricesTestCase(FNCSTestCase):
     def test_market_sales(self):
         response = self.client.get(reverse('fncs:market_sales'))
         self.assertContains(response, 'No transactions')
-        receipt = self.take_in(10,'boxes','oranges')
+        receipt = self.take_in(10, 'boxes', 'oranges')
         transactions = utils.sell(receipt, 10, 10)
         response = self.client.get(reverse('fncs:market_sales'))
         self.assertContains(response, self.market.name)
@@ -520,8 +523,8 @@ class FarmerBusinessAdvisorTestCase(FNCSTestCase):
         self.assertContains(response, 'farmers')
         self.assertContains(response, 'market-prices')
 
-class IdentityAuthenticationBackendTestCase(TestCase):
 
+class IdentityAuthenticationBackendTestCase(TestCase):
     def test_login_with_identity(self):
         farmer = utils.create_farmer(msisdn='1234')
         farmer.actor.add_identity('6789', '6789')
@@ -531,4 +534,4 @@ class IdentityAuthenticationBackendTestCase(TestCase):
         response = client.get(reverse('fncs:home'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['user'],
-            farmer.actor.user)
+                         farmer.actor.user)

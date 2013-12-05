@@ -14,9 +14,9 @@ from magriculture.fncs.models.props import Transaction
 from magriculture.fncs.models.actors import Actor, Farmer
 from magriculture.fncs.models.geo import Market
 
-
 # Third Party
 from tastypie.test import ResourceTestCase
+
 
 class ApiTestCase(TestCase):
 
@@ -100,7 +100,6 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertIn("meta", json_item)
         self.assertIn("objects", json_item)
 
-
     def test_get_ward(self):
         """
         Get a specific ward
@@ -116,7 +115,6 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertIn("objects", json_item)
         self.assertEqual("test_ward", json_item["objects"][0]["name"])
         self.assertEqual(len(json_item["objects"]), 1)
-
 
     def test_get_district(self):
         """
@@ -165,7 +163,6 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertIn("objects", json_item)
         self.assertEqual(len(json_item["objects"]), 0)
 
-
     def test_get_specific_farmer(self):
         """
         Get Specific Farmer
@@ -174,7 +171,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         Farmer.create("27721111111", "test_first_name", "test_surname")
         Farmer.create("27721111112", "test_first_name2", "test_surname2")
         Farmer.create("27721111113", "test_first_name3", "test_surname3")
-        Farmer.create("27721111114", "test_first_name4", "test_surname4c")
+        Farmer.create("27721111114", "test_first_name4", "test_surname4")
 
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'farmer',
@@ -187,15 +184,16 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertIn("objects", json_item)
 
         self.assertEqual(len(json_item["objects"]), 1)
-        self.assertEqual("27721111111", json_item["objects"][0]["actor"]["user"]["username"])
-        self.assertEqual("test_first_name", json_item["objects"][0]["actor"]["user"]["first_name"])
-        self.assertEqual("test_surname", json_item["objects"][0]["actor"]["user"]["last_name"])
-
+        self.assertEqual("27721111111",
+                         json_item["objects"][0]["actor"]["user"]["username"])
+        self.assertEqual("test_first_name",
+                         json_item["objects"][0]["actor"]["user"]["first_name"])
+        self.assertEqual("test_surname",
+                         json_item["objects"][0]["actor"]["user"]["last_name"])
 
         response = self.api_client.get("%s?actor__user__username=27721111110" % url)
         json_item = json.loads(response.content)
         self.assertEqual(len(json_item["objects"]), 0)
-
 
     def test_create_farmer(self):
         """
@@ -207,7 +205,7 @@ class TestCreateFarmerApi(ResourceTestCase):
                      "last_name": "test_last_name"}
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'user',
-                      'api_name': 'v1'})
+                              'api_name': 'v1'})
         response = self.api_client.post(url, data=user_data, format="json")
         json_item_user = json.loads(response.content)
         self.assertEqual("test_first_name", json_item_user["first_name"])
@@ -262,22 +260,27 @@ class TestCreateFarmerApi(ResourceTestCase):
         url_actor = reverse('fncs:api_dispatch_list',
                             kwargs={'resource_name': 'actor',
                                     'api_name': 'v1'})
-        response_actor = self.api_client.get("%s?user__username=27721231234" % url_actor)
+        response_actor = self.api_client.get("%s?user__username=27721231234"
+                                             % url_actor)
         json_item_actor = json.loads(response_actor.content)
         self.assertEqual(1, len(json_item_actor["objects"]))
 
         farmer_data = {
-                        "actor": "/api/v1/actor/%s/" % json_item_actor["objects"][0]["id"],
+                        "actor": ("/api/v1/actor/%s/" %
+                                  json_item_actor["objects"][0]["id"]),
                         "agents": "",
-                        "crops": ["/api/v1/crop/%s/" % json_item_crop["objects"][0]["id"]],
-                        "districts": ["/api/v1/district/%s/" % json_item_district["objects"][0]["id"]],
+                        "crops": ["/api/v1/crop/%s/" %
+                                  json_item_crop["objects"][0]["id"]],
+                        "districts": ["/api/v1/district/%s/" %
+                                      json_item_district["objects"][0]["id"]],
                         "hh_id": "",
                         "id_number": "123456789",
                         "markets": "",
                         "participant_type": "",
                         "resource_uri": "",
-                        "wards": ["/api/v1/actor/%s/" % json_item_ward["objects"][0]["id"]]
-                    }
+                        "wards": (["/api/v1/actor/%s/" %
+                                  json_item_ward["objects"][0]["id"]])
+                        }
 
         url_farmer = reverse('fncs:api_dispatch_list',
                              kwargs={'resource_name': 'farmer',
