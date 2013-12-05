@@ -11,8 +11,20 @@
             {% if form.errors %}
                 <div class="error">Please see error below.</div>
             {% endif %}
-            {{ form}}
-            <input type="submit" name="submit" class="submit" value="Send To Group &raquo;" />
+
+            {% if not choose_district %}
+                {{form.crop.label_tag }}
+            {% endif %}
+
+            {{ form.crop }}
+
+            {% if choose_district %}
+                {{form.district.label_tag }}
+                {{ form.district }}
+            {% endif %}
+
+            <input type="submit" name="submit" class="submit" value="Next &raquo;" />
+            <input type="submit" name="cancel" class="submit" value="cancel" />
         </form>
 
 
@@ -27,8 +39,7 @@
                 {% endfor %}
             </div>
 
-            <input type="submit" name="submit" class="submit" value="Next &raquo;" />
-            <input type="submit" name="cancel" class="submit" value="cancel" />
+
             {% csrf_token %}
         </form>
 
