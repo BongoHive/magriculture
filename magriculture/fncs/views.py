@@ -355,6 +355,7 @@ def group_message_new(request):
                 form.fields['crop'].widget = HiddenInput()
                 choose_district = True
             else:
+                form.fields["crop"].queryset = Crop.objects.filter(farmer_crop__agent_farmer=agent).all().distinct()
                 messages.error(request, 'There are some errors on the form')
     else:
         form = forms.FarmerGroupCreateFilterForm()
@@ -395,6 +396,8 @@ def group_message_write(request):
             messages.success(request, 'The message has been sent to all group'
                              ' members via SMS')
             return HttpResponseRedirect(reverse('fncs:messages'))
+        else:
+            messages.error(request, 'There are some errors on the form')
     else:
         form = forms.GroupMessageForm()
 
