@@ -14,7 +14,7 @@ from magriculture.fncs.models.actors import Farmer, FarmerGroup, Agent
 from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
                                             CropUnit, Offer, CropReceipt,
                                             DirectSale)
-from magriculture.fncs.models.geo import Market, Ward
+from magriculture.fncs.models.geo import Market, Ward, District
 from magriculture.fncs import forms
 
 
@@ -328,9 +328,8 @@ def group_messages(request):
 def group_message_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
-    # farmergroups = FarmerGroup.objects.distinct().filter(
-    #     farmer__in=agent.farmers.all())
-    form = forms.FarmerGroupCreateFilterForm()
+    choose_district = None
+
     if request.method == "POST":
         if 'cancel' in request.POST:
             messages.success(request, 'Message Cancelled')
@@ -339,22 +338,30 @@ def group_message_new(request):
             form = forms.FarmerGroupCreateFilterForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
-                farmergroup = FarmerGroup(district=data["district"],
-                                          crop=data["crop"],
-                                          agent=agent
-                                          )
-                farmergroup.save()
-                farmergroup.wards.add(data["ward"])
-                return HttpResponseRedirect('%s?%s' % (
-                    reverse('fncs:group_message_write'),
-                    urllib.urlencode([('fg', fg_id) for fg_id
-                                      in request.POST.getlist('fg')])
-                ))
+                if data["district"]:
+                    district_list = [("district", d.id) for d in data["district"]]
+                    url_list = [("crop", data["crop"].id)] + district_list
+                    return HttpResponseRedirect('%s?%s' % (
+                            reverse('fncs:group_message_write'),
+                            urllib.urlencode(url_list)))
+
+                form.fields["district"].queryset = (District.
+                                                objects.
+                                                filter(farmer_district__agent_farmer=agent).
+                                                filter(farmer_district__crops=data["crop"]).
+                                                all().
+                                                distinct())
+                form.fields['crop'].widget = HiddenInput()
+                choose_district = True
             else:
                 messages.error(request, 'There are some errors on the form')
+    else:
+        form = forms.FarmerGroupCreateFilterForm()
+        form.fields["crop"].queryset = Crop.objects.filter(farmer_crop__agent_farmer=agent).all()
 
     return render_to_response('group_messages_new.html', {
-        'form': form
+        'form': form,
+        'choose_district': choose_district,
     }, context_instance=RequestContext(request))
 
 
@@ -363,9 +370,12 @@ def group_message_write(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
 
-    farmergroups = FarmerGroup.objects.filter(pk__in=request.GET.getlist('fg'))
-    if not farmergroups.exists():
+    crop = request.GET.getlist('crop')
+    district = request.GET.getlist('district')
+
+    if not crop or not district:
         raise Http404
+
 
     if request.method == "POST":
 
@@ -376,6 +386,10 @@ def group_message_write(request):
         form = forms.GroupMessageForm(request.POST)
         if form.is_valid():
             content = form.cleaned_data['content']
+            farmergroups = FarmerGroup(crop=get_object_or_404(Crop, pk__in=crop),
+                                       agent=agent)
+            farmergroups.save()
+            farmergroups.district.add(*District.objects.filter(pk__in=district).all())
             agent.send_message_to_farmergroups(farmergroups, content)
             messages.success(request, 'The message has been sent to all group'
                              ' members via SMS')
@@ -385,7 +399,6 @@ def group_message_write(request):
 
     return render_to_response('group_messages_write.html', {
         'form': form,
-        'farmergroups': farmergroups
     }, context_instance=RequestContext(request))
 
 
