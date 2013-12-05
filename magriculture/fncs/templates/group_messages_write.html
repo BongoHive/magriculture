@@ -4,7 +4,7 @@
 <div class="content">
 
     <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a> &gt; New Message</div>
-
+    {% include "includes/messages.html" %}
     <div class="h2">Compose Message</div>
 
     <form class="standard" action="" method="post">
