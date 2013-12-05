@@ -60,16 +60,20 @@ class TestSendMessage(TestCase):
     def test_send_farmer_group_message_get_initial_form(self):
         url = reverse("fncs:group_message_new")
         response = self.client.get(url, follow=True)
-        response_crops = [(crop.id, crop.name) for crop in response.context["form"].fields["crop"].queryset]
-        db_crops = [(crop.id, crop.name) for crop in Crop.objects.filter(farmer_crop__agent_farmer=self.agent)]
+        response_crops = [(crop.id, crop.name) for crop in
+                          response.context["form"].fields["crop"].queryset]
+        db_crops = [(crop.id, crop.name) for crop in
+                    Crop.objects.filter(farmer_crop__agent_farmer=self.agent)]
         self.assertEquals(sorted(response_crops),
                                  sorted(db_crops))
 
     def test_send_farmer_group_message_new_empty(self):
         url = reverse("fncs:group_message_new")
         response = self.client.post(url, follow=True)
-        response_crops = [(crop.id, crop.name) for crop in response.context["form"].fields["crop"].queryset]
-        db_crops = [(crop.id, crop.name) for crop in Crop.objects.filter(farmer_crop__agent_farmer=self.agent)]
+        response_crops = [(crop.id, crop.name) for crop in
+                          response.context["form"].fields["crop"].queryset]
+        db_crops = [(crop.id, crop.name) for crop in
+                    Crop.objects.filter(farmer_crop__agent_farmer=self.agent)]
         self.assertEquals(sorted(response_crops),
                                  sorted(db_crops))
         self.assertEquals(response.context["form"].errors["crop"],
@@ -91,7 +95,8 @@ class TestSendMessage(TestCase):
                           True)
         self.assertEqual(response.request["PATH_INFO"], url)
 
-        response_district = [(d.id, d.name) for d in response.context["form"].fields["district"].queryset]
+        response_district = [(d.id, d.name) for d in
+                             response.context["form"].fields["district"].queryset]
         db_district = [(d.id, d.name) for d in
                        (District.
                         objects.
@@ -103,7 +108,8 @@ class TestSendMessage(TestCase):
         self.assertEquals(sorted(response_district),
                                  sorted(db_district))
 
-        data_2 = {"district": [self.district.pk, self.district_2.pk], "crop": self.crop.pk}
+        data_2 = {"district": [self.district.pk, self.district_2.pk],
+                  "crop": self.crop.pk}
         response_2 = self.client.post(url, data=data_2)
 
         url_write = reverse("fncs:group_message_write")
@@ -138,14 +144,22 @@ class TestSendMessage(TestCase):
         self.assertTrue(GroupMessage.objects.count(), 2)
         self.assertTrue(self.agent.actor.sentmessages_set.count(), 2)
 
-        # Testing if the directly filtered farmers is equal to the posted farmers
-        farmers = Farmer.objects.filter(agent_farmer=self.agent,
-                                        crops=self.crop,
-                                        districts__in=[self.district.pk, self.district_2.pk]).all().distinct()
+        # Testing if the filtered farmers is equal to the posted farmers
+        farmers = (Farmer.objects.
+                   filter(agent_farmer=self.agent,
+                          crops=self.crop,
+                          districts__in=[self.district.pk, self.district_2.pk]).
+                   all().
+                   distinct())
 
-        # Data structure for the list below is [(username, content, number_of_messages_sent)]
-        message_list = [(obj.recipient.user.username, obj.content, 1) for obj in Message.objects.all()]
-        farmers_list = [(obj.actor.user.username, data["content"], obj.actor.receivedmessages_set.count()) for obj in farmers]
+        # Data structure below is [(username, content, number_of_messages_sent)]
+        message_list = [(obj.recipient.user.username,
+                         obj.content, 1) for obj in Message.objects.all()]
+        farmers_list = [(obj.actor.user.username,
+                         data["content"],
+                         obj.actor.receivedmessages_set.count())
+                        for obj in farmers]
+
         self.assertEquals(sorted(message_list), sorted(farmers_list))
 
 
