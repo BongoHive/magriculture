@@ -170,17 +170,11 @@ class TestCreateFarmerApi(ResourceTestCase):
         """
         Get Specific Farmer
         """
-        rpiarea = utils.create_rpiarea("rpiarea")
-        zone = utils.create_zone("zone", rpiarea)
-        province = utils.create_province("province")
-        district = utils.create_district("district", province)
-        ward = utils.create_ward("ward", district)
-        farmergroup = utils.create_farmergroup("fg", zone, district, ward)
         self.assertFalse(Farmer.objects.exists())
-        Farmer.create("27721111111", "test_first_name", "test_surname", farmergroup)
-        Farmer.create("27721111112", "test_first_name2", "test_surname2", farmergroup)
-        Farmer.create("27721111113", "test_first_name3", "test_surname3", farmergroup)
-        Farmer.create("27721111114", "test_first_name4", "test_surname4c", farmergroup)
+        Farmer.create("27721111111", "test_first_name", "test_surname")
+        Farmer.create("27721111112", "test_first_name2", "test_surname2")
+        Farmer.create("27721111113", "test_first_name3", "test_surname3")
+        Farmer.create("27721111114", "test_first_name4", "test_surname4c")
 
         url = reverse('fncs:api_dispatch_list',
                       kwargs={'resource_name': 'farmer',
@@ -200,7 +194,6 @@ class TestCreateFarmerApi(ResourceTestCase):
 
         response = self.api_client.get("%s?actor__user__username=27721111110" % url)
         json_item = json.loads(response.content)
-        # import pdb; pdb.set_trace()
         self.assertEqual(len(json_item["objects"]), 0)
 
 
