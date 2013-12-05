@@ -65,6 +65,16 @@ class TestSendMessage(TestCase):
         self.assertEquals(sorted(response_crops),
                                  sorted(db_crops))
 
+    def test_send_farmer_group_message_new_empty(self):
+        url = reverse("fncs:group_message_new")
+        response = self.client.post(url, follow=True)
+        response_crops = [(crop.id, crop.name) for crop in response.context["form"].fields["crop"].queryset]
+        db_crops = [(crop.id, crop.name) for crop in Crop.objects.filter(farmer_crop__agent_farmer=self.agent)]
+        self.assertEquals(sorted(response_crops),
+                                 sorted(db_crops))
+        self.assertEquals(response.context["form"].errors["crop"],
+                          [u'This field is required.'])
+
     def test_send_farmer_group_message_new(self):
         """
         Testing the New group message based on filters
