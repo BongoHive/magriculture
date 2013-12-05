@@ -364,6 +364,59 @@ describe("as an unregistered farmer", function() {
         p.then(done, done);
     });
 
+    it("Choosing tomato should should ask if want to add more or finish", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_crop",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one",
+                    registration_district: "one"
+                },
+                pages: {
+                    registration_crop: 24
+                }
+            },
+            content: "1",
+            next_state: "registration_crop_more",
+            response: "^Would you like to add another crop\\?[^]" +
+                        "1. Yes[^]" +
+                        "2. No$"
+        });
+        p.then(done, done);
+    });
+
+    it("Choosing no more crops to add I should be thanked and exit", function (done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "registration_crop_more",
+                answers: {
+                    registration_start: "registration_name_first",
+                    registration_name_first: "Bob",
+                    registration_name_last: "Marley",
+                    registration_gender: "M",
+                    registration_town: "town one",
+                    registration_district: "one",
+                    registration_crop: "registration_crop_more"
+                },
+                custom: {
+                    registration_crops: [18]
+                },
+                pages: {
+                    registration_crop: 24
+                }
+            },
+            content: "2",
+            next_state: "registration_end",
+            response: "^Thank you for registering with LimaLinks!$",
+            continue_session: false
+        });
+        p.then(done, done);
+    });
+
     it.skip("Confirming district I should be thanked and exit", function (done) {
         var p = tester.check_state({
             user: {

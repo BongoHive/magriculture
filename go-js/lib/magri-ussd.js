@@ -523,7 +523,14 @@ function MagriWorker() {
             }
             return new PaginatedChoiceState(
                 state_name,
-                "registration_crop",
+                function (choice) {
+                    // build or add to array of crops they want to claim
+                    var curr_crops = self.get_user_item(im.user, "registration_crops", []);
+                    curr_crops.push(choice.value);
+                    self.set_user_item(im.user, "registration_crops",
+                                       curr_crops);
+                    return "registration_crop_more";
+                },
                 _.gettext("What crops do you grow?"),
                 choices,
                 null,
@@ -534,6 +541,18 @@ function MagriWorker() {
         return p;
     });
     
+    self.add_state(new ChoiceState(
+        "registration_crop_more",
+        function (choice) {
+            return choice.value;
+        },
+        "Would you like to add another crop?",
+        [
+            new Choice("registration_crop", "Yes"),
+            new Choice("registration_end", "No")
+        ]
+    ));
+
 
     self.add_state(new EndState(
         "registration_end",
