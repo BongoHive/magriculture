@@ -50,12 +50,85 @@ class TestSendMessage(TestCase):
 
     def setUp(self):
         self.client.login(username="m", password="m")
+        self.user = User.objects.get(username="m")
+        self.actor = self.user.get_profile()
+        self.agent = self.actor.as_agent()
+
+    def test_send_farmer_group_message_get_initial_form(self):
+        url = reverse("fncs:group_message_new")
+        response = self.client.get(url, follow=True)
+        response_crops = [(crop.id, crop.name) for crop in response.context["form"].fields["crop"].queryset]
+        db_crops = [(crop.id, crop.name) for crop in Crop.objects.filter(farmer__agent_farmer=self.agent)]
+        self.assertEquals(sorted(response_crops),
+                                 sorted(db_crops))
 
     def test_send_farmer_group_message_final_screen_empty_data(self):
         url = reverse("fncs:group_message_new")
         response = self.client.post(url, follow=True)
         self.assertEquals(response.context["form"].errors["__all__"],
                           [u'You need to choose at least one filter'])
+
+    def test_send_farmer_group_message_final_screen_crop(self):
+        crop = Crop.objects.get(name="Coffee")
+        district = District.objects.get(name="Kafue")
+        district_2 = District.objects.get(name="Nchelenge")
+
+        data={"crop": crop.pk}
+
+        url = reverse("fncs:group_message_new")
+        response = self.client.post(url, data=data, follow=True)
+
+        form_data = response.context["form"].cleaned_data
+        self.assertEquals(form_data["crop"], crop)
+        self.assertEquals(form_data["district"], [])
+        self.assertEquals(response.context["choose_district"],
+                          True)
+        self.assertEqual(response.request["PATH_INFO"], url)
+
+        response_district = [(d.id, d.name) for d in response.context["form"].fields["district"].queryset]
+        db_district = [(d.id, d.name) for d in
+                       (District.
+                        objects.
+                        filter(farmer_district__agent_farmer=self.agent).
+                        filter(farmer_district__crops=crop).
+                        all().
+                        distinct())]
+
+        self.assertEquals(sorted(response_district),
+                                 sorted(db_district))
+
+        data_2 = {"district": [district.pk, district_2.pk], "crop": crop.pk}
+        response_2 = self.client.post(url, data=data_2)
+
+        url_write = reverse("fncs:group_message_write")
+        self.assertRedirects(response_2,
+                             "%s?crop=1&district=5&district=4" % url_write)
+
+        response_3 = self.client.post(url, data=data_2, follow=True)
+        self.assertIn("content", response_3.context["form"].fields)
+        self.assertEquals(response_3.request["QUERY_STRING"],
+                          "district=5&district=4&crop=1")
+
+        data_3 = {"content": "Test Send Message"}
+        response_4 = self.client.post("%s?district=5&district=4&crop=1" % url_write,
+                                      data=data_3,
+                                      follow=True)
+
+        farmergrp = FarmerGroup.objects.all()
+        self.assertEquals(farmergrp.count(), 1)
+        self.assertEquals(farmergrp[0].crop, crop)
+        self.assertEquals(sorted([(d.id, d.name) for d in farmergrp[0].district.all()]),
+                          sorted([(district.pk, district.name), (district_2.pk, district_2.name)]))
+        self.assertEquals(farmergrp[0].agent,
+                          response.context["user"].actor.as_agent())
+
+        farmers = Farmer.objects.filter(agent_farmer=self.agent,
+                                        crops=crop,
+                                        districts__in=[district.pk, district_2.pk]).all()
+        message_list = [(obj.recipient.user.username, obj.content) for obj in Message.objects.all()]
+        farmers_list = [(obj.actor.user.username, data_3["content"]) for obj in farmers]
+        self.assertEquals(sorted(message_list), sorted(farmers_list))
+
 
     def test_send_farmer_group_message_final_screen_good_data(self):
         crop = Crop.objects.get(pk=1)
