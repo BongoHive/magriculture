@@ -5,14 +5,13 @@
     "data": {
         "actor": "/api/v1/actor/20/",
         "agents": "",
-        "crops": ["/api/v1/crop/1/"],
+        "crops": ["/api/v1/crop/18/"],
         "districts": ["/api/v1/district/1/"],
         "hh_id": "",
         "id_number": null,
         "markets": "",
         "participant_type": "",
-        "resource_uri": "",
-        "wards": ["/api/v1/ward/268/"]
+        "wards": null
     },
     "body": {
         "actor": {

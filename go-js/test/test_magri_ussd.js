@@ -282,7 +282,8 @@ describe("as an unregistered farmer", function() {
                     registration_name_last: "Marley",
                     registration_gender: "M",
                     registration_town: "town one",
-                    registration_district: "one"
+                    registration_district: "one",
+                    registration_district_confirm: 1
                 }
             },
             content: "9",
@@ -312,7 +313,8 @@ describe("as an unregistered farmer", function() {
                     registration_name_last: "Marley",
                     registration_gender: "M",
                     registration_town: "town one",
-                    registration_district: "one"
+                    registration_district: "one",
+                    registration_district_confirm: 1
                 },
                 pages: {
                     registration_crop: 8
@@ -345,7 +347,8 @@ describe("as an unregistered farmer", function() {
                     registration_name_last: "Marley",
                     registration_gender: "M",
                     registration_town: "town one",
-                    registration_district: "one"
+                    registration_district: "one",
+                    registration_district_confirm: 1
                 },
                 pages: {
                     registration_crop: 16
@@ -374,7 +377,8 @@ describe("as an unregistered farmer", function() {
                     registration_name_last: "Marley",
                     registration_gender: "M",
                     registration_town: "town one",
-                    registration_district: "one"
+                    registration_district: "one",
+                    registration_district_confirm: 1
                 },
                 pages: {
                     registration_crop: 24
@@ -400,6 +404,7 @@ describe("as an unregistered farmer", function() {
                     registration_gender: "M",
                     registration_town: "town one",
                     registration_district: "one",
+                    registration_district_confirm: 1,
                     registration_crop: "registration_crop_more"
                 },
                 custom: {
@@ -417,27 +422,42 @@ describe("as an unregistered farmer", function() {
         p.then(done, done);
     });
 
-    it.skip("Confirming district I should be thanked and exit", function (done) {
-        var p = tester.check_state({
-            user: {
-                current_state: "registration_district_confirm",
-                answers: {
-                    registration_start: "registration_name_first",
-                    registration_name_first: "Bob",
-                    registration_name_last: "Marley",
-                    registration_gender: "M",
-                    registration_town: "town one",
-                    registration_district: "one"
-                }
-            },
-            content: "1",
-            next_state: "registration_end",
-            response: "^Thank you for registering with LimaLinks!$",
-            continue_session: false
+    it("Choosing to add more crops to add I return to crop list", function (done) {
+            var p = tester.check_state({
+                user: {
+                    current_state: "registration_crop_more",
+                    answers: {
+                        registration_start: "registration_name_first",
+                        registration_name_first: "Bob",
+                        registration_name_last: "Marley",
+                        registration_gender: "M",
+                        registration_town: "town one",
+                        registration_district: "one",
+                        registration_district_confirm: 1,
+                        registration_crop: "registration_crop_more"
+                    },
+                    custom: {
+                        registration_crops: [18]
+                    },
+                    pages: {
+                        registration_crop: 24
+                    }
+                },
+                content: "1",
+                next_state: "registration_crop",
+                response: "^What crops do you grow\\?[^]" +
+                        "1. Beans[^]" +
+                        "2. Cabbage[^]" +
+                        "3. Carrots[^]" +
+                        "4. Cassava[^]" +
+                        "5. Cauliflower[^]" +
+                        "6. Chinese Cabbage[^]" +
+                        "7. Coffee[^]" +
+                        "8. Eggplant[^]" +
+                        "9. More$"
+            });
+            p.then(done, done);
         });
-        p.then(done, done);
-    });
-
 
 });
 

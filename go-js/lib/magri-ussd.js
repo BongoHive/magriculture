@@ -206,6 +206,12 @@ function MagriWorker() {
     };
 
     self.registration_data_collect = function(){
+        var crops = [];
+        var curr_crops = self.get_user_item(im.user, "registration_crops", []);
+        curr_crops.forEach(function(v, i){
+            crops.push("/api/v1/crop/" + v + "/");
+        });
+
         var data = {
             user: {
                 "username": im.user_addr,
@@ -215,14 +221,13 @@ function MagriWorker() {
             farmer: {
                 "actor": "/api/v1/actor/",
                 "agents": "",
-                "crops": ["/api/v1/crop/1/"],
+                "crops": crops,
                 "districts": ["/api/v1/district/" + im.get_user_answer('registration_district_confirm') + "/"],
                 "hh_id": "",
                 "id_number": null,
                 "markets": "",
                 "participant_type": "",
-                "resource_uri": "",
-                "wards": ["/api/v1/ward/268/"]
+                "wards": null
             }
         };
         return data;
@@ -563,17 +568,20 @@ function MagriWorker() {
                 // save user
                 var lima_links_api = self.lima_links_api(im);
                 var data = self.registration_data_collect();
+                // Create a user first
                 var p = lima_links_api.post_user(data.user);
                 var farmer_id;
                 p.add_callback(function (user) {
+                    // Add the data to the farmer object
                     data.farmer.actor += user.id + "/";
                     return data.farmer;
                 });
                 p.add_callback(function(farmer){
+                    // Make the user a farmer
                     return lima_links_api.post_farmer(farmer);
                 });
                 p.add_callback(function(farmer){
-                    // update contact
+                    // update vumi go contact
                     farmer_id = farmer.id;
                     return self.get_contact();
                 });
