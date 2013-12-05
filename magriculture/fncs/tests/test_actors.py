@@ -6,7 +6,9 @@ from magriculture.fncs.models.actors import (Actor, Farmer, FarmerGroup,
 from magriculture.fncs.models.props import Message, GroupMessage, Note
 from magriculture.fncs.errors import ActorException
 from datetime import datetime, timedelta
-
+from django.core.urlresolvers import reverse
+from magriculture.fncs import errors
+from nose.tools import raises
 
 class ActorTestCase(TestCase):
 
@@ -74,6 +76,20 @@ class AgentTestCase(TestCase):
         agent = utils.create_agent()
         actor = agent.actor
         self.assertEquals(agent, actor.as_agent())
+
+    @raises(errors.ActorException)
+    def test_actor_without_agent(self):
+        """
+        This should raise an ActorException for agent doesn't exist
+        """
+        user = User.objects.create_user("27721111111",
+                                        "27721111111@mail.com",
+                                        "pass123")
+        login = self.client.login(username=user.username,
+                                  password="pass123")
+        self.assertTrue(login)
+        url_messages = reverse("fncs:farmers")
+        self.client.get(url_messages)
 
     def test_agent_crop_receipt_inventory(self):
         farmer1 = utils.create_farmer(msisdn="27700000000")
