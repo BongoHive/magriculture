@@ -396,7 +396,6 @@ def group_message_write(request):
     if not crop or not district:
         raise Http404
 
-
     if request.method == "POST":
 
         if 'cancel' in request.POST:
@@ -408,12 +407,15 @@ def group_message_write(request):
             content = form.cleaned_data['content']
 
             # Creating the farmer group model
-            farmergroups = FarmerGroup(crop=get_object_or_404(Crop, pk__in=crop),
+            farmergroups = FarmerGroup(crop=get_object_or_404(Crop,
+                                       pk__in=crop),
                                        agent=agent)
             farmergroups.save()
 
             # Adding District Obj to M2M field as *args
-            farmergroups.district.add(*District.objects.filter(pk__in=district).all())
+            (farmergroups.district.
+             add(*District.objects.filter(pk__in=district).all()))
+
             agent.send_message_to_farmergroups(farmergroups, content)
             messages.success(request, 'The message has been sent to all group'
                              ' members via SMS')
