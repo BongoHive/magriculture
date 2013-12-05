@@ -1,61 +1,72 @@
 {
-    "url": "http://qa/api/v1/farmer/?username=2",
+    "url": "http://qa/api/v1/farmer/?actor__user__username=1234567",
     "method": "GET",
     "body": {
-        "actor": {
-            "gender": "",
-            "id": 20,
-            "name": "QA Farmer",
-            "resource_uri": "",
-            "user": {
-                "email": "",
-                "first_name": "Farmer",
+        "meta": {
+            "limit": 20,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total_count": 1
+        },
+        "objects": [
+            {
+                "actor": {
+                    "gender": "",
+                    "id": 20,
+                    "name": "QA Farmer",
+                    "resource_uri": "",
+                    "user": {
+                        "email": "",
+                        "first_name": "Farmer",
+                        "id": 20,
+                        "last_name": "Bob",
+                        "resource_uri": "",
+                        "username": "27738590053"
+                    }
+                },
+                "agents": [
+                    {
+                        "id": 43,
+                        "resource_uri": ""
+                    }
+                ],
+                "crops": [ {
+                    "description": "",
+                    "id": 1,
+                    "name": "Beans",
+                    "resource_uri": ""
+                },
+                {
+                    "description": "Horticultural Crop",
+                    "id": 2,
+                    "name": "Cabbage",
+                    "resource_uri": ""
+                },
+                {
+                    "description": "Horticultural Crop",
+                    "id": 3,
+                    "name": "Carrots",
+                    "resource_uri": ""
+                }],
+                "districts": [],
+                "gender": "M",
+                "hh_id": "",
                 "id": 20,
-                "last_name": "Bob",
+                "id_number": "",
+                "markets": [],
+                "number_of_females": null,
+                "number_of_males": null,
+                "participant_type": "",
                 "resource_uri": "",
-                "username": "27738590053"
-            }
-        },
-        "agents": [
-            {
-                "id": 43,
-                "resource_uri": ""
-            }
-        ],
-        "crops": [ {
-            "description": "",
-            "id": 1,
-            "name": "Beans",
-            "resource_uri": ""
-        },
-        {
-            "description": "Horticultural Crop",
-            "id": 2,
-            "name": "Cabbage",
-            "resource_uri": ""
-        },
-        {
-            "description": "Horticultural Crop",
-            "id": 3,
-            "name": "Carrots",
-            "resource_uri": ""
-        }],
-        "districts": [],
-        "gender": "M",
-        "hh_id": "",
-        "id": 20,
-        "id_number": "",
-        "markets": [],
-        "number_of_females": null,
-        "number_of_males": null,
-        "participant_type": "",
-        "resource_uri": "",
-        "wards": [
-            {
-                "code": "10224.0",
-                "id": 39,
-                "name": "Waya",
-                "resource_uri": ""
+                "wards": [
+                    {
+                        "code": "10224.0",
+                        "id": 39,
+                        "name": "Waya",
+                        "resource_uri": ""
+                    }
+                ]
             }
         ]
     }

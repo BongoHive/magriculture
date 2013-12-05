@@ -1,5 +1,5 @@
 {
-    "url": "http://qa/api/v1/farmer/?msisdn=1234567",
+    "url": "http://qa/api/v1/farmer/?actor__user__username=1234567",
     "method": "GET",
     "body": {
         "meta": {

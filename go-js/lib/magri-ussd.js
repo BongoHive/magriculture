@@ -80,10 +80,14 @@ function LimaLinksApi(im, url, opts) {
 
     self.get_farmer = function(username) {
         var p = self.api_call("farmer/", {
-            username: username
+            actor__user__username: username
         });
         p.add_callback(function(result){
-            return result;
+            if (result.objects.length === 0){
+                return null;
+            } else {
+                return result.objects[0];
+            }
         });
         return p;
     };
@@ -395,10 +399,9 @@ function MagriWorker() {
     self.add_creator("select_service", function(state_name, im) {
         var _ = im.i18n;
         var lima_links_api = self.lima_links_api(im);
-        var p = self.get_contact(im);
-
-        p.add_callback(function(result) {
-            if (result.contact["extras-magri_id"] === undefined){
+        var p_farmer = lima_links_api.get_farmer(im.user_addr);
+        p_farmer.add_callback(function (farmer) {
+            if (farmer === null) {
                 return new ChoiceState(
                     "registration_start",
                     function (choice) {
@@ -409,34 +412,23 @@ function MagriWorker() {
                     [new Choice("registration_name_first", _.gettext("Register for LimaLinks"))]
                 );
             } else {
-                var p_farmer = lima_links_api.get_farmer(result.contact["extras-magri_id"]);
-                p_farmer.add_callback(function (farmer) {
-                    if (farmer === null) {
-                        return new EndState(
-                            "error_deleted",
-                            "Sorry - your LimaLinks is no longer active",
-                            "select_service");
-                    } else {
-                        var choices = [
-                            new Choice("select_crop", _.gettext("Market prices"))
-                        ];
-                        return new ChoiceState(
-                            state_name,
-                            function (choice) {
-                                return choice.value;
-                            },
-                            _.translate("Hi %1$s.\n" +
-                                        "Select a service:"
-                                       ).fetch(farmer.actor.user.first_name + " " + farmer.actor.user.last_name),
-                            choices,
-                            _.gettext("Please enter the number of the service.")
-                        );
-                    }
-                });
-                return p_farmer;
+                var choices = [
+                    new Choice("select_crop", _.gettext("Market prices"))
+                ];
+                return new ChoiceState(
+                    state_name,
+                    function (choice) {
+                        return choice.value;
+                    },
+                    _.translate("Hi %1$s.\n" +
+                                "Select a service:"
+                               ).fetch(farmer.actor.user.first_name + " " + farmer.actor.user.last_name),
+                    choices,
+                    _.gettext("Please enter the number of the service.")
+                );
             }
         });
-        return p;
+        return p_farmer;
     });
 
     self.add_state(new FreeText(
@@ -608,7 +600,7 @@ function MagriWorker() {
         var lima_links_api = self.lima_links_api(im);
         var p = self.get_contact();
         p.add_callback(function(result){
-            return lima_links_api.get_farmer(result.contact["extras-magri_id"]);
+            return lima_links_api.get_farmer(im.user_addr);
         });
         p.add_callback(function (farmer) {
             var choices = farmer.crops.map(function (crop) {
