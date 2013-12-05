@@ -325,7 +325,6 @@ class TestGetPriceHistory(ResourceTestCase):
                 "test_auth_user.json",
                 "test_actor.json",
                 "test_agent",
-                "test_farmergroup.json",
                 "test_farmer.json",
                 "test_crop_unit.json",
                 "test_crop.json",
