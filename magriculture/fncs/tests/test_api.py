@@ -166,6 +166,44 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual(len(json_item["objects"]), 0)
 
 
+    def test_get_specific_farmer(self):
+        """
+        Get Specific Farmer
+        """
+        rpiarea = utils.create_rpiarea("rpiarea")
+        zone = utils.create_zone("zone", rpiarea)
+        province = utils.create_province("province")
+        district = utils.create_district("district", province)
+        ward = utils.create_ward("ward", district)
+        farmergroup = utils.create_farmergroup("fg", zone, district, ward)
+        self.assertFalse(Farmer.objects.exists())
+        Farmer.create("27721111111", "test_first_name", "test_surname", farmergroup)
+        Farmer.create("27721111112", "test_first_name2", "test_surname2", farmergroup)
+        Farmer.create("27721111113", "test_first_name3", "test_surname3", farmergroup)
+        Farmer.create("27721111114", "test_first_name4", "test_surname4c", farmergroup)
+
+        url = reverse('fncs:api_dispatch_list',
+                      kwargs={'resource_name': 'farmer',
+                      'api_name': 'v1'})
+        response = self.api_client.get("%s?actor__user__username=27721111111" % url)
+        json_item = json.loads(response.content)
+        self.assertEqual("application/json", response["Content-Type"])
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("meta", json_item)
+        self.assertIn("objects", json_item)
+
+        self.assertEqual(len(json_item["objects"]), 1)
+        self.assertEqual("27721111111", json_item["objects"][0]["actor"]["user"]["username"])
+        self.assertEqual("test_first_name", json_item["objects"][0]["actor"]["user"]["first_name"])
+        self.assertEqual("test_surname", json_item["objects"][0]["actor"]["user"]["last_name"])
+
+
+        response = self.api_client.get("%s?actor__user__username=27721111110" % url)
+        json_item = json.loads(response.content)
+        # import pdb; pdb.set_trace()
+        self.assertEqual(len(json_item["objects"]), 0)
+
+
     def test_create_farmer(self):
         """
         Test the actual create farmer functionality works
@@ -197,7 +235,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual(True, created_user.is_active)
         self.assertEqual(False, created_user.is_staff)
         self.assertEqual(False, created_user.is_superuser)
-        self.assertGreater(len(created_user.password), 5)
+        self.assertEqual('!', created_user.password)
 
         # Test if Actor has been created
         created_actor = Actor.objects.get(user__username="27721231234")
@@ -272,7 +310,6 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual("27721231234", json_item["actor"]['user']["username"])
         self.assertEqual("test_first_name test_last_name", json_item["actor"]["name"])
 
-
     def test_create_malicious_user(self):
         """
         Test the actual create farmer functionality works
@@ -306,7 +343,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual(True, created_user.is_active)
         self.assertEqual(False, created_user.is_staff)
         self.assertEqual(False, created_user.is_superuser)
-        self.assertGreater(len(created_user.password), 5)
+        self.assertEqual('!', created_user.password)
 
         # Test if Actor has been created
         created_actor = Actor.objects.get(user__username="27721231234")
