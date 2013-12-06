@@ -257,11 +257,10 @@ class Farmer(models.Model):
     """
     #: the :class:`Actor` this farmer is linked to
     actor = models.ForeignKey('fncs.Actor')
-    id_number = models.CharField(blank=True, null=True, max_length=255,
-                                 unique=True)
+    id_number = models.CharField(blank=True, null=True, max_length=255)
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
-    wards = models.ManyToManyField('fncs.Ward')
+    wards = models.ManyToManyField('fncs.Ward', null=True)
     districts = models.ManyToManyField('fncs.District',
                                        related_name='farmer_district')
     crops = models.ManyToManyField('fncs.Crop', related_name='farmer_crop')
