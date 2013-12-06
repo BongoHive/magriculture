@@ -138,6 +138,7 @@ class TestSendMessage(TestCase):
 
         self.assertEquals(farmergrp[0].agent,
                           response.context["user"].actor.as_agent())
+        self.assertEquals(farmergrp[0].name, u'Coffee farmers in Nchelenge & Kafue ')
         self.assertTrue(GroupMessage.objects.count(), 2)
         self.assertTrue(self.agent.actor.sentmessages_set.count(), 2)
 
