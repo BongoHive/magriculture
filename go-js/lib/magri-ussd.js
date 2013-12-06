@@ -192,15 +192,6 @@ function MagriWorker() {
         return indexes;
     };
 
-    self.extractFieldFromArray = function(arr, field) {
-        var extracted = [];
-        arr.forEach(function(el, index) {
-            if (el[field])
-                extracted.push(el[field]);
-        });
-        return extracted;
-    };
-
     self.get_contact = function(){
         var p = im.api_request('contacts.get_or_create', {
             delivery_class: 'ussd',
@@ -475,7 +466,7 @@ function MagriWorker() {
             var lima_links_api = self.lima_links_api(im);
             var p = lima_links_api.all_districts();
             p.add_callback(function(districts) {
-                var matches = self.findInArray(self.extractFieldFromArray(districts, "name"), district);
+                var matches = self.findInArray(districts.map(function(d) { return d['name']; }).filter(function(d) { return d; }), district);
                 if (matches.length === 0) {
                     // No districts similar
                     return new FreeText(
