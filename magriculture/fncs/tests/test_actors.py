@@ -348,7 +348,7 @@ class FarmerTestCase(TestCase):
     def test_farmer_creation(self):
         farmer = utils.create_farmer(name="joe")
         self.assertEquals(farmer.actor.user.first_name, "joe")
-        self.assertEquals(farmer.agents.count(), 0)
+        self.assertEquals(farmer.agent_farmer.count(), 0)
 
     def test_farmer_match(self):
         def match(*args, **kw):
