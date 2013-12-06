@@ -232,19 +232,6 @@ class AgentTestCase(TestCase):
         message = agent.send_message_to_farmer(farmer, 'hello world')
         self.assertIn(message, Message.objects.filter(sender=agent.actor,
                                                       recipient=farmer.actor))
-    """
-    UPDATE WHEN CHANGE FARMER GROUP
-    """
-    # def test_send_farmergroup_message(self):
-    #     farmer1 = utils.create_farmer(msisdn='1')
-    #     farmer2 = utils.create_farmer(msisdn='2')
-    #     farmergroups = FarmerGroup.objects.all()
-    #     agent = utils.create_agent()
-    #     agent.send_message_to_farmergroups(farmergroups, 'hello world')
-    #     self.assertTrue(agent.actor.sentmessages_set.count(), 2)
-    #     self.assertTrue(GroupMessage.objects.count(), 2)
-    #     self.assertTrue(farmer1.actor.receivedmessages_set.count(), 1)
-    #     self.assertTrue(farmer2.actor.receivedmessages_set.count(), 1)
 
     def test_write_note(self):
         farmer = utils.create_farmer()
