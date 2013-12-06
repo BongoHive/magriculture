@@ -30,22 +30,6 @@
             <input type="submit" name="cancel" class="submit" value="cancel" />
         </form>
 
-
-        <div class="h2">Choose Recipients</div>
-        <form class="standard" action="" method="post">
-            <div class="list overflow">
-                {% for group in farmergroups %}
-                    <div class="item">
-                        <input type="checkbox" name="fg" value="{{group.pk}}" id="form-group-{{group.pk}}" />
-                        <label for="form-group-{{group.pk}}">{{group|title}}</label>
-                    </div>
-                {% endfor %}
-            </div>
-
-
-            {% csrf_token %}
-        </form>
-
         <div class="h2">Menu</div>
         {% include "includes/menu.html" %}
     </div> <!-- /.content -->
