@@ -214,21 +214,22 @@ def create_crop_unit(name):
 
 
 def create_farmer(msisdn='27761234567', name="name", surname="surname",
-                  farmergroup_name="farmer group", province_name="province",
-                  zone_name="zone", district_name="district", ward_name="ward",
+                  province_name="province", zone_name="zone",
+                  district_name="district", ward_name="ward",
                   rpiarea_name="rpiarea", id_number=None):
     rpiarea = create_rpiarea(rpiarea_name)
     province = create_province(province_name)
     zone = create_zone(zone_name, rpiarea)
     district = create_district(district_name, province)
     ward = create_ward(ward_name, district)
-    farmergroup = create_farmergroup(farmergroup_name, zone, district, ward)
     user, _ = User.objects.get_or_create(username=msisdn)
     user.first_name = name
     user.last_name = surname
     user.save()
     farmer, _ = Farmer.objects.get_or_create(
-        farmergroup=farmergroup, actor=user.get_profile(), id_number=id_number)
+        actor=user.get_profile(), id_number=id_number)
+    farmer.districts.add(district)
+    farmer.wards.add(ward)
     return farmer
 
 

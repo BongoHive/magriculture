@@ -93,9 +93,6 @@ class FarmerForm(forms.Form):
     msisdn3 = forms.CharField(label='Mobile Number 3', required=False)
     id_number = forms.CharField(label='National ID Number', required=False)
     gender = forms.ChoiceField(label="Gender of Farmer", choices=Farmer.GENDER)
-    farmergroup = forms.ModelChoiceField(
-        label='Farmer Group', required=True,
-        empty_label=None, queryset=FarmerGroup.objects.all())
     markets = forms.ModelMultipleChoiceField(
         label='Markets', required=True,
         queryset=Market.objects.all())
@@ -238,3 +235,13 @@ class CropReceiptSaleStep2Form(forms.Form):
     amount = forms.FloatField(required=True, min_value=0.1, label='How many?')
     price = forms.FloatField(required=True, min_value=0.1,
                              label='At what price?')
+
+
+class FarmerGroupCreateFilterForm(forms.Form):
+    crop = forms.ModelChoiceField(queryset=Crop.objects.all(),
+                                  required=True,
+                                  label='Choose Crop')
+    district = forms.ModelMultipleChoiceField(
+                        queryset=District.objects.all(),
+                        required=False,
+                        label='Choose District')

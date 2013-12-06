@@ -5,24 +5,47 @@
     <div class="content">
 
         <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Messages</a> &gt; New Message</div>
-        
+
+        {% include "includes/messages.html" %}
+        <div class="h2">New Farmer</div>
+
+        <form class="standard" method="post" action=""> {% csrf_token %}
+            {% if form.errors %}
+                <div class="error">Please see error below.</div>
+            {% endif %}
+
+            {% if not choose_district %}
+                <h3>If the crop you wish to message about is not listed you currently do not have any farmers supplying that crop</h3>
+                <b>{{form.crop.label_tag }}</b>
+            {% endif %}
+
+            {{ form.crop }}
+
+            {% if choose_district %}
+                <b>{{form.district.label_tag }}</b>
+                {{ form.district }}
+            {% endif %}
+
+            <input type="submit" name="submit" class="submit" value="Next &raquo;" />
+            <input type="submit" name="cancel" class="submit" value="cancel" />
+        </form>
+
+
         <div class="h2">Choose Recipients</div>
-        
         <form class="standard" action="" method="post">
             <div class="list overflow">
                 {% for group in farmergroups %}
                     <div class="item">
                         <input type="checkbox" name="fg" value="{{group.pk}}" id="form-group-{{group.pk}}" />
-                        <label for="form-group-{{group.pk}}">{{group|title}}</label> 
+                        <label for="form-group-{{group.pk}}">{{group|title}}</label>
                     </div>
                 {% endfor %}
             </div>
-            
-            <input type="submit" name="submit" class="submit" value="Next &raquo;" />
-            <input type="submit" name="cancel" class="submit" value="cancel" />
+
+
             {% csrf_token %}
-        </form>        
-        
+        </form>
+
         <div class="h2">Menu</div>
         {% include "includes/menu.html" %}
     </div> <!-- /.content -->

@@ -12,7 +12,7 @@ class TransactionTestCase(TestCase):
 
     def test_price_history(self):
         farmer = utils.create_farmer()
-        market = utils.create_market("market", farmer.farmergroup.district)
+        market = utils.create_market("market", farmer.districts.all()[0])
         agent = utils.create_agent()
 
         crop = utils.create_crop("potatoes")

@@ -257,15 +257,15 @@ class Farmer(models.Model):
     """
     #: the :class:`Actor` this farmer is linked to
     actor = models.ForeignKey('fncs.Actor')
-    farmergroup = models.ForeignKey('fncs.FarmerGroup', null=True)
     agents = models.ManyToManyField('fncs.Agent')
     id_number = models.CharField(blank=True, null=True, max_length=255,
                                  unique=True)
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
     wards = models.ManyToManyField('fncs.Ward')
-    districts = models.ManyToManyField('fncs.District')
-    crops = models.ManyToManyField('fncs.Crop')
+    districts = models.ManyToManyField('fncs.District',
+                                       related_name='farmer_district')
+    crops = models.ManyToManyField('fncs.Crop', related_name='farmer_crop')
     hh_id = models.CharField(blank=True, max_length=100)
     participant_type = models.CharField(blank=True, max_length=100, choices=(
         ('Y', 'Y'),
@@ -273,8 +273,10 @@ class Farmer(models.Model):
     ))
     number_of_males = models.IntegerField(blank=True, null=True)
     number_of_females = models.IntegerField(blank=True, null=True)
-    gender = models.CharField(blank=True, max_length=100, choices=GENDER, default=UNKNOWN)
-
+    gender = models.CharField(blank=True,
+                              max_length=100,
+                              choices=GENDER,
+                              default=UNKNOWN)
 
     class Meta:
         app_label = 'fncs'
@@ -372,7 +374,7 @@ class Farmer(models.Model):
         self.markets.add(*markets)
 
     @classmethod
-    def create(cls, msisdn, name, surname, farmergroup, id_number=None, gender=UNKNOWN):
+    def create(cls, msisdn, name, surname, id_number=None, gender=UNKNOWN):
         """
         Create a new Farmer.
 
@@ -383,8 +385,6 @@ class Farmer(models.Model):
         :type msisdn: str
         :type name: str
         :type surname: str
-        :param farmergroup: the group this farmer belongs so.
-        :type farmergroup: magriculture.fncs.models.actors.FarmerGroup
         :type id_number: str
         :returns: a farmer
         :rtype: magriculture.fncs.models.actors.Farmer
@@ -400,7 +400,6 @@ class Farmer(models.Model):
             return actor.as_farmer()
 
         farmer = cls(actor=actor,
-                     farmergroup=farmergroup,
                      id_number=id_number,
                      gender=gender)
         farmer.save()
@@ -432,20 +431,30 @@ class FarmerGroup(models.Model):
     zone = models.ForeignKey('fncs.Zone', null=True)
     #: The :class:`magriculture.fncs.models.geo.District` this group
     #: operates in
-    district = models.ForeignKey('fncs.District', null=True)
+    district = models.ManyToManyField('fncs.District', null=True)
     #: Which :class:`magriculture.fncs.models.geo.Ward` this group is
     #: active in, a M2M relationship.
-    wards = models.ManyToManyField('fncs.Ward')
+    wards = models.ManyToManyField('fncs.Ward', null=True)
     #: The :class:`ExtensionOfficer` assigned to
     #: this FarmerGroup
     extensionofficer = models.ForeignKey('fncs.ExtensionOfficer', null=True)
+    #: The :class:`Actor` assigned to
+    #: this FarmerGroup
+    #: Each dynamic group must have an actor for specific filtering
+    agent = models.ForeignKey('fncs.Agent', null=True)
+    crop = models.ForeignKey('fncs.Crop', null=True)
 
     def members(self):
         """
-        :returns: the farmers member to this group
+        :returns: the farmers member to this group by direct filtering
         :rtype: magriculture.fncs.models.actors.Farmer
         """
-        return self.farmer_set.all()
+        return (Farmer.objects.
+                filter(agent_farmer=self.agent,
+                                     crops=self.crop,
+                                     districts__in=self.district.all()).
+                all().
+                distinct())
 
     class Meta:
         ordering = ['-name']
@@ -525,7 +534,8 @@ class Agent(models.Model):
     actor = models.ForeignKey('fncs.Actor')
     #: the :class:`Farmer` this agent is doing
     #: business for
-    farmers = models.ManyToManyField('fncs.Farmer')
+    farmers = models.ManyToManyField('fncs.Farmer',
+                                     related_name='agent_farmer')
     #: the :class:`Market` this agent is doing
     #: business at
     markets = models.ManyToManyField('fncs.Market')
@@ -718,7 +728,7 @@ class Agent(models.Model):
 
     def send_message_to_farmergroups(self, farmergroups, message):
         """
-        Send a message to all farmers in the given farmer groups
+        Send a message to all farmers in the given farmer groups filters
 
         :param farmergroups: list of :class:`FarmerGroup`
         :param message: :func:`str`, message to send.
@@ -728,10 +738,10 @@ class Agent(models.Model):
         """
         groupmessage = GroupMessage.objects.create(sender=self.actor,
                                                    content=message)
-        for farmergroup in farmergroups:
-            groupmessage.farmergroups.add(farmergroup)
-            for farmer in farmergroup.members():
-                self.send_message_to_farmer(farmer, message, groupmessage)
+
+        groupmessage.farmergroups.add(farmergroups)
+        for farmer in farmergroups.members():
+            self.send_message_to_farmer(farmer, message, groupmessage)
         return groupmessage
 
     def write_note(self, farmer, note):
