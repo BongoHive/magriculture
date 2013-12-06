@@ -118,6 +118,15 @@ class TestSendMessage(TestCase):
         self.assertEquals(response_3.request["QUERY_STRING"],
                           "district=5&district=4&crop=1")
 
+    def test_send_farmer_group_message_crop_not_for_agent(self):
+        crop = Crop.objects.exclude(farmer_crop__agent_farmer__actor__user__username="m").all()
+        data = {"crop": crop[0].pk}
+
+        url = reverse("fncs:group_message_new")
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEquals(response.context["messages"]._loaded_data[0].message,
+                          u'Invalid crop, please select your crop.')
+
     def test_send_farmer_group_message_write(self):
         """
         Testing the write new message
