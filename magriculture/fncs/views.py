@@ -351,7 +351,6 @@ def group_message_new(request):
                             objects.
                             exclude(farmer_crop__agent_farmer__actor__user__username="m").
                             all())
-                print excluded
                 if data["crop"] in excluded:
                     messages.error(request, 'Invalid crop, please select your crop.')
                     return HttpResponseRedirect(reverse('fncs:group_message_new'))
