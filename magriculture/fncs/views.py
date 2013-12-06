@@ -347,7 +347,13 @@ def group_message_new(request):
                     return HttpResponseRedirect('%s?%s' % (
                             reverse('fncs:group_message_write'),
                             urllib.urlencode(url_list)))
-
+                excluded = (Crop.
+                            objects.
+                            exclude(farmer_crop__agent_farmer__actor__user__username="m").
+                            all())
+                if data["crop"] in excluded:
+                    messages.error(request, 'Invalid crop, please select your crop.')
+                    return HttpResponseRedirect(reverse('fncs:group_message_new'))
                 # Dynamically setting the district Choice field
                 form.fields["district"].queryset = (District.
                                                 objects.
