@@ -14,7 +14,7 @@ from magriculture.fncs.models.props import Message, GroupMessage, Note, Crop
 from magriculture.fncs.errors import ActorException
 from magriculture.fncs import errors
 from nose.tools import raises
-from magriculture.fncs.models.geo import District, Ward
+from magriculture.fncs.models.geo import District
 
 class ActorTestCase(TestCase):
 
