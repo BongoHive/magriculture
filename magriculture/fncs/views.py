@@ -318,6 +318,7 @@ def group_messages(request):
     actor = request.user.get_profile()
     paginator = Paginator(GroupMessage.objects.filter(sender=actor), 5)
     page = paginator.page(request.GET.get('p', 1))
+    # import pdb; pdb.set_trace()
     return render_to_response('messages.html', {
         'paginator': paginator,
         'page': page
@@ -407,14 +408,17 @@ def group_message_write(request):
             content = form.cleaned_data['content']
 
             # Creating the farmer group model
-            farmergroups = FarmerGroup(crop=get_object_or_404(Crop,
-                                       pk__in=crop),
-                                       agent=agent)
+            crop_obj = get_object_or_404(Crop, pk__in=crop)
+            district_obj = District.objects.filter(pk__in=district).all()
+            district_names = [obj.name for obj in district_obj]
+            name = "%s farmers in %s " % (crop_obj.name, " & ".join(district_names))
+            farmergroups = FarmerGroup(crop=crop_obj,
+                                       agent=agent,
+                                       name=name)
             farmergroups.save()
 
             # Adding District Obj to M2M field as *args
-            (farmergroups.district.
-             add(*District.objects.filter(pk__in=district).all()))
+            farmergroups.district.add(*district_obj)
 
             agent.send_message_to_farmergroups(farmergroups, content)
             messages.success(request, 'The message has been sent to all group'
