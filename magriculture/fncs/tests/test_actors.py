@@ -162,6 +162,52 @@ class TestSendMessage(TestCase):
         self.assertEquals(sorted(message_list), sorted(farmers_list))
 
 
+class TestCreateFarmerWithFixtureData(TestCase):
+    """
+    Test Send Message to Farmer Groups
+    """
+    fixtures = ["test_province.json",
+                "test_district.json",
+                "test_ward.json",
+                "test_zone.json",
+                "test_rpiarea.json",
+                "test_auth_user.json",
+                "test_actor.json",
+                "test_agent",
+                "test_farmer.json",
+                "test_crop_unit.json",
+                "test_crop.json",
+                "test_market.json",
+                "test_crop_receipt.json",
+                "test_transaction.json"]
+
+    def setUp(self):
+        self.client.login(username="m", password="m")
+        self.user = User.objects.get(username="m")
+        self.actor = self.user.get_profile()
+        self.agent = self.actor.as_agent()
+        self.crop = Crop.objects.get(name="Coffee")
+        self.district = District.objects.get(name="Kafue")
+        self.district_2 = District.objects.get(name="Nchelenge")
+
+    def test_farmer_creation_duplicate_null_id_number(self):
+        """
+        Replicate duplicate ID number bug, only occurs in
+        post data as None is converted to a string.
+        """
+        utils.create_farmer(name="joe_1")
+
+        url = reverse("fncs:farmer_new")
+        data_1 = {"name": "name_1",
+                  "surname": "surname_1",
+                  "msisdn1": "123456781",
+                  "gender": "M",
+                  "markets": [1, 2]}
+        self.client.post(url, data=data_1, follow=True)
+        farmer = Farmer.objects.get(actor__user__username="123456781")
+        self.assertEquals(farmer.actor.user.first_name, "name_1")
+
+
 class AgentTestCase(TestCase):
     def test_agent_creation(self):
         agent = utils.create_agent()
