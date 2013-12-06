@@ -257,7 +257,6 @@ class Farmer(models.Model):
     """
     #: the :class:`Actor` this farmer is linked to
     actor = models.ForeignKey('fncs.Actor')
-    agents = models.ManyToManyField('fncs.Agent')
     id_number = models.CharField(blank=True, null=True, max_length=255,
                                  unique=True)
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
@@ -353,7 +352,7 @@ class Farmer(models.Model):
         self.markets.add(market)
         agent.markets.add(market)
         # the farmer has the agent registered as an agent
-        self.agents.add(agent)
+        self.agent_farmer.add(agent)
         # the agent has the farmer registered as a farmer
         agent.farmers.add(self)
 
