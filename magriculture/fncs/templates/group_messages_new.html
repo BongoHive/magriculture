@@ -7,7 +7,7 @@
         <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Messages</a> &gt; New Message</div>
 
         {% include "includes/messages.html" %}
-        <div class="h2">New Farmer</div>
+        <div class="h2">New Message</div>
 
         <form class="standard" method="post" action=""> {% csrf_token %}
             {% if form.errors %}
@@ -28,22 +28,6 @@
 
             <input type="submit" name="submit" class="submit" value="Next &raquo;" />
             <input type="submit" name="cancel" class="submit" value="cancel" />
-        </form>
-
-
-        <div class="h2">Choose Recipients</div>
-        <form class="standard" action="" method="post">
-            <div class="list overflow">
-                {% for group in farmergroups %}
-                    <div class="item">
-                        <input type="checkbox" name="fg" value="{{group.pk}}" id="form-group-{{group.pk}}" />
-                        <label for="form-group-{{group.pk}}">{{group|title}}</label>
-                    </div>
-                {% endfor %}
-            </div>
-
-
-            {% csrf_token %}
         </form>
 
         <div class="h2">Menu</div>
