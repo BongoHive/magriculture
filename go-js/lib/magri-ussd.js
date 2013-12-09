@@ -64,17 +64,62 @@ function LimaLinksApi(im, url, opts) {
     // in case we need to translate content from the API later
     self.lang = im.user.lang || im.config.default_lang || "en";
 
+    self.headers = {
+        'Content-Type': ['application/json']
+    };
+
     self.api_call = function(method, params) {
         var url = self.url + method;
         return self.json_api.get(url, {params: params});
     };
 
-    self.get_farmer = function(msisdn) {
+    self.api_post = function(method, data) {
+        var url = self.url + method;
+        return self.json_api.post(url, {data: data, headers: self.headers});
+    };
+
+    self.get_farmer = function(username) {
         var p = self.api_call("farmer/", {
-            msisdn: msisdn
+            actor__user__username: username
         });
         p.add_callback(function(result){
-            return result.objects[0];
+            if (result.objects.length === 0){
+                return null;
+            } else {
+                return result.objects[0];
+            }
+        });
+        return p;
+    };
+
+    self.get_actor = function(username) {
+        var p = self.api_call("actor/", {
+            user__username: username
+        });
+        p.add_callback(function(result){
+            if (result.objects.length === 0){
+                return null;
+            } else {
+                return result.objects[0];
+            }
+        });
+        return p;
+    };
+
+    self.post_user = function(data) {
+        var p = self.api_post("user/", data);
+        p.add_callback(function(result){
+            // TODO: error checking
+            return result;
+        });
+        return p;
+    };
+
+    self.post_farmer = function(data) {
+        var p = self.api_post("farmer/", data);
+        p.add_callback(function(result){
+            // TODO: error checking
+            return result;
         });
         return p;
     };
@@ -111,6 +156,26 @@ function LimaLinksApi(im, url, opts) {
         });
         return p;
     };
+
+    self.all_districts = function() {
+        var p = self.api_call("district/", {
+            limit: 0
+        });
+        p.add_callback(function(result){
+            return result.objects;
+        });
+        return p;
+    };
+
+    self.all_crops = function() {
+        var p = self.api_call("crop/", {
+            limit: 0
+        });
+        p.add_callback(function(result){
+            return result.objects;
+        });
+        return p;
+    };
 }
 
 
@@ -128,6 +193,53 @@ function MagriWorker() {
             opts.auth = {username: cfg.username, password: cfg.password};
         }
         return new LimaLinksApi(im, cfg.url, opts);
+    };
+
+    self.findInArray = function(array, what) {
+        var indexes = [], what = what.toLowerCase();
+        if (!what.length)
+            return indexes;
+        array.forEach(function(el, index) {
+            if (typeof(el) == "string" && el.toLowerCase().indexOf(what)!=-1)
+                indexes.push(index);
+        });
+        return indexes;
+    };
+
+    self.get_contact = function(){
+        var p = im.api_request('contacts.get_or_create', {
+            delivery_class: 'ussd',
+            addr: im.user_addr
+        });
+        return p;
+    };
+
+    self.registration_data_collect = function(){
+        var crops = [];
+        var curr_crops = self.get_user_item(im.user, "registration_crops", []);
+        curr_crops.forEach(function(v, i){
+            crops.push("/api/v1/crop/" + v + "/");
+        });
+
+        var data = {
+            user: {
+                "username": im.user_addr,
+                "first_name": im.get_user_answer('registration_name_first'),
+                "last_name": im.get_user_answer('registration_name_last')
+            },
+            farmer: {
+                "actor": "/api/v1/actor/",
+                "agents": "",
+                "crops": crops,
+                "districts": ["/api/v1/district/" + im.get_user_answer('registration_district_confirm') + "/"],
+                "hh_id": "",
+                "id_number": null,
+                "markets": [],
+                "participant_type": "",
+                "wards": []
+            }
+        };
+        return data;
     };
 
     // Session metrics helper
@@ -292,44 +404,216 @@ function MagriWorker() {
     self.add_creator("select_service", function(state_name, im) {
         var _ = im.i18n;
         var lima_links_api = self.lima_links_api(im);
-        var p = lima_links_api.get_farmer(im.user_addr);
-        p.add_callback(function (farmer) {
+        var p_farmer = lima_links_api.get_farmer(im.user_addr);
+        p_farmer.add_callback(function (farmer) {
             if (farmer === null) {
-                return new EndState(
+                return new ChoiceState(
+                    "registration_start",
+                    function (choice) {
+                        return choice.value;
+                    },
+                    _.gettext("Welcome to LimaLinks.\nIn order to use this system we " +
+                        "need to register you with a few short questions."),
+                    [new Choice("registration_name_first", _.gettext("Register for LimaLinks"))]
+                );
+            } else {
+                var choices = [
+                    new Choice("select_crop", _.gettext("Market prices"))
+                ];
+                return new ChoiceState(
                     state_name,
-                    _.gettext("You are not registered. Please register" +
-                              " your phone with a market agent."),
-                    "select_service"
+                    function (choice) {
+                        return choice.value;
+                    },
+                    _.translate("Hi %1$s.\n" +
+                                "Select a service:"
+                               ).fetch(farmer.actor.user.first_name + " " + farmer.actor.user.last_name),
+                    choices,
+                    _.gettext("Please enter the number of the service.")
                 );
             }
+        });
+        return p_farmer;
+    });
 
-            var choices = [
-                new Choice("select_crop", _.gettext("Market prices"))
-            ];
-            return new ChoiceState(
+    self.add_state(new FreeText(
+        "registration_name_first",
+        "registration_name_last",
+        "Please enter your first name"
+    ));
+
+    self.add_state(new FreeText(
+        "registration_name_last",
+        "registration_gender",
+        "Please enter your last name"
+    ));
+
+    self.add_state(new ChoiceState(
+        'registration_gender',
+        'registration_town',
+        "What is your gender?",
+        [
+            new Choice("M", "Male"),
+            new Choice("F", "Female")
+        ]
+    ));
+
+    self.add_state(new FreeText(
+        "registration_town",
+        "registration_district",
+        "What is the town your farm is in?"
+    ));
+
+    self.add_state(new FreeText(
+        "registration_district",
+        "registration_district_confirm",
+        "What is the district your farm is in?"
+    ));
+
+    self.add_creator('registration_district_confirm', function(state_name, im) {
+        var _ = im.i18n;
+        // Get the users input if they've made any
+        var district = im.get_user_answer('registration_district');
+
+        if (district) {
+            // find maps
+            var lima_links_api = self.lima_links_api(im);
+            var p = lima_links_api.all_districts();
+            p.add_callback(function(districts) {
+                var matches = self.findInArray(districts.map(function(d) { return d['name']; }).filter(function(d) { return d; }), district);
+                if (matches.length === 0) {
+                    // No districts similar
+                    return new FreeText(
+                        "registration_district",
+                        "registration_district_confirm",
+                        _.gettext("Sorry we could not find a matching district. Please retry entering " +
+                            "what district your farm is in:")
+                    );
+                } else {
+                    var choices = [];
+                    for (var i=0; i<matches.length; i++){
+                        choices[choices.length] = new Choice(districts[matches[i]].id, districts[matches[i]].name);
+                    }
+                    return new ChoiceState(
+                        state_name,
+                        "registration_crop",
+                        _.gettext("Do you mean:"),
+                        choices
+                    );
+                }
+            });
+            return p;
+        } else {
+            // Blank or missing district
+            return new FreeText(
+                "registration_district",
+                "registration_district_confirm",
+                _.gettext("What is the district your farm is in?")
+            );
+        }
+    });
+
+    self.add_creator('registration_crop', function(state_name, im) {
+        var _ = im.i18n;
+
+        var lima_links_api = self.lima_links_api(im);
+        var p = lima_links_api.all_crops();
+        p.add_callback(function(crops) {
+            var choices = [];
+            for (var i=0; i<crops.length; i++){
+                choices[choices.length] = new Choice(crops[i].id, crops[i].name);
+            }
+            return new PaginatedChoiceState(
                 state_name,
                 function (choice) {
-                    return choice.value;
+                    // build or add to array of crops they want to claim
+                    var curr_crops = self.get_user_item(im.user, "registration_crops", []);
+                    curr_crops.push(choice.value);
+                    self.set_user_item(im.user, "registration_crops",
+                                       curr_crops);
+                    return "registration_crop_more";
                 },
-                _.translate("Hi %1$s.\n" +
-                            "Select a service:"
-                           ).fetch(farmer.farmer_name),
+                _.gettext("What crops do you grow?"),
                 choices,
-                _.gettext("Please enter the number of the service.")
+                null,
+                null,
+                {}
             );
         });
         return p;
     });
+    
+    self.add_state(new ChoiceState(
+        "registration_crop_more",
+        function (choice) {
+            return choice.value;
+        },
+        "Would you like to add another crop?",
+        [
+            new Choice("registration_crop", "Yes"),
+            new Choice("registration_end", "No")
+        ]
+    ));
+
+
+    self.add_state(new EndState(
+        "registration_end",
+        "Thank you for registering with LimaLinks!",
+        "select_service",
+        {
+            on_enter: function(){
+                // save user
+                var lima_links_api = self.lima_links_api(im);
+                var data = self.registration_data_collect();
+                // Create a user first
+                var p = lima_links_api.post_user(data.user);
+                var farmer_id;
+                p.add_callback(function (user) {
+                    // Get the post-save created actor
+                    return lima_links_api.get_actor(im.user_addr);
+                });
+                p.add_callback(function (actor) {
+                    // Add the data to the farmer object
+                    data.farmer.actor += actor.id + "/";
+                    return data.farmer;
+                });
+                p.add_callback(function(farmer){
+                    // Make the user a farmer
+                    return lima_links_api.post_farmer(farmer);
+                });
+                p.add_callback(function(farmer){
+                    // update vumi go contact
+                    farmer_id = farmer.id;
+                    return self.get_contact();
+                });
+                p.add_callback(function(contact){
+                    var fields = {
+                        "magri_id": JSON.stringify(farmer_id)
+                    };
+                    return im.api_request('contacts.update_extras', {
+                        key: contact.key,
+                        fields: fields
+                    });
+                });
+                p.add_callback(function(result){
+                    return true;
+                });
+                return p;
+            }
+        }
+    ));
+
 
     self.add_creator("select_crop", function(state_name, im) {
         var _ = im.i18n;
         var lima_links_api = self.lima_links_api(im);
-        var p = lima_links_api.get_farmer(im.user_addr);
+        var p = self.get_contact();
+        p.add_callback(function(result){
+            return lima_links_api.get_farmer(im.user_addr);
+        });
         p.add_callback(function (farmer) {
             var choices = farmer.crops.map(function (crop) {
-                var crop_id = crop[0];
-                var crop_name = crop[1];
-                return new Choice(crop_id, crop_name);
+                return new Choice(crop.id, crop.name);
             });
             return new ChoiceState(
                 state_name,
@@ -427,7 +711,6 @@ function MagriWorker() {
 
         var initial_market_idx = self.get_user_item(im.user, "chosen_market_idx");
         var markets = self.get_user_item(im.user, "chosen_markets");
-
         var next_prev = (markets.length > 1 ?
                          _.gettext("Enter 1 for next market," +
                                      " 2 for previous market.") + "\n"

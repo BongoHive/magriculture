@@ -1,5 +1,5 @@
 {
-    "url": "http://qa/api/v1/farmer/?msisdn=1234567",
+    "url": "http://qa/api/v1/farmer/?actor__user__username=1234567",
     "method": "GET",
     "body": {
         "meta": {
@@ -11,14 +11,61 @@
         },
         "objects": [
             {
-                "farmer_name": "Farmer Bob",
-                "crops": [
-                    ["crop1", "Peas"],
-                    ["crop2", "Carrots"]
+                "actor": {
+                    "gender": "",
+                    "id": 20,
+                    "name": "QA Farmer",
+                    "resource_uri": "",
+                    "user": {
+                        "email": "",
+                        "first_name": "Farmer",
+                        "id": 20,
+                        "last_name": "Bob",
+                        "resource_uri": "",
+                        "username": "27738590053"
+                    }
+                },
+                "agents": [
+                    {
+                        "id": 43,
+                        "resource_uri": ""
+                    }
                 ],
-                "markets": [
-                    ["market1", "Kitwe"],
-                    ["market2", "Ndola"]
+                "crops": [ {
+                    "description": "",
+                    "id": 1,
+                    "name": "Beans",
+                    "resource_uri": ""
+                },
+                {
+                    "description": "Horticultural Crop",
+                    "id": 2,
+                    "name": "Cabbage",
+                    "resource_uri": ""
+                },
+                {
+                    "description": "Horticultural Crop",
+                    "id": 3,
+                    "name": "Carrots",
+                    "resource_uri": ""
+                }],
+                "districts": [],
+                "gender": "M",
+                "hh_id": "",
+                "id": 20,
+                "id_number": "",
+                "markets": [],
+                "number_of_females": null,
+                "number_of_males": null,
+                "participant_type": "",
+                "resource_uri": "",
+                "wards": [
+                    {
+                        "code": "10224.0",
+                        "id": 39,
+                        "name": "Waya",
+                        "resource_uri": ""
+                    }
                 ]
             }
         ]
