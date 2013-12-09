@@ -732,7 +732,7 @@ def inventory_sale(request):
         form.fields['farmer'].widget = HiddenInput()
     else:
         form = forms.CropReceiptSaleStep1Form()
-    form.fields['farmer'].queryset = agent.farmer_set.all()
+    form.fields['farmer'].queryset = agent.farmers.all()
     return render(request, 'inventory_sale.html', {
         'agent': agent,
         'form': form,
