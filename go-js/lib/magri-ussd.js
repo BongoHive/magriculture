@@ -234,9 +234,9 @@ function MagriWorker() {
                 "districts": ["/api/v1/district/" + im.get_user_answer('registration_district_confirm') + "/"],
                 "hh_id": "",
                 "id_number": null,
-                "markets": "",
+                "markets": [],
                 "participant_type": "",
-                "wards": null
+                "wards": []
             }
         };
         return data;

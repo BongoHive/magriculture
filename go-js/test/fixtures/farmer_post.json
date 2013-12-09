@@ -9,9 +9,9 @@
         "districts": ["/api/v1/district/1/"],
         "hh_id": "",
         "id_number": null,
-        "markets": "",
+        "markets": [],
         "participant_type": "",
-        "wards": null
+        "wards": []
     },
     "body": {
         "actor": {
