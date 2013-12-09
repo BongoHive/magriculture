@@ -92,6 +92,20 @@ function LimaLinksApi(im, url, opts) {
         return p;
     };
 
+    self.get_actor = function(username) {
+        var p = self.api_call("actor/", {
+            user__username: username
+        });
+        p.add_callback(function(result){
+            if (result.objects.length === 0){
+                return null;
+            } else {
+                return result.objects[0];
+            }
+        });
+        return p;
+    };
+
     self.post_user = function(data) {
         var p = self.api_post("user/", data);
         p.add_callback(function(result){
@@ -555,8 +569,12 @@ function MagriWorker() {
                 var p = lima_links_api.post_user(data.user);
                 var farmer_id;
                 p.add_callback(function (user) {
+                    // Get the post-save created actor
+                    return lima_links_api.get_actor(im.user_addr);
+                });
+                p.add_callback(function (actor) {
                     // Add the data to the farmer object
-                    data.farmer.actor += user.id + "/";
+                    data.farmer.actor += actor.id + "/";
                     return data.farmer;
                 });
                 p.add_callback(function(farmer){

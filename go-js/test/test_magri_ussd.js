@@ -40,6 +40,7 @@ var test_fixtures_registration = [
     "test/fixtures/crop.json",
     "test/fixtures/farmer_post.json",
     "test/fixtures/user_post.json",
+    "test/fixtures/actor.json",
 ];
 
 
