@@ -119,6 +119,8 @@ class Actor(models.Model):
             raise errors.ActorException('More than one agent for an actor')
         if agents.exists():
             return agents[0]
+        else:
+            raise errors.ActorException('You need to be an agent to acces this page')
 
     def as_marketmonitor(self):
         """
@@ -255,12 +257,10 @@ class Farmer(models.Model):
     """
     #: the :class:`Actor` this farmer is linked to
     actor = models.ForeignKey('fncs.Actor')
-    agents = models.ManyToManyField('fncs.Agent')
-    id_number = models.CharField(blank=True, null=True, max_length=255,
-                                 unique=True)
+    id_number = models.CharField(blank=True, null=True, max_length=255, unique=True)
     fbas = models.ManyToManyField('fncs.FarmerBusinessAdvisor')
     markets = models.ManyToManyField('fncs.Market')
-    wards = models.ManyToManyField('fncs.Ward')
+    wards = models.ManyToManyField('fncs.Ward', null=True)
     districts = models.ManyToManyField('fncs.District',
                                        related_name='farmer_district')
     crops = models.ManyToManyField('fncs.Crop', related_name='farmer_crop')
@@ -351,7 +351,7 @@ class Farmer(models.Model):
         self.markets.add(market)
         agent.markets.add(market)
         # the farmer has the agent registered as an agent
-        self.agents.add(agent)
+        self.agent_farmer.add(agent)
         # the agent has the farmer registered as a farmer
         agent.farmers.add(self)
 

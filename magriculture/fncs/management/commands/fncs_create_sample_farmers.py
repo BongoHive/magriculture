@@ -47,7 +47,7 @@ class Command(BaseCommand):
             farmer = utils.create_farmer(msisdn=str(msisdn),
                                          name=utils.random_name(),
                                          surname=utils.random_surname(),
-                                         farmergroup_name=farmergroup_name)
+                                         )
 
             # cultivates two types of crops
             farmer.grows_crop(utils.random_crop())

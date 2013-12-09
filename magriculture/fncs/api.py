@@ -255,7 +255,7 @@ class FarmerResource(ModelResource):
     "content_type": "application/json",
     "body": {
                 "actor": "/api/v1/actor/%s/" % json_item_actor["objects"][0]["id"],
-                "agents": "",
+                "agents": [],
                 "crops": ["/api/v1/crop/%s/" % json_item_crop["objects"][0]["id"]],
                 "districts": ["/api/v1/district/%s/" % json_item_district["objects"][0]["id"]],
                 "hh_id": "",
@@ -273,7 +273,7 @@ class FarmerResource(ModelResource):
         method: GET
     """
     agents = fields.ManyToManyField('magriculture.fncs.api.AgentsResource',
-                                    'agents',
+                                    'agent_farmer',
                                     full=True)
     actor = fields.ForeignKey('magriculture.fncs.api.ActorResource',
                               'actor',

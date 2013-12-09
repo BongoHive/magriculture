@@ -268,7 +268,7 @@ class TestCreateFarmerApi(ResourceTestCase):
         farmer_data = {
                         "actor": ("/api/v1/actor/%s/" %
                                   json_item_actor["objects"][0]["id"]),
-                        "agents": "",
+                        "agents": [],
                         "crops": ["/api/v1/crop/%s/" %
                                   json_item_crop["objects"][0]["id"]],
                         "districts": ["/api/v1/district/%s/" %
@@ -313,6 +313,8 @@ class TestCreateFarmerApi(ResourceTestCase):
         self.assertEqual("27721231234", json_item["actor"]['user']["username"])
         self.assertEqual("test_first_name test_last_name",
                          json_item["actor"]["name"])
+
+        self.assertEqual(0, len(json_item["agents"]))
 
     def test_create_malicious_user(self):
         """

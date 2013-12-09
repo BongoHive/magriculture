@@ -12,8 +12,9 @@ from magriculture.fncs.models.actors import (Actor, Farmer, FarmerGroup,
                                              Identity)
 from magriculture.fncs.models.props import Message, GroupMessage, Note, Crop
 from magriculture.fncs.errors import ActorException
-from magriculture.fncs.models.geo import District, Ward
-
+from magriculture.fncs import errors
+from nose.tools import raises
+from magriculture.fncs.models.geo import District
 
 class ActorTestCase(TestCase):
 
@@ -170,6 +171,53 @@ class TestSendMessage(TestCase):
         self.assertEquals(sorted(message_list), sorted(farmers_list))
 
 
+class TestCreateFarmerWithFixtureData(TestCase):
+    """
+    Test Send Message to Farmer Groups
+    """
+    fixtures = ["test_province.json",
+                "test_district.json",
+                "test_ward.json",
+                "test_zone.json",
+                "test_rpiarea.json",
+                "test_auth_user.json",
+                "test_actor.json",
+                "test_agent",
+                "test_farmer.json",
+                "test_crop_unit.json",
+                "test_crop.json",
+                "test_market.json",
+                "test_crop_receipt.json",
+                "test_transaction.json"]
+
+    def setUp(self):
+        self.client.login(username="m", password="m")
+        self.user = User.objects.get(username="m")
+        self.actor = self.user.get_profile()
+        self.agent = self.actor.as_agent()
+        self.crop = Crop.objects.get(name="Coffee")
+        self.district = District.objects.get(name="Kafue")
+        self.district_2 = District.objects.get(name="Nchelenge")
+
+    def test_farmer_creation_duplicate_null_id_number(self):
+        """
+        Replicate duplicate ID number bug, only occurs in
+        post data as None is converted to a string.
+        """
+        utils.create_farmer(name="joe_1")
+
+        url = reverse("fncs:farmer_new")
+        data_1 = {"name": "name_1",
+                  "surname": "surname_1",
+                  "msisdn1": "123456781",
+                  "gender": "M",
+                  "markets": [1, 2]}
+        self.client.post(url, data=data_1, follow=True)
+        farmer = Farmer.objects.get(actor__user__username="123456781")
+        self.assertEquals(farmer.actor.user.first_name, "name_1")
+        self.assertEquals(farmer.id_number, None)
+
+
 class AgentTestCase(TestCase):
     def test_agent_creation(self):
         agent = utils.create_agent()
@@ -222,6 +270,20 @@ class AgentTestCase(TestCase):
         agent = utils.create_agent()
         actor = agent.actor
         self.assertEquals(agent, actor.as_agent())
+
+    @raises(errors.ActorException)
+    def test_actor_without_agent(self):
+        """
+        This should raise an ActorException for agent doesn't exist
+        """
+        user = User.objects.create_user("27721111111",
+                                        "27721111111@mail.com",
+                                        "pass123")
+        login = self.client.login(username=user.username,
+                                  password="pass123")
+        self.assertTrue(login)
+        url_messages = reverse("fncs:farmers")
+        self.client.get(url_messages)
 
     def test_agent_crop_receipt_inventory(self):
         farmer1 = utils.create_farmer(msisdn="27700000000")
@@ -329,7 +391,7 @@ class FarmerTestCase(TestCase):
     def test_farmer_creation(self):
         farmer = utils.create_farmer(name="joe")
         self.assertEquals(farmer.actor.user.first_name, "joe")
-        self.assertEquals(farmer.agents.count(), 0)
+        self.assertEquals(farmer.agent_farmer.count(), 0)
 
     def test_farmer_match(self):
         def match(*args, **kw):

@@ -348,7 +348,7 @@ class FarmersTestCase(FNCSTestCase):
             }))
         farmer = Farmer.objects.get(pk=farmer.pk)
         self.assertEqual(set([other_agent, self.agent]),
-                         set(farmer.agents.all()))
+                         set(farmer.agent_farmer.all()))
 
 
 class AgentTestCase(FNCSTestCase):

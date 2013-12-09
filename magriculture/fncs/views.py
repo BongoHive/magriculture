@@ -64,6 +64,9 @@ def farmer_new(request):
             matched_farmer = form.cleaned_data['matched_farmer']
             gender = form.cleaned_data["gender"]
 
+            if not id_number:
+                id_number = None
+
             if matched_farmer:
                 messages.info(request, 'Farmer added.')
                 if agent:
