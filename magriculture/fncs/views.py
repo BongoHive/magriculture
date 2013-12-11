@@ -16,15 +16,18 @@ from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
                                             DirectSale)
 from magriculture.fncs.models.geo import Market, Ward, District
 from magriculture.fncs import forms
+from magriculture.fncs.decorators import extension_officer_required, agent_required
 
 
 @login_required
+@agent_required
 def home(request):
     return render_to_response('home.html',
                               context_instance=RequestContext(request))
 
 
 @login_required
+@agent_required
 def farmers(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -42,6 +45,7 @@ def farmers(request):
 
 
 @login_required
+@agent_required
 def farmer_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -105,6 +109,7 @@ def farmer_new(request):
 
 
 @login_required
+@agent_required
 def farmer_location_search(request, farmer_pk):
     """Search for a farmer's location."""
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
@@ -124,6 +129,7 @@ def farmer_location_search(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_location_save(request, farmer_pk):
     """Set the location of a farmer."""
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
@@ -146,6 +152,7 @@ def farmer_location_save(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer(request, farmer_pk):
     return HttpResponseRedirect(reverse('fncs:farmer_sales', kwargs={
         'farmer_pk': farmer_pk
@@ -153,6 +160,7 @@ def farmer(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_sales(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     agent = request.user.get_profile().as_agent()
@@ -166,6 +174,7 @@ def farmer_sales(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_sale(request, farmer_pk, sale_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     transaction = get_object_or_404(Transaction, crop_receipt__farmer=farmer,
@@ -177,6 +186,7 @@ def farmer_sale(request, farmer_pk, sale_pk):
 
 
 @login_required
+@agent_required
 def farmer_new_sale(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -192,6 +202,7 @@ def farmer_new_sale(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_new_sale_detail(request, farmer_pk):
     crop_receipt = get_object_or_404(CropReceipt,
                                      pk=request.GET.get('crop_receipt'))
@@ -228,6 +239,7 @@ def farmer_new_sale_detail(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_messages(request, farmer_pk):
     actor = request.user.get_profile()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
@@ -242,6 +254,7 @@ def farmer_messages(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_new_message(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -270,6 +283,7 @@ def farmer_new_message(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_notes(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -284,6 +298,7 @@ def farmer_notes(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_new_note(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -309,6 +324,7 @@ def farmer_new_note(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_profile(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     return render_to_response('farmers/profile.html', {
@@ -317,6 +333,7 @@ def farmer_profile(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def group_messages(request):
     actor = request.user.get_profile()
     paginator = Paginator(GroupMessage.objects.filter(sender=actor), 5)
@@ -329,6 +346,7 @@ def group_messages(request):
 
 
 @login_required
+@agent_required
 def group_message_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -396,6 +414,7 @@ def group_message_new(request):
 
 
 @login_required
+@agent_required
 def group_message_write(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -444,12 +463,14 @@ def group_message_write(request):
 
 
 @login_required
+@agent_required
 def sales(request):
     return render_to_response('sales.html', {
     }, context_instance=RequestContext(request))
 
 
 @login_required
+@agent_required
 def sales_crops(request):
     agent = request.user.get_profile().as_agent()
     paginator = Paginator(agent.transactions(), 5)
@@ -462,18 +483,21 @@ def sales_crops(request):
 
 
 @login_required
+@agent_required
 def sales_agents(request):
     return render_to_response('sales_agents.html', {
     }, context_instance=RequestContext(request))
 
 
 @login_required
+@agent_required
 def sales_agent_breakdown(request):
     return render_to_response('sales_agent_breakdown.html', {
     }, context_instance=RequestContext(request))
 
 
 @login_required
+@agent_required
 def farmer_crops(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     if request.method == "POST":
@@ -496,6 +520,7 @@ def farmer_crops(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def farmer_edit(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     actor = farmer.actor
@@ -543,12 +568,14 @@ def farmer_edit(request, farmer_pk):
 
 
 @login_required
+@agent_required
 def market_prices(request):
     return render_to_response('markets/prices.html', {
     }, context_instance=RequestContext(request))
 
 
 @login_required
+@agent_required
 def market_sales(request):
     paginator = Paginator(Market.objects.all(), 5)
     page = paginator.page(request.GET.get('p', 1))
@@ -559,6 +586,7 @@ def market_sales(request):
 
 
 @login_required
+@agent_required
 def market_sale(request, market_pk):
     market = get_object_or_404(Market, pk=market_pk)
     paginator = Paginator(market.crops(), 5)
@@ -571,6 +599,7 @@ def market_sale(request, market_pk):
 
 
 @login_required
+@agent_required
 def crop(request, market_pk, crop_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
@@ -585,6 +614,7 @@ def crop(request, market_pk, crop_pk):
 
 
 @login_required
+@agent_required
 def crop_unit(request, market_pk, crop_pk, unit_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
@@ -605,6 +635,7 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
 
 
 @login_required
+@agent_required
 def market_offers(request):
     market_ids = [offer.market_id for offer in Offer.objects.all()]
     markets = Market.objects.filter(pk__in=market_ids)
@@ -617,6 +648,7 @@ def market_offers(request):
 
 
 @login_required
+@agent_required
 def market_offer(request, market_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crops = [offer.crop for offer in Offer.objects.filter(market=market)]
@@ -630,6 +662,7 @@ def market_offer(request, market_pk):
 
 
 @login_required
+@agent_required
 def offer(request, market_pk, crop_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
@@ -646,6 +679,7 @@ def offer(request, market_pk, crop_pk):
 
 
 @login_required
+@agent_required
 def offer_unit(request, market_pk, crop_pk, unit_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
@@ -665,6 +699,7 @@ def offer_unit(request, market_pk, crop_pk, unit_pk):
 
 
 @login_required
+@agent_required
 def market_new_offer(request, *args, **kwargs):
     paginator = Paginator(Market.objects.all(), 5)
     page = paginator.page(request.GET.get('p', 1))
@@ -675,6 +710,7 @@ def market_new_offer(request, *args, **kwargs):
 
 
 @login_required
+@agent_required
 def market_register_offer(request, market_pk):
     actor = request.user.get_profile()
     marketmonitor = actor.as_marketmonitor()
@@ -707,6 +743,7 @@ def market_register_offer(request, market_pk):
 
 
 @login_required
+@agent_required
 def inventory(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -720,6 +757,7 @@ def inventory(request):
 
 
 @login_required
+@agent_required
 def inventory_sale(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -740,6 +778,7 @@ def inventory_sale(request):
 
 
 @login_required
+@agent_required
 def inventory_sale_details(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -777,6 +816,7 @@ def inventory_sale_details(request):
 
 
 @login_required
+@agent_required
 def inventory_intake(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -790,6 +830,7 @@ def inventory_intake(request):
 
 
 @login_required
+@agent_required
 def inventory_intake_details(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -835,6 +876,7 @@ def inventory_intake_details(request):
 
 
 @login_required
+@agent_required
 def inventory_direct_sale(request, receipt_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -886,6 +928,7 @@ def agents(request):
 
 
 @login_required
+@agent_required
 def agent(request, agent_pk):
     agent = get_object_or_404(Agent, pk=agent_pk)
     actor = agent.actor
@@ -923,6 +966,7 @@ def agent(request, agent_pk):
 
 
 @login_required
+@agent_required
 def agent_new(request):
     if request.method == "POST":
         form = forms.AgentForm(request.POST)
