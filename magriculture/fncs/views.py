@@ -16,6 +16,7 @@ from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
                                             DirectSale)
 from magriculture.fncs.models.geo import Market, Ward, District
 from magriculture.fncs import forms
+from magriculture.fncs.decorators import extension_officer_required
 
 
 @login_required
@@ -603,6 +604,30 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
         'page': page
     }, context_instance=RequestContext(request))
 
+
+@login_required
+@extension_officer_required
+def market_new(request):
+    actor = request.user.get_profile()
+    ext_officer = actor.as_extensionofficer()
+
+    if not ext_officer:
+        messages.error(request, "You need to be an extension officer to add new market")
+        return redirect(reverse("fncs:home"))
+
+    if request.method == "POST":
+        form = forms.MarketForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "A new market has been created.")
+            return redirect(reverse("fncs:home"))
+    else:
+        form = forms.MarketForm()
+
+    context = {"form": form}
+    return render(request,
+                  'markets/market_new.html',
+                  context)
 
 @login_required
 def market_offers(request):
