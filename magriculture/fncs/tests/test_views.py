@@ -589,3 +589,31 @@ class TestExtensionOfficerMarkets(TestCase):
         self.assertRedirects(response, reverse("fncs:home"))
         self.assertEquals(response.context["messages"]._loaded_data[0].message,
                           "A new market has been created.")
+
+
+class TestExtensionOfficersAgents(TestCase):
+    def setUp(self):
+        self.province = utils.create_province('test province')
+        self.district = utils.create_district('test district', self.province)
+        self.ward = utils.create_ward('test ward', self.district)
+        self.market = utils.create_market('test market', self.district)
+
+        self.agent = utils.create_agent()
+
+        self.farmers = list(create_random_farmers(10, self.agent, self.market))
+        self.farmer = self.farmers[0]
+
+        self.officer = utils.create_extension_officer()
+        self.client.login(username=self.officer.actor.user.username, password=utils.PASSWORD)
+
+
+    def test_add_new_agent(self):
+        data = {"name": "name_first",
+                "surname": "name_surname",
+                "msisdn": "1234567890",
+                "farmers": [self.farmer.pk],
+                "markets": [self.market.pk]}
+        response = self.client.post(reverse('fncs:agent_new'), data=data, follow=True)
+        self.assertEquals(response.context["messages"]._loaded_data[0].message,
+                          "Agent Created")
+        self.assertRedirects(response, reverse("fncs:agents"))
