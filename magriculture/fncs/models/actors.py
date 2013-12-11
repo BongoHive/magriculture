@@ -221,6 +221,14 @@ class Actor(models.Model):
             if not self.identity_set.filter(msisdn=msisdn).exists():
                 self.add_identity(msisdn)
 
+    def is_agent(self):
+        """
+        Checks if the logged in user is an agent based on :class:`Agent`
+        role. This is used in the to dynamically display the menu based
+        on the user type.
+        """
+        return self.agent_set.exists()
+
     @classmethod
     def _find_identity(cls, msisdn):
         return Identity.objects.get(msisdn=msisdn)
