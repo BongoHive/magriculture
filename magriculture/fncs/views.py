@@ -929,9 +929,7 @@ def agent(request, agent_pk):
             agent.save()
 
             messages.success(request, "Agent Profile has been updated")
-            return HttpResponseRedirect(reverse('fncs:agent', kwargs={
-                'agent_pk': agent.pk
-            }))
+            return HttpResponseRedirect(reverse("fncs:agents"))
     else:
         form = forms.AgentForm(initial={
             'name': user.first_name,
@@ -962,11 +960,9 @@ def agent_new(request):
             if possible_matches:
                 messages.info(request, "This agent already exists.")
             else:
-                agent = Agent.create(msisdn, name, surname, farmers, markets)
+                Agent.create(msisdn, name, surname, farmers, markets)
                 messages.success(request, "Agent Created")
-                return HttpResponseRedirect(reverse("fncs:agent", kwargs={
-                    'agent_pk': agent.pk
-                }))
+                return HttpResponseRedirect(reverse("fncs:agents"))
     else:
         form = forms.AgentForm()
 
