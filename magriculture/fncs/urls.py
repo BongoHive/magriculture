@@ -33,6 +33,12 @@ urlpatterns = patterns('',
     url(r'^sales/crops/$', views.sales_crops, name='sales_crops'),
     url(r'^sales/agents/$', views.sales_agents, name='sales_agents'),
     url(r'^sales/agents/breakdown/$', views.sales_agent_breakdown, name='sales_agent_breakdown'),
+
+    # Markets
+    url(r'^market/new/$', views.market_new, name='market_new'),
+    url(r'^market/edit/(?P<market_pk>\d+)/$', views.market_prices, name='market_prices'),
+
+    # Market-Prices
     url(r'^market-prices/$', views.market_prices, name='market_prices'),
     url(r'^market-prices/offers/$', views.market_offers, name='market_offers'),
     url(r'^market-prices/offers/new/$', views.market_new_offer, name='market_new_offer'),
