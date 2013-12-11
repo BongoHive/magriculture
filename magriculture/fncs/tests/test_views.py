@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.utils.unittest import skip
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
 from django.db import IntegrityError
 
 from magriculture.fncs.tests import utils
@@ -78,6 +79,24 @@ class SessionTestCase(FNCSTestCase):
         response = self.client.get(reverse('fncs:home'))
         self.assertRedirects(response, self.login_url)
 
+    def test_user_agent_menu_view(self):
+        """
+        This tests if a user with agent status is an agent
+        according to the request context
+        """
+        self.login()
+        response = self.client.get(reverse('fncs:home'))
+        self.assertTrue(response.context["user"].actor.is_agent())
+
+    def test_user_non_agent_menu_view(self):
+        """
+        This tests if a user without agent status is not an agent
+        according to the request context
+        """
+        User.objects.create_user("non_agent", "non_agent@mail.com", "pass123")
+        self.client.login(username="non_agent", password="pass123")
+        response = self.client.get(reverse('fncs:home'))
+        self.assertFalse(response.context["user"].actor.is_agent())
 
 def format_timestamp(key, timestamp):
     return {
