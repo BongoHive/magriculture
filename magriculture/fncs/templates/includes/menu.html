@@ -6,7 +6,7 @@
     <div class="item"><a href="{% url fncs:inventory_intake %}"><img src="{{ STATIC_URL }}images/icon-write.gif" alt="Stock" width="16" height="16" /> Crop Intake &raquo;</a></div>
     {% endif %}
     <div class="item"><a href="{% url fncs:farmer_new %}"><img src="{{ STATIC_URL }}images/icon-profile.gif" alt="Farmers" width="16" height="16" /> Add Farmer &raquo;</a></div>
-    {% if user.is_superuser %}
+    {% if user.is_superuser or user.actor.is_extensionofficer %}
 	    <div class="item"><a href="{% url fncs:agents %}"><img src="{{ STATIC_URL }}images/icon-profile.gif" alt="Add an Agent" width="16" height="16" />Add an Agent &raquo;</a></div>
 	{% endif %}
     <div class="" style="background-color: #2E5333; height: 4px"></div>
