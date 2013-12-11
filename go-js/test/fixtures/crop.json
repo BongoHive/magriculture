@@ -1,0 +1,189 @@
+{
+    "url": "http://qa/api/v1/crop/?limit=0",
+    "method": "GET",
+    "body": {
+        "meta": {
+            "limit": 20,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total_count": 3
+        },
+        "objects": [
+        {
+            "description": "",
+            "id": 1,
+            "name": "Beans",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 2,
+            "name": "Cabbage",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 3,
+            "name": "Carrots",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 22,
+            "name": "Cassava",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 4,
+            "name": "Cauliflower",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 5,
+            "name": "Chinese Cabbage",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 20,
+            "name": "Coffee",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 6,
+            "name": "Eggplant",
+            "resource_uri": ""
+        },
+        {
+            "description": "Field Crop",
+            "id": 7,
+            "name": "Fruit",
+            "resource_uri": ""
+        },
+        {
+            "description": "Field Crop",
+            "id": 8,
+            "name": "Green Maize",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 9,
+            "name": "Green Pepper",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 10,
+            "name": "Impwa",
+            "resource_uri": ""
+        },
+        {
+            "description": "Field Crop",
+            "id": 11,
+            "name": "Kalembula",
+            "resource_uri": ""
+        },
+        {
+            "description": "Field Crop",
+            "id": 12,
+            "name": "Maize",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 19,
+            "name": "Millet",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 13,
+            "name": "Okra",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 14,
+            "name": "Onion",
+            "resource_uri": ""
+        },
+        {
+            "description": "Field Crop",
+            "id": 15,
+            "name": "Pumpkin Leaves",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 16,
+            "name": "Rape",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 21,
+            "name": "Rice",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 23,
+            "name": "Soybean",
+            "resource_uri": ""
+        },
+        {
+            "description": "Field Crop",
+            "id": 17,
+            "name": "Sugar Cane",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 24,
+            "name": "Sunflowers",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 26,
+            "name": "Tobacco",
+            "resource_uri": ""
+        },
+        {
+            "description": "Horticultural Crop",
+            "id": 18,
+            "name": "Tomato",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 27,
+            "name": "Wheat",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 28,
+            "name": "Fruit - Oranges",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 29,
+            "name": "Fruit - Apples",
+            "resource_uri": ""
+        },
+        {
+            "description": "",
+            "id": 30,
+            "name": "Fruit - Bananas",
+            "resource_uri": ""
+        }
+    ]
+    }
+}

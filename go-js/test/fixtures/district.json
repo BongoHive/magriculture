@@ -1,0 +1,30 @@
+{
+    "url": "http://qa/api/v1/district/?limit=0",
+    "method": "GET",
+    "body": {
+        "meta": {
+            "limit": 20,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total_count": 3
+        },
+        "objects": [
+            {
+                "name": "district one",
+                "id": 1,
+                "resource_uri": "/api/v1/district/1/"
+            },
+            {
+                "name": "district two",
+                "id": 2,
+                "resource_uri": "/api/v1/district/2/"
+            },
+            {
+                "name": "district three",
+                "id": 3,
+                "resource_uri": "/api/v1/district/3/"
+            }
+        ]
+    }
+}

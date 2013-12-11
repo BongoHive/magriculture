@@ -1,0 +1,18 @@
+{
+    "url": "http://qa/api/v1/user/",
+    "method": "POST",
+    "content_type": "application/json",
+    "data": {
+        "username": "1234567",
+        "first_name": "Bob",
+        "last_name": "Marley"
+    },
+    "body": {
+        "email": "",
+        "first_name": "Bob",
+        "id": 20,
+        "last_name": "Marley",
+        "resource_uri": "",
+        "username": "1234567"
+    }
+}
