@@ -23,7 +23,7 @@ def agent_required(function):
     @wraps(function)
     def decorated_function(request, *args, **kwargs):
         if request.user.is_authenticated:
-            if not request.user.actor.as_agent():
+            if not request.user.actor.is_agent():
                 messages.error(request, "You need to be an extension officer to view that.")
                 return redirect(reverse("login"))
 
