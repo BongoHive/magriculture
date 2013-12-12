@@ -43,7 +43,7 @@ class VumiGoSender(SmsSender):
         return "%s/%s/messages.json" % (self.api_url, self.conversation_id)
 
     def send_sms(self, to_addr, content):
-        auth = requests.HTTPBasicAuth(self.account_id, self.conversation_token)
+        auth = (self.account_id, self.conversation_token)
         headers = {"Content-Type": "application/json; charset=utf-8"}
         payload = {
             "content": content,
