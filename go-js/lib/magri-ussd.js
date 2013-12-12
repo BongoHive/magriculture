@@ -194,13 +194,12 @@ function LimaLinksApi(im, url, opts) {
     };
 
     self.findIndex = function(arr, item, value){
-        var result = -1;
         for (var i=0; i<arr.length; i++){
             if (arr[i][item] == value){
-                result = i;
+                return i;
             }
         }
-        return result;
+        return -1;
     };
 }
 
