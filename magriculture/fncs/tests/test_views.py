@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 
 from django.test import TestCase
 from django.test.client import Client
@@ -6,7 +7,8 @@ from django.utils.unittest import skip
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.contrib.auth.models import User
+from django.contrib.auth.models import check_password
+from magriculture.fncs.models.props import Message
 
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import Agent, Farmer, MarketMonitor
@@ -637,14 +639,23 @@ class TestExtensionOfficersAgents(TestCase):
         self.assertEquals(response.context["messages"]._loaded_data[0].message,
                           "Agent Created")
         self.assertRedirects(response, reverse("fncs:agents"))
-        new_agent = User.objects.get(username="1234567890")
+        new_agent = User.objects.get(username=data["msisdn"])
         self.assertEquals(new_agent.first_name, "name_first")
         self.assertEquals(new_agent.last_name, "name_surname")
-        self.assertEquals(new_agent.password, "")
+        # self.assertEquals(new_agent.password, "")
         self.assertTrue(new_agent.actor.is_agent())
         self.assertFalse(new_agent.actor.is_extensionofficer())
+        self.client.logout()
 
-        # self.client.logout()
-        # import pdb; pdb.set_trace()
-        # login_agent = self.client.login(username="1234567890")
-        # self.assertTrue(login_agent)
+        # Assumes that if message is stored message has been sent
+        # There is a current flaw in teh code where the sender and
+        # recipient is the same actor
+        messages = Message.objects.get(recipient=new_agent.actor)
+        self.assertEquals(messages.sender, new_agent.actor)
+        self.assertIn('You have been registered and your pin is - ',
+                      messages.content)
+
+        reg_pin = re.compile(r"\d\d\d\d")
+        pin = reg_pin.search(messages.content).group()
+        login_agent = self.client.login(username=data["msisdn"], password=pin)
+        self.assertTrue(login_agent)
