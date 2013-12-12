@@ -125,13 +125,27 @@ function LimaLinksApi(im, url, opts) {
     };
 
     self.price_history = function(market_id, crop_id, limit) {
-        var p =  self.api_call("price_history/", {
-            market: market_id,
-            crop: crop_id,
+        var p =  self.api_call("transaction/", {
+            crop_receipt__market: market_id,
+            crop_receipt__crop: crop_id,
             limit: limit
         });
         p.add_callback(function(result){
-            return result.objects[0];
+            return result.objects.map(function (transaction) {
+                return {
+                    "unit_id": transaction.crop_receipt.unit.id,
+                    "unit_name": transaction.crop_receipt.unit.name,
+                    "price": transaction.price
+                };
+                }).reduce(function(pv, cv){
+                    var pos = self.findIndex(pv, 'unit_id', cv.unit_id);
+                    if (pos === -1){
+                        return pv.concat({"unit_id":cv.unit_id, "unit_name": cv.unit_name, "prices": [cv.price]});
+                    } else {
+                        pv[pos].prices.push(cv.price);
+                        return pv;
+                    }
+                }, []);
         });
         return p;
     };
@@ -148,11 +162,13 @@ function LimaLinksApi(im, url, opts) {
     };
 
     self.all_markets = function(limit) {
-        var p = self.api_call("markets/", {
+        var p = self.api_call("market/", {
             limit: limit
         });
         p.add_callback(function(result){
-            return result.objects;
+            return result.objects.map(function (market) {
+                return [market.id, market.name];
+            });
         });
         return p;
     };
@@ -176,9 +192,16 @@ function LimaLinksApi(im, url, opts) {
         });
         return p;
     };
+
+    self.findIndex = function(arr, item, value){
+        for (var i=0; i<arr.length; i++){
+            if (arr[i][item] == value){
+                return i;
+            }
+        }
+        return -1;
+    };
 }
-
-
 
 function MagriWorker() {
     var self = this;
@@ -726,17 +749,10 @@ function MagriWorker() {
             p.add_callback(function(prices) {
                 var title = _.translate("Prices of %1$s in %2$s:"
                                        ).fetch(crop_name, market_name);
-                var unit_ids = [];
-                var unit_id;
-                for (unit_id in prices) {
-                    unit_ids.push(unit_id);
-                }
-                unit_ids.sort();
 
                 var price_lines = [];
-                for (var idx in unit_ids) {
-                    unit_id = unit_ids[idx];
-                    var unit_info = prices[unit_id];
+
+                function findCropAverage(unit_info){
                     var unit_prices = unit_info.prices;
                     var avg_text;
                     if (unit_prices.length) {
@@ -751,6 +767,9 @@ function MagriWorker() {
                     }
                     price_lines.push("  " + unit_info.unit_name + ": " + avg_text);
                 }
+
+                prices.forEach(findCropAverage);
+
                 if (!price_lines.length) {
                     price_lines.push("  " + _.gettext("No prices available."));
                 }
