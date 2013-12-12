@@ -1,5 +1,5 @@
 {
-    "url": "http://qa/api/v1/markets/?limit=10",
+    "url": "http://qa/api/v1/market/?limit=10",
     "method": "GET",
     "body": {
         "meta": {

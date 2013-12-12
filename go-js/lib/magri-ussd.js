@@ -162,7 +162,7 @@ function LimaLinksApi(im, url, opts) {
     };
 
     self.all_markets = function(limit) {
-        var p = self.api_call("markets/", {
+        var p = self.api_call("market/", {
             limit: limit
         });
         p.add_callback(function(result){
