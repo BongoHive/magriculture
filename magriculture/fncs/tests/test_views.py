@@ -5,6 +5,7 @@ from django.test.client import Client
 from django.utils.unittest import skip
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from django.contrib.auth.models import User
 
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import Agent, Farmer, MarketMonitor
@@ -617,3 +618,12 @@ class TestExtensionOfficersAgents(TestCase):
         self.assertEquals(response.context["messages"]._loaded_data[0].message,
                           "Agent Created")
         self.assertRedirects(response, reverse("fncs:agents"))
+        new_agent = User.objects.get(username="1234567890")
+        self.assertEquals(new_agent.first_name, "name_first")
+        self.assertEquals(new_agent.last_name, "name_surname")
+        self.assertEquals(new_agent.password, "")
+
+        # self.client.logout()
+        # import pdb; pdb.set_trace()
+        # login_agent = self.client.login(username="1234567890")
+        # self.assertTrue(login_agent)
