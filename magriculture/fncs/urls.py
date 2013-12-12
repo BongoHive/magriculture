@@ -36,7 +36,7 @@ urlpatterns = patterns('',
 
     # Markets
     url(r'^market/new/$', views.market_new, name='market_new'),
-    url(r'^market/edit/(?P<market_pk>\d+)/$', views.market_prices, name='market_prices'),
+    url(r'^market/view/$', views.market_view, name='market_view'),
 
     # Market-Prices
     url(r'^market-prices/$', views.market_prices, name='market_prices'),
