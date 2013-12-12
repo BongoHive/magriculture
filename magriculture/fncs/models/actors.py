@@ -541,10 +541,12 @@ class Agent(models.Model):
     #: the :class:`Farmer` this agent is doing
     #: business for
     farmers = models.ManyToManyField('fncs.Farmer',
-                                     related_name='agent_farmer')
+                                     related_name='agent_farmer',
+                                     blank=True)
     #: the :class:`Market` this agent is doing
     #: business at
-    markets = models.ManyToManyField('fncs.Market')
+    markets = models.ManyToManyField('fncs.Market',
+                                     blank=True)
 
     class Meta:
         app_label = 'fncs'
