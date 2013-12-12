@@ -412,7 +412,7 @@ class AgentTestCase(FNCSTestCase):
             'farmers': [self.farmer.pk],
             'markets': [self.market.pk],
         })
-        self.assertRedirects(response, agent_url)
+        self.assertRedirects(response, reverse("fncs:agents"))
         agent = Agent.objects.get(pk=self.agent.pk)
         user = agent.actor.user
         self.assertEqual(user.first_name, 'n')
