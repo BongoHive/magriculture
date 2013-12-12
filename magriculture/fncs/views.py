@@ -629,6 +629,18 @@ def market_new(request):
                   'markets/market_new.html',
                   context)
 
+
+@login_required
+@extension_officer_required
+def market_view(request):
+    paginator = Paginator(Market.objects.all(), 5)
+    page = paginator.page(request.GET.get('p', 1))
+    context = {'paginator': paginator,
+               'page': page,}
+    return render(request,
+                  "markets/market_view.html",
+                  context)
+
 @login_required
 def market_offers(request):
     market_ids = [offer.market_id for offer in Offer.objects.all()]
