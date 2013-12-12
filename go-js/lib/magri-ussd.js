@@ -754,8 +754,6 @@ function MagriWorker() {
                 var price_lines = [];
 
                 function findCropAverage(unit_info){
-                    // unit_id = unit_ids[idx];
-                    // var unit_info = prices[unit_id];
                     var unit_prices = unit_info.prices;
                     var avg_text;
                     if (unit_prices.length) {
