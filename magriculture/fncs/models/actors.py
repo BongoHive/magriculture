@@ -736,7 +736,7 @@ class Agent(models.Model):
             crop_receipt=crop_receipt, amount=amount, price=price,
             created_at=datetime.now())
 
-        self.send_message_to_farmer(crop_receipt.farmer,
+        self.actor.send_message_to_farmer(crop_receipt.farmer,
                                     transaction.as_sms())
 
         # see if we've sold everything we have and then update the
@@ -744,7 +744,7 @@ class Agent(models.Model):
         if crop_receipt.remaining_inventory() <= 0:
             crop_receipt.reconciled = True
             crop_receipt.save()
-            self.send_message_to_farmer(crop_receipt.farmer,
+            self.actor.send_message_to_farmer(crop_receipt.farmer,
                                         crop_receipt.as_sms())
         return transaction
 
@@ -758,36 +758,6 @@ class Agent(models.Model):
         """
         return Transaction.objects.filter(crop_receipt__farmer=farmer,
                                           crop_receipt__agent=self)
-
-    def send_message_to_farmer(self, farmer, message, group=None):
-        """
-        Send a message to a farmer
-
-        :param farmer: :class:`Farmer`
-        :param message: :func:`str`, the message text
-        :param group: :class:`magriculture.fncs.models.props.GroupMessage`,
-                      defaults to `None`
-        :returns: the message sent, `magriculture.fncs.models.props.Message`
-        """
-        return self.actor.send_message(farmer.actor, message, group)
-
-    def send_message_to_farmergroups(self, farmergroups, message):
-        """
-        Send a message to all farmers in the given farmer groups filters
-
-        :param farmergroups: list of :class:`FarmerGroup`
-        :param message: :func:`str`, message to send.
-        :returns: the group message sent,
-                  :class:`magriculture.fncs.models.props.GroupMessage`
-
-        """
-        groupmessage = GroupMessage.objects.create(sender=self.actor,
-                                                   content=message)
-
-        groupmessage.farmergroups.add(farmergroups)
-        for farmer in farmergroups.members():
-            self.send_message_to_farmer(farmer, message, groupmessage)
-        return groupmessage
 
     def write_note(self, farmer, note):
         """
