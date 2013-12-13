@@ -455,7 +455,7 @@ class FarmerGroup(models.Model):
     #: The :class:`Actor` assigned to
     #: this FarmerGroup
     #: Each dynamic group must have an actor for specific filtering
-    agent = models.ForeignKey('fncs.Agent', null=True)
+    actor = models.ForeignKey('fncs.Actor', null=True)
     crop = models.ForeignKey('fncs.Crop', null=True)
 
     def members(self):
