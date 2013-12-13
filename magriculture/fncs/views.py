@@ -16,6 +16,7 @@ from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
                                             DirectSale)
 from magriculture.fncs.models.geo import Market, Ward, District
 from magriculture.fncs import forms
+from magriculture.fncs.decorators import extension_officer_required
 
 
 @login_required
@@ -333,7 +334,8 @@ def group_messages(request):
 @login_required
 def group_message_new(request):
     actor = request.user.get_profile()
-    agent = actor.as_agent()
+    agent = actor.as_agent() if actor.is_agent() else None
+
     choose_district = None  # Used to determine if render district field
 
     if request.method == "POST":
@@ -352,44 +354,50 @@ def group_message_new(request):
                     return HttpResponseRedirect('%s?%s' % (
                             reverse('fncs:group_message_write'),
                             urllib.urlencode(url_list)))
-                excluded = (Crop.
-                            objects.
-                            exclude(farmer_crop__agent_farmer__actor__user__username="m").
-                            all())
-                if data["crop"] in excluded:
-                    messages.error(request, 'Invalid crop, please select your crop.')
-                    return HttpResponseRedirect(reverse('fncs:group_message_new'))
-                # Dynamically setting the district Choice field
-                form.fields["district"].queryset = (District.
-                                                objects.
-                                                filter(farmer_district__agent_farmer=agent).
-                                                filter(farmer_district__crops=data["crop"]).
-                                                all().
-                                                distinct())
 
-                # Setting the total cound of farmers in the District
-                form.fields["district"].label_from_instance = (lambda obj: "%s (%s)" %
-                                                               (obj.name,
-                                                                obj.get_farmer_count(agent,
-                                                                                     data["crop"])))
+
+                # If the user is an agent dynamically generate select field.
+                if actor.is_agent():
+                    included = (Crop.objects.filter(farmer_crop__agent_farmer=agent).
+                                all().distinct())
+
+                    if data["crop"] not in included:
+                        messages.error(request, 'Invalid crop, please select your crop.')
+                        return HttpResponseRedirect(reverse('fncs:group_message_new'))
+
+                    # Dynamically setting the district Choice field
+                    form.fields["district"].queryset = (District.
+                                                    objects.
+                                                    filter(farmer_district__agent_farmer=agent).
+                                                    filter(farmer_district__crops=data["crop"]).
+                                                    all().
+                                                    distinct())
+
+                    # Setting the total cound of farmers in the District
+                    form.fields["district"].label_from_instance = (lambda obj: "%s (%s)" %
+                                                                   (obj.name,
+                                                                    obj.get_farmer_count(agent,
+                                                                                         data["crop"])))
 
                 # If form.is_valid() first time round, hide the crop widget
                 form.fields['crop'].widget = HiddenInput()
                 choose_district = True
             else:
-                # Dynamically setting the Crop queryset if form.is_invalid()
-                form.fields["crop"].queryset = (Crop.objects.
-                                                filter(farmer_crop__agent_farmer=agent).
-                                                all().
-                                                distinct())
+                # Dynamically setting the Crop queryset if form.is_invalid() if user is agent
+                if actor.is_agent():
+                    form.fields["crop"].queryset = (Crop.objects.
+                                                    filter(farmer_crop__agent_farmer=agent).
+                                                    all().
+                                                    distinct())
                 messages.error(request, 'There are some errors on the form')
     else:
         # If a get is done on the form render below
         form = forms.FarmerGroupCreateFilterForm()
-        form.fields["crop"].queryset = (Crop.objects.
-                                        filter(farmer_crop__agent_farmer=agent).
-                                        all().
-                                        distinct())
+        if actor.is_agent():
+            form.fields["crop"].queryset = (Crop.objects.
+                                            filter(farmer_crop__agent_farmer=agent).
+                                            all().
+                                            distinct())
 
     return render_to_response('group_messages_new.html', {
         'form': form,
@@ -400,7 +408,6 @@ def group_message_new(request):
 @login_required
 def group_message_write(request):
     actor = request.user.get_profile()
-    agent = actor.as_agent()
 
     crop = request.GET.getlist('crop')
     district = request.GET.getlist('district')
@@ -424,14 +431,14 @@ def group_message_write(request):
             district_names = [obj.name for obj in district_obj]
             name = "%s farmers in %s " % (crop_obj.name, " & ".join(district_names))
             farmergroups = FarmerGroup(crop=crop_obj,
-                                       agent=agent,
+                                       actor=actor,
                                        name=name)
             farmergroups.save()
 
             # Adding District Obj to M2M field as *args
             farmergroups.district.add(*district_obj)
 
-            agent.send_message_to_farmergroups(farmergroups, content)
+            actor.send_message_to_farmergroups(farmergroups, content)
             messages.success(request, 'The message has been sent to all group'
                              ' members via SMS')
             return HttpResponseRedirect(reverse('fncs:messages'))
@@ -605,6 +612,42 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
         'page': page
     }, context_instance=RequestContext(request))
 
+
+@login_required
+@extension_officer_required
+def market_new(request):
+    actor = request.user.get_profile()
+    ext_officer = actor.as_extensionofficer()
+
+    if not ext_officer:
+        messages.error(request, "You need to be an extension officer to add new market")
+        return redirect(reverse("fncs:home"))
+
+    if request.method == "POST":
+        form = forms.MarketForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "A new market has been created.")
+            return redirect(reverse("fncs:home"))
+    else:
+        form = forms.MarketForm()
+
+    context = {"form": form}
+    return render(request,
+                  'markets/market_new.html',
+                  context)
+
+
+@login_required
+@extension_officer_required
+def market_view(request):
+    paginator = Paginator(Market.objects.all(), 5)
+    page = paginator.page(request.GET.get('p', 1))
+    context = {'paginator': paginator,
+               'page': page,}
+    return render(request,
+                  "markets/market_view.html",
+                  context)
 
 @login_required
 def market_offers(request):

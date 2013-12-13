@@ -163,6 +163,14 @@ class Actor(models.Model):
         if extensionofficers.exists():
             return extensionofficers[0]
 
+        return None
+
+    def is_extensionofficer(self):
+        """
+        Checks if the user is an extension officer
+        """
+        return self.extensionofficer_set.exists()
+
     def as_fba(self):
         """
         Get the :class:`FarmerBusinessAdvisor` for this actor, raises an
@@ -228,6 +236,37 @@ class Actor(models.Model):
         on the user type.
         """
         return self.agent_set.exists()
+
+
+    def send_message_to_farmer(self, farmer, message, group=None):
+        """
+        Send a message to a farmer
+
+        :param farmer: :class:`Farmer`
+        :param message: :func:`str`, the message text
+        :param group: :class:`magriculture.fncs.models.props.GroupMessage`,
+                      defaults to `None`
+        :returns: the message sent, `magriculture.fncs.models.props.Message`
+        """
+        return self.send_message(farmer.actor, message, group)
+
+    def send_message_to_farmergroups(self, farmergroups, message):
+        """
+        Send a message to all farmers in the given farmer groups filters
+
+        :param farmergroups: list of :class:`FarmerGroup`
+        :param message: :func:`str`, message to send.
+        :returns: the group message sent,
+                  :class:`magriculture.fncs.models.props.GroupMessage`
+
+        """
+        groupmessage = GroupMessage.objects.create(sender=self,
+                                                   content=message)
+
+        groupmessage.farmergroups.add(farmergroups)
+        for farmer in farmergroups.members():
+            self.send_message_to_farmer(farmer, message, groupmessage)
+        return groupmessage
 
     @classmethod
     def _find_identity(cls, msisdn):
@@ -447,7 +486,7 @@ class FarmerGroup(models.Model):
     #: The :class:`Actor` assigned to
     #: this FarmerGroup
     #: Each dynamic group must have an actor for specific filtering
-    agent = models.ForeignKey('fncs.Agent', null=True)
+    actor = models.ForeignKey('fncs.Actor', null=True)
     crop = models.ForeignKey('fncs.Crop', null=True)
 
     def members(self):
@@ -455,12 +494,12 @@ class FarmerGroup(models.Model):
         :returns: the farmers member to this group by direct filtering
         :rtype: magriculture.fncs.models.actors.Farmer
         """
-        return (Farmer.objects.
-                filter(agent_farmer=self.agent,
-                                     crops=self.crop,
-                                     districts__in=self.district.all()).
-                all().
-                distinct())
+        data = {"crops": self.crop,
+                "districts__in": self.district.all()}
+
+        if self.actor.is_agent():
+            data["agent_farmer"] = self.actor.as_agent()
+        return (Farmer.objects.filter(**data).all().distinct())
 
     class Meta:
         ordering = ['-name']

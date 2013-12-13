@@ -598,3 +598,57 @@ class IdentityAuthenticationBackendTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['user'],
                          farmer.actor.user)
+
+
+class TestExtensionOfficerLogin(TestCase):
+    def setUp(self):
+        pass
+
+    def test_login_extension_officer(self):
+        user = utils.create_generic_user()
+        login = self.client.login(username=user.username,
+                                  password=utils.PASSWORD)
+        self.assertTrue(login)
+        response = self.client.get(reverse('fncs:home'))
+        self.assertFalse(response.context["user"].actor.is_extensionofficer())
+
+    def test_login_non_extension_officer(self):
+        officer = utils.create_extension_officer()
+        login = self.client.login(username=officer.actor.user.username,
+                                  password=utils.PASSWORD)
+        self.assertTrue(login)
+
+        response = self.client.get(reverse('fncs:home'))
+        self.assertTrue(response.context["user"].actor.is_extensionofficer())
+
+    def test_non_extension_officer_get_new_markets(self):
+        user = utils.create_generic_user()
+        login = self.client.login(username=user.username,
+                                  password=utils.PASSWORD)
+        self.assertTrue(login)
+        response = self.client.get(reverse('fncs:market_new'), follow=True)
+        self.assertRedirects(response, reverse("fncs:home"))
+        self.assertEquals(response.context["messages"]._loaded_data[0].message,
+                          "You need to be an extension officer to view that.")
+
+
+class TestExtensionOfficerMarkets(TestCase):
+    def setUp(self):
+        self.province = utils.create_province('test province')
+        self.district = utils.create_district('test district', self.province)
+        self.ward = utils.create_ward('test ward', self.district)
+        self.market = utils.create_market('test market', self.district)
+
+        self.officer = utils.create_extension_officer()
+        self.client.login(username=self.officer.actor.user.username, password=utils.PASSWORD)
+
+    def test_add_new_markets(self):
+        data = {"name": "New Market",
+                "district": self.district.id}
+        response = self.client.post(reverse('fncs:market_new'), data=data, follow=True)
+        market = Market.objects.get(name="New Market")
+
+        self.assertEquals(market.district, self.district)
+        self.assertRedirects(response, reverse("fncs:home"))
+        self.assertEquals(response.context["messages"]._loaded_data[0].message,
+                          "A new market has been created.")
