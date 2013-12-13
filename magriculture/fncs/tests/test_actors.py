@@ -373,7 +373,7 @@ class AgentTestCase(TestCase):
     def test_send_farmer_message(self):
         farmer = utils.create_farmer()
         agent = utils.create_agent()
-        message = agent.send_message_to_farmer(farmer, 'hello world')
+        message = agent.actor.send_message_to_farmer(farmer, 'hello world')
         self.assertIn(message, Message.objects.filter(sender=agent.actor,
                                                       recipient=farmer.actor))
 
