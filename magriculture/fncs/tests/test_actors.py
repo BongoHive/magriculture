@@ -54,11 +54,12 @@ class TestSendMessage(TestCase):
         self.user = User.objects.get(username="m")
         self.actor = self.user.get_profile()
         self.agent = self.actor.as_agent()
+        self.officer = utils.create_extension_officer()
         self.crop = Crop.objects.get(name="Coffee")
         self.district = District.objects.get(name="Kafue")
         self.district_2 = District.objects.get(name="Nchelenge")
 
-    def test_send_farmer_group_message_get_initial_form(self):
+    def test_send_farmer_group_message_get_initial_form_as_agent(self):
         url = reverse("fncs:group_message_new")
         response = self.client.get(url, follow=True)
         response_crops = [(crop.id, crop.name) for crop in
@@ -67,7 +68,7 @@ class TestSendMessage(TestCase):
                     Crop.objects.filter(farmer_crop__agent_farmer=self.agent)]
         self.assertEquals(sorted(response_crops), sorted(db_crops))
 
-    def test_send_farmer_group_message_new_empty(self):
+    def test_send_farmer_group_message_new_empty_as_agent(self):
         url = reverse("fncs:group_message_new")
         response = self.client.post(url, follow=True)
         response_crops = [(crop.id, crop.name) for crop in
@@ -78,7 +79,7 @@ class TestSendMessage(TestCase):
         self.assertEquals(response.context["form"].errors["crop"],
                           [u'This field is required.'])
 
-    def test_send_farmer_group_message_new(self):
+    def test_send_farmer_group_message_new_as_agent(self):
         """
         Testing the New group message based on filters
         """
@@ -119,7 +120,7 @@ class TestSendMessage(TestCase):
         self.assertEquals(response_3.request["QUERY_STRING"],
                           "district=5&district=4&crop=1")
 
-    def test_send_farmer_group_message_crop_not_for_agent(self):
+    def test_send_farmer_group_message_crop_not_for_agent_as_agent(self):
         crop = Crop.objects.exclude(farmer_crop__agent_farmer__actor__user__username="m").all()
         data = {"crop": crop[0].pk}
 
@@ -128,10 +129,7 @@ class TestSendMessage(TestCase):
         self.assertEquals(response.context["messages"]._loaded_data[0].message,
                           u'Invalid crop, please select your crop.')
 
-    def test_send_farmer_group_message_write(self):
-        """
-        Testing the write new message
-        """
+    def test_send_farmer_group_message_write_as_agent(self):
         url_write = reverse("fncs:group_message_write")
         data = {"content": "Test Send Message"}
         response = self.client.post("%s?district=5&district=4&crop=1" % url_write,
@@ -146,7 +144,7 @@ class TestSendMessage(TestCase):
                           sorted([(self.district.pk, self.district.name),
                                  (self.district_2.pk, self.district_2.name)]))
 
-        self.assertEquals(farmergrp[0].agent,
+        self.assertEquals(farmergrp[0].actor.as_agent(),
                           response.context["user"].actor.as_agent())
         self.assertEquals(farmergrp[0].name, u'Coffee farmers in Nchelenge & Kafue ')
         self.assertTrue(GroupMessage.objects.count(), 2)
@@ -154,8 +152,83 @@ class TestSendMessage(TestCase):
 
         # Testing if the filtered farmers is equal to the posted farmers
         farmers = (Farmer.objects.
-                   filter(agent_farmer=self.agent,
+                   filter(agent_farmer=self.actor.as_agent(),
                           crops=self.crop,
+                          districts__in=[self.district.pk, self.district_2.pk]).
+                   all().
+                   distinct())
+
+        # Data structure below is [(username, content, number_of_messages_sent)]
+        message_list = [(obj.recipient.user.username,
+                         obj.content, 1) for obj in Message.objects.all()]
+        farmers_list = [(obj.actor.user.username,
+                         data["content"],
+                         obj.actor.receivedmessages_set.count())
+                        for obj in farmers]
+
+        self.assertEquals(sorted(message_list), sorted(farmers_list))
+
+    def test_send_farmer_group_message_new_as_officer(self):
+        self.client.login(username=self.officer.actor.user.username, password=utils.PASSWORD)
+
+        data = {"crop": self.crop.pk}
+
+        url = reverse("fncs:group_message_new")
+        response = self.client.post(url, data=data, follow=True)
+
+        form_data = response.context["form"].cleaned_data
+        self.assertEquals(form_data["crop"], self.crop)
+        self.assertEquals(form_data["district"], [])
+        self.assertEquals(response.context["choose_district"],
+                          True)
+        self.assertEqual(response.request["PATH_INFO"], url)
+
+        dt_queryset = response.context["form"].fields["district"].queryset
+        response_district = [(d.id, d.name) for d in dt_queryset]
+        db_district = [(d.id, d.name) for d in
+                       (District.objects.all().distinct())]
+
+        self.assertEquals(sorted(response_district), sorted(db_district))
+
+        data_2 = {"district": [self.district.pk, self.district_2.pk],
+                  "crop": self.crop.pk}
+        response_2 = self.client.post(url, data=data_2)
+
+        url_write = reverse("fncs:group_message_write")
+        self.assertRedirects(response_2,
+                             "%s?crop=1&district=5&district=4" % url_write)
+
+        response_3 = self.client.post(url, data=data_2, follow=True)
+        self.assertIn("content", response_3.context["form"].fields)
+        self.assertEquals(response_3.request["QUERY_STRING"],
+                          "district=5&district=4&crop=1")
+
+    def test_send_farmer_group_message_write_as_officer(self):
+        self.client.login(username=self.officer.actor.user.username, password=utils.PASSWORD)
+
+        url_write = reverse("fncs:group_message_write")
+        data = {"content": "Test Send Message"}
+        response = self.client.post("%s?district=5&district=4&crop=1" % url_write,
+                                    data=data,
+                                    follow=True)
+
+        farmergrp = FarmerGroup.objects.all()
+        self.assertEquals(farmergrp.count(), 1)
+        self.assertEquals(farmergrp[0].crop, self.crop)
+        grp_district = [(d.id, d.name) for d in farmergrp[0].district.all()]
+        self.assertEquals(sorted(grp_district),
+                          sorted([(self.district.pk, self.district.name),
+                                 (self.district_2.pk, self.district_2.name)]))
+
+        self.assertEquals(farmergrp[0].actor,
+                          response.context["user"].actor)
+        self.assertEquals(farmergrp[0].name, u'Coffee farmers in Nchelenge & Kafue ')
+        self.assertTrue(GroupMessage.objects.count(), 2)
+        self.assertTrue(self.officer.actor.sentmessages_set.count(), 2)
+
+        # Testing if the filtered farmers is equal to the posted farmers
+        farmers = (Farmer.objects.
+                   filter(crops=self.crop,
                           districts__in=[self.district.pk, self.district_2.pk]).
                    all().
                    distinct())
