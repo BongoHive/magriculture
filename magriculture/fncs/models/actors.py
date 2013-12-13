@@ -1,4 +1,5 @@
 from datetime import datetime
+import random
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -607,9 +608,12 @@ class Agent(models.Model):
         :returns: an agent
         :rtype: magriculture.fncs.models.actors.Agent
         """
-        user, _ = User.objects.get_or_create(username=msisdn)
+        user, created = User.objects.get_or_create(username=msisdn)
         user.first_name = name
         user.last_name = surname
+        if created:
+            password = random.randint(1000, 9999)
+            user.password = make_password(password)
         user.save()
 
         actor = user.get_profile()
@@ -619,6 +623,9 @@ class Agent(models.Model):
         agent = cls(actor=actor)
         agent.save()
 
+        if created:
+            message = "You have been registered and your pin is - %s" % password
+            actor.send_message(actor, message, None)
         agent.farmers = farmers
         agent.markets = markets
 
