@@ -354,6 +354,7 @@ def group_message_new(request):
                             urllib.urlencode(url_list)))
 
 
+                # If the user is an agent dynamically generate select field.
                 if actor.is_agent():
                     included = (Crop.objects.filter(farmer_crop__agent_farmer=agent).
                                 all().distinct())
@@ -380,7 +381,7 @@ def group_message_new(request):
                 form.fields['crop'].widget = HiddenInput()
                 choose_district = True
             else:
-                # Dynamically setting the Crop queryset if form.is_invalid()
+                # Dynamically setting the Crop queryset if form.is_invalid() if user is agent
                 if actor.is_agent():
                     form.fields["crop"].queryset = (Crop.objects.
                                                     filter(farmer_crop__agent_farmer=agent).
