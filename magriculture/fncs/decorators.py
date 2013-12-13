@@ -7,24 +7,28 @@ from django.shortcuts import redirect
 from django.contrib import messages
 
 
-def extension_officer_required(function):
-    @wraps(function)
-    def decorated_function(request, *args, **kwargs):
-        if request.user.is_authenticated:
-            if not request.user.actor.as_extensionofficer():
-                messages.error(request, "You need to be an extension officer to view that.")
-                return redirect(reverse("login"))
+class SpecificRightsRequired:
+    """
+    The purpose of this class decorator is to take variable arguments
+    and determines if request.user has the rights depending on the
+    decorator
+    """
+    def __init__(self, agent=False, ext_officer=False, superuser=False):
+        self.agent = agent
+        self.ext_officer = ext_officer
+        self.superuser = superuser
 
-        return function(request, *args, **kwargs)
-    return decorated_function
+    def __call__(self, func):
+        @wraps(func)
+        def decorated_function(request, *args, **kwargs):
+            true_agent = self.agent and request.user.actor.is_agent()
+            true_ext_officer = self.ext_officer and request.user.actor.is_extensionofficer()
+            true_superuser = self.superuser and request.user.is_superuser
 
+            if request.user.is_authenticated:
+                if true_agent or true_ext_officer or true_superuser:
+                    return func(request, *args, **kwargs)
 
-def agent_required(function):
-    @wraps(function)
-    def decorated_function(request, *args, **kwargs):
-        if request.user.is_authenticated:
-            if not request.user.actor.is_agent():
-                messages.error(request, "You need to be an extension officer to view that.")
-                return redirect(reverse("fncs:home"))
-        return function(request, *args, **kwargs)
-    return decorated_function
+            messages.error(request, "Sorry you don't have rights to view this part of the system.")
+            return redirect(reverse("fncs:home"))
+        return decorated_function
