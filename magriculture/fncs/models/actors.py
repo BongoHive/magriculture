@@ -163,6 +163,14 @@ class Actor(models.Model):
         if extensionofficers.exists():
             return extensionofficers[0]
 
+        return None
+
+    def is_extensionofficer(self):
+        """
+        Checks if the user is an extension officer
+        """
+        return self.extensionofficer_set.exists()
+
     def as_fba(self):
         """
         Get the :class:`FarmerBusinessAdvisor` for this actor, raises an

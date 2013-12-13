@@ -25,7 +25,6 @@ def agent_required(function):
         if request.user.is_authenticated:
             if not request.user.actor.is_agent():
                 messages.error(request, "You need to be an extension officer to view that.")
-                return redirect(reverse("login"))
-
+                return redirect(reverse("fncs:home"))
         return function(request, *args, **kwargs)
     return decorated_function

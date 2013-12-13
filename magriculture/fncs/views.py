@@ -636,6 +636,42 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
 
 @login_required
 @agent_required
+@extension_officer_required
+def market_new(request):
+    actor = request.user.get_profile()
+    ext_officer = actor.as_extensionofficer()
+
+    if not ext_officer:
+        messages.error(request, "You need to be an extension officer to add new market")
+        return redirect(reverse("fncs:home"))
+
+    if request.method == "POST":
+        form = forms.MarketForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "A new market has been created.")
+            return redirect(reverse("fncs:home"))
+    else:
+        form = forms.MarketForm()
+
+    context = {"form": form}
+    return render(request,
+                  'markets/market_new.html',
+                  context)
+
+
+@login_required
+@extension_officer_required
+def market_view(request):
+    paginator = Paginator(Market.objects.all(), 5)
+    page = paginator.page(request.GET.get('p', 1))
+    context = {'paginator': paginator,
+               'page': page,}
+    return render(request,
+                  "markets/market_view.html",
+                  context)
+
+@login_required
 def market_offers(request):
     market_ids = [offer.market_id for offer in Offer.objects.all()]
     markets = Market.objects.filter(pk__in=market_ids)
