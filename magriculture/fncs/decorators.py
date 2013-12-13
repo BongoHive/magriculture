@@ -10,8 +10,8 @@ from django.contrib import messages
 class SpecificRightsRequired:
     """
     The purpose of this class decorator is to take variable arguments
-    and determines if request.user has the rights depending on the
-    decorator
+    and determines if request.user has the rights to the function depending
+     on the Object arguments and user status.
     """
     def __init__(self, agent=False, ext_officer=False, superuser=False):
         self.agent = agent
