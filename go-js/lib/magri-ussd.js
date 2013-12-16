@@ -156,7 +156,7 @@ function LimaLinksApi(im, url, opts) {
             limit: limit
         });
         p.add_callback(function(result){
-            return result.objects;
+            return result;
         });
         return p;
     };
