@@ -642,7 +642,6 @@ class TestExtensionOfficersAgents(TestCase):
         new_agent = User.objects.get(username=data["msisdn"])
         self.assertEquals(new_agent.first_name, "name_first")
         self.assertEquals(new_agent.last_name, "name_surname")
-        # self.assertEquals(new_agent.password, "")
         self.assertTrue(new_agent.actor.is_agent())
         self.assertFalse(new_agent.actor.is_extensionofficer())
         self.client.logout()
