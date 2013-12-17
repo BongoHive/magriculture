@@ -13,6 +13,7 @@ from magriculture.fncs.models.props import Message
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import Agent, Farmer, MarketMonitor
 from magriculture.fncs.models.geo import Market
+from magriculture.fncs.models.props import Message
 
 
 def create_farmer_for_agent(agent, market, **kwargs):
@@ -246,6 +247,8 @@ class FarmersTestCase(FNCSTestCase):
             self.assertNotContains(response, crop.name)
 
     def test_farmer_new_sale_detail(self):
+        # Making sure the messages Model is empty
+        self.assertEquals(Message.objects.all().count(), 0)
         receipt = self.take_in(10, 'boxes', 'tomato')
         self.assertFalse(receipt.reconciled)
         sale_url = '%s?crop_receipt=%s' % (self.farmer_url('new_sale_detail'),
@@ -263,6 +266,7 @@ class FarmersTestCase(FNCSTestCase):
             'amount': receipt.amount,
             'market': self.market.pk,
         })
+
         response = self.client.post(sale_url, post_args, follow=True)
         self.assertRedirects(response, self.farmer_url('sales'))
         transaction = receipt.farmer.transactions().latest()
@@ -271,6 +275,46 @@ class FarmersTestCase(FNCSTestCase):
         self.assertEqual(transaction.amount, receipt.amount)
         self.assertEqual(transaction.total, 10 * receipt.amount)
         self.assertTrue(transaction.crop_receipt.reconciled)
+
+        # As all the tomatoes have been sold, expecting two messages
+        messages = Message.objects.all()
+        self.assertEquals(messages.count(), 2)
+        content = ["10 boxes(s) of tomato all sold by name surname",
+                    "name surname sold 10 boxes(s) of tomato for 100.00 (10.00 per boxes)"]
+        self.assertEquals(sorted(content),
+                          sorted([obj.content for obj in messages]))
+
+    def test_farmer_new_sale_detail_with_remaining_stock(self):
+        self.assertEquals(Message.objects.all().count(), 0)
+        receipt = self.take_in(10, 'boxes', 'tomato')
+        self.assertFalse(receipt.reconciled)
+        sale_url = '%s?crop_receipt=%s' % (self.farmer_url('new_sale_detail'),
+            receipt.pk)
+
+        post_args = format_timestamp('created_at', datetime.now())
+        amount = receipt.amount - 5
+        post_args.update({
+            'crop_receipt': receipt.pk,
+            'price': 10.0,
+            'amount': amount,
+            'market': self.market.pk,
+        })
+
+        response = self.client.post(sale_url, post_args, follow=True)
+
+        self.assertRedirects(response, self.farmer_url('sales'))
+        transaction = receipt.farmer.transactions().latest()
+        self.assertEqual(transaction.crop_receipt.pk, receipt.pk)
+        self.assertEqual(transaction.price, 10)
+        self.assertEqual(transaction.amount, amount)
+        self.assertEqual(transaction.total, 10 * amount)
+        self.assertFalse(transaction.crop_receipt.reconciled)
+
+        # As all the tomatoes have not been sold, only expecting one message
+        messages = Message.objects.all()
+        self.assertEquals(messages.count(), 1)
+        self.assertEquals(messages[0].content,
+                          "name surname sold 5 boxes(s) of tomato for 50.00 (10.00 per boxes)")
 
     def test_farmer_profile(self):
         response = self.client.get(self.farmer_url('profile'))

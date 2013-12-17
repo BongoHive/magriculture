@@ -211,7 +211,7 @@ def farmer_new_sale_detail(request, farmer_pk):
             if form.is_valid():
                 price = form.cleaned_data['price']
                 amount = form.cleaned_data['amount']
-                agent.register_sale(crop_receipt, price, amount)
+                agent.register_sale(crop_receipt, amount, price)
                 messages.success(request, "New sale registered and %s will be"
                                  " notified via SMS" % (farmer.actor.name,))
                 return redirect_to_farmer
