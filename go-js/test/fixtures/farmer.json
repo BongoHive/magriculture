@@ -54,7 +54,17 @@
                 "hh_id": "",
                 "id": 20,
                 "id_number": "",
-                "markets": [],
+                "markets": [
+                    {
+                        "altitude": null,
+                        "id": 10,
+                        "latitude": null,
+                        "longitude": null,
+                        "name": "Kitwe",
+                        "resource_uri": "",
+                        "volume": "unknown"
+                    }
+                ],
                 "number_of_females": null,
                 "number_of_males": null,
                 "participant_type": "",
