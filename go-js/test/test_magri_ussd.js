@@ -463,7 +463,7 @@ describe("as an unregistered farmer", function() {
 });
 
 
-describe("test menu worker", function() {
+describe("As a registered farmer", function() {
 
     var fixtures = test_fixtures_full;
     beforeEach(function() {
@@ -513,7 +513,7 @@ describe("test menu worker", function() {
         return teardown;
     };
 
-    it("select_service state should respond", function(done) {
+    it("first I should be greeted and shown menu", function(done) {
         var p = tester.check_state({
             user: {current_state: "select_service"},
             content: null,
@@ -524,10 +524,12 @@ describe("test menu worker", function() {
         });
         p.then(done, done);
     });
-    it("select_crop should respond", function(done) {
+    it("selecting market prices should ask for crop choice from my crops", function(done) {
         var p = tester.check_state({
-            user: {current_state: "select_crop"},
-            content: null,
+            user: {
+                current_state: "select_service"
+            },
+            content: "1",
             next_state: "select_crop",
             response: ("^Select a crop:[^]" +
                        "1. Beans[^]" +
@@ -536,32 +538,37 @@ describe("test menu worker", function() {
         });
         p.then(done, done);
     });
-    it("select_market_list should respond", function(done) {
+    it("choosing beans from crop choice should ask which markets for", function(done) {
         var p = tester.check_state({
             user: {
-                current_state: "select_market_list",
-                custom: {
-                    chosen_crop_name: "Peas"
+                current_state: "select_crop",
+                answers: {
+                    select_service: 'select_crop'
                 }
             },
-            content: null,
+            content: "1",
             next_state: "select_market_list",
             response: ("^Select which markets to view:[^]" +
                        "1. All markets[^]" +
-                       "2. Best markets for Peas$")
+                       "2. Best markets for Beans$")
         });
         p.then(done, done);
     });
-    it("select_market should respond (best_markets)", function(done) {
+    it("choosing best market should show best market options", function(done) {
         var p = tester.check_state({
             user: {
-                current_state: "select_market",
+                current_state: "select_market_list",
                 answers: {
-                    select_crop: "crop1",
-                    select_market_list: "best_markets"
+                    select_service: 'select_crop',
+                    select_crop: 1,
+                    select_market_list: "all_markets"
+                },
+                custom: {
+                    chosen_crop_name: "Beans",
+                    chosen_markets: null
                 }
             },
-            content: null,
+            content: "2",
             next_state: "select_market",
             response: ("^Select a market:[^]" +
                        "1. Kitwe[^]" +
@@ -569,15 +576,21 @@ describe("test menu worker", function() {
         });
         p.then(done, done);
     });
-    it("select_market should respond (all_markets)", function(done) {
+    it("choosing best market should show all market options", function(done) {
         var p = tester.check_state({
             user: {
-                current_state: "select_market",
+                current_state: "select_market_list",
                 answers: {
+                    select_service: 'select_crop',
+                    select_crop: 1,
                     select_market_list: "all_markets"
+                },
+                custom: {
+                    chosen_crop_name: "Beans",
+                    chosen_markets: null
                 }
             },
-            content: null,
+            content: "1",
             next_state: "select_market",
             response: ("^Select a market:[^]" +
                        "1. Kitwe[^]" +
@@ -586,31 +599,33 @@ describe("test menu worker", function() {
         });
         p.then(done, done);
     });
-    it("select_market should show_prices for selected market", function(done) {
+    it("selecting Kitwe for market should show prices for beans", function(done) {
         var p = tester.check_state({
             user: {
                 current_state: "select_market",
                 answers: {
-                    select_crop: "crop1"
+                    select_service: 'select_crop',
+                    select_crop: 1,
+                    select_market_list: "all_markets"
                 },
                 custom: {
                     chosen_markets: [
-                        ["market1", "Kitwe"],
-                        ["market2", "Ndola"]
+                        [10, "Kitwe"],
+                        [8, "Ndola"]
                     ],
-                    chosen_crop_name: "Peas"
+                    chosen_crop_name: "Beans"
                 }
             },
             content: "1",
             next_state: "show_prices",
-            response: ("^Prices of Peas in Kitwe:[^]" +
-                       "  boxes: 1.27[^]" +
-                       "  crates: 1.70[^]" +
+            response: ("^Prices of Beans in Kitwe:[^]" +
+                       "  Big Bags: 65.00[^]" +
+                       "  Bags: 30.33[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$"),
             teardown: assert_summary_equal({
-                "Peas, boxes": { "Kitwe": "1.27" },
-                "Peas, crates": { "Kitwe": "1.70" }
+                "Beans, Big Bags": { "Kitwe": "65.00" },
+                "Beans, Bags": { "Kitwe": "30.33" }
             })
         });
         p.then(done, done);
@@ -620,19 +635,21 @@ describe("test menu worker", function() {
             user: {
                 current_state: "select_market",
                 answers: {
-                    select_crop: "crop2"
+                    select_service: 'select_crop',
+                    select_crop: 2,
+                    select_market_list: "all_markets"
                 },
                 custom: {
                     chosen_markets: [
-                        ["market1", "Kitwe"],
-                        ["market2", "Ndola"]
+                        [10, "Kitwe"],
+                        [8, "Ndola"]
                     ],
-                    chosen_crop_name: "Carrots"
+                    chosen_crop_name: "Cabbage"
                 }
             },
             content: "1",
             next_state: "show_prices",
-            response: ("^Prices of Carrots in Kitwe:[^]" +
+            response: ("^Prices of Cabbage in Kitwe:[^]" +
                        "  No prices available\\.[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$"),
@@ -640,29 +657,32 @@ describe("test menu worker", function() {
         });
         p.then(done, done);
     });
-    it("show_prices should move to previous market on 1", function(done) {
+    it("selecting 1 to see next market should show prices", function(done) {
         var p = tester.check_state({
             user: {
                 current_state: "show_prices",
                 answers: {
-                    select_crop: "crop1"
+                    select_service: 'select_crop',
+                    select_crop: 1,
+                    select_market_list: "all_markets"
                 },
                 pages: {
                     show_prices: 0
                 },
                 custom: {
                     chosen_markets: [
-                        ["market1", "Kitwe"],
-                        ["market2", "Ndola"]
+                        [10, "Kitwe"],
+                        [8, "Ndola"]
                     ],
+                    chosen_crop_name: "Beans",
                     chosen_market_idx: 0,
-                    chosen_crop_name: "Peas"
                 }
             },
             content: "1",
             next_state: "show_prices",
-            response: ("^Prices of Peas in Ndola:[^]" +
-                       "  boxes: -[^]" +
+            response: ("^Prices of Beans in Ndola:[^]" +
+                       "  Big Bags: 10.00[^]" +
+                       "  Bags: 30.33[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$")
         });
@@ -673,42 +693,51 @@ describe("test menu worker", function() {
             user: {
                 current_state: "show_prices",
                 answers: {
-                    select_crop: "crop1"
+                    select_service: 'select_crop',
+                    select_crop: 1,
+                    select_market_list: "all_markets"
                 },
                 pages: {
                     show_prices: 1
                 },
                 custom: {
                     chosen_markets: [
-                        ["market1", "Kitwe"],
-                        ["market2", "Ndola"]
+                        [10, "Kitwe"],
+                        [8, "Ndola"]
                     ],
+                    chosen_crop_name: "Beans",
                     chosen_market_idx: 0,
-                    chosen_crop_name: "Peas"
                 }
             },
             content: "2",
             next_state: "show_prices",
-            response: ("^Prices of Peas in Kitwe:[^]" +
-                       "  boxes: 1.27[^]" +
-                       "  crates: 1.70[^]" +
+            response: ("^Prices of Beans in Kitwe:[^]" +
+                       "  Big Bags: 65.00[^]" +
+                       "  Bags: 30.33[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 0 to exit\\.$")
+                       "Enter 0 to exit\\.$"),
         });
         p.then(done, done);
     });
-    it("show_prices should move to end on 0", function(done) {
+    it("Selecting 0 to exit should say goodbye", function(done) {
         var p = tester.check_state({
             user: {
                 current_state: "show_prices",
+                answers: {
+                    select_service: 'select_crop',
+                    select_crop: 1,
+                    select_market_list: "all_markets"
+                },
+                pages: {
+                    show_prices: 1
+                },
                 custom: {
                     chosen_markets: [
-                        ["market1", "Kitwe"],
-                        ["market2", "Ndola"]
+                        [10, "Kitwe"],
+                        [8, "Ndola"]
                     ],
-                    chosen_market_idx: 0,
-                    chosen_crop_name: "Peas"
-               }
+                    chosen_crop_name: "Beans"
+                }
             },
             content: "0",
             next_state: "end",
