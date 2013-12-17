@@ -310,7 +310,7 @@ class FarmersTestCase(FNCSTestCase):
         self.assertEqual(transaction.total, 10 * amount)
         self.assertFalse(transaction.crop_receipt.reconciled)
 
-        # As all the tomatoes have been sold, expecting two messages
+        # As all the tomatoes have not been sold, only expecting one message
         messages = Message.objects.all()
         self.assertEquals(messages.count(), 1)
         self.assertEquals(messages[0].content,
