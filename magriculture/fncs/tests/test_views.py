@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 
 from django.test import TestCase
 from django.test.client import Client
@@ -6,6 +7,8 @@ from django.utils.unittest import skip
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+from django.contrib.auth.models import check_password
+from magriculture.fncs.models.props import Message
 
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.actors import Agent, Farmer, MarketMonitor
@@ -409,7 +412,7 @@ class AgentTestCase(FNCSTestCase):
             'farmers': [self.farmer.pk],
             'markets': [self.market.pk],
         })
-        self.assertRedirects(response, agent_url)
+        self.assertRedirects(response, reverse("fncs:agents"))
         agent = Agent.objects.get(pk=self.agent.pk)
         user = agent.actor.user
         self.assertEqual(user.first_name, 'n')
@@ -560,7 +563,7 @@ class TestExtensionOfficerLogin(TestCase):
     def setUp(self):
         pass
 
-    def test_login_extension_officer(self):
+    def test_login_non_extension_officer(self):
         user = utils.create_generic_user()
         login = self.client.login(username=user.username,
                                   password=utils.PASSWORD)
@@ -568,7 +571,7 @@ class TestExtensionOfficerLogin(TestCase):
         response = self.client.get(reverse('fncs:home'))
         self.assertFalse(response.context["user"].actor.is_extensionofficer())
 
-    def test_login_non_extension_officer(self):
+    def test_login_extension_officer(self):
         officer = utils.create_extension_officer()
         login = self.client.login(username=officer.actor.user.username,
                                   password=utils.PASSWORD)
@@ -586,6 +589,14 @@ class TestExtensionOfficerLogin(TestCase):
         self.assertRedirects(response, reverse("fncs:home"))
         self.assertEquals(response.context["messages"]._loaded_data[0].message,
                           "You need to be an extension officer to view that.")
+
+    def test_extension_officer_get_new_markets(self):
+        officer = utils.create_extension_officer()
+        login = self.client.login(username=officer.actor.user.username,
+                                  password=utils.PASSWORD)
+        self.assertTrue(login)
+        response = self.client.get(reverse('fncs:market_new'), follow=True)
+        self.assertEqual(response.request.get("PATH_INFO"), reverse('fncs:market_new'))
 
 
 class TestExtensionOfficerMarkets(TestCase):
@@ -608,3 +619,50 @@ class TestExtensionOfficerMarkets(TestCase):
         self.assertRedirects(response, reverse("fncs:home"))
         self.assertEquals(response.context["messages"]._loaded_data[0].message,
                           "A new market has been created.")
+
+
+class TestExtensionOfficersAgents(TestCase):
+    def setUp(self):
+        self.province = utils.create_province('test province')
+        self.district = utils.create_district('test district', self.province)
+        self.ward = utils.create_ward('test ward', self.district)
+        self.market = utils.create_market('test market', self.district)
+
+        self.agent = utils.create_agent()
+
+        self.farmers = list(create_random_farmers(10, self.agent, self.market))
+        self.farmer = self.farmers[0]
+
+        self.officer = utils.create_extension_officer()
+        self.client.login(username=self.officer.actor.user.username, password=utils.PASSWORD)
+
+
+    def test_add_new_agent(self):
+        data = {"name": "name_first",
+                "surname": "name_surname",
+                "msisdn": "1234567890",
+                "farmers": [self.farmer.pk],
+                "markets": [self.market.pk]}
+        response = self.client.post(reverse('fncs:agent_new'), data=data, follow=True)
+        self.assertEquals(response.context["messages"]._loaded_data[0].message,
+                          "Agent Created")
+        self.assertRedirects(response, reverse("fncs:agents"))
+        new_agent = User.objects.get(username=data["msisdn"])
+        self.assertEquals(new_agent.first_name, "name_first")
+        self.assertEquals(new_agent.last_name, "name_surname")
+        self.assertTrue(new_agent.actor.is_agent())
+        self.assertFalse(new_agent.actor.is_extensionofficer())
+        self.client.logout()
+
+        # Assumes that if message is stored message has been sent
+        # There is a current flaw in teh code where the sender and
+        # recipient is the same actor
+        messages = Message.objects.get(recipient=new_agent.actor)
+        self.assertEquals(messages.sender, new_agent.actor)
+        self.assertIn('You have been registered and your pin is - ',
+                      messages.content)
+
+        reg_pin = re.compile(r"\d\d\d\d")
+        pin = reg_pin.search(messages.content).group()
+        login_agent = self.client.login(username=data["msisdn"], password=pin)
+        self.assertTrue(login_agent)
