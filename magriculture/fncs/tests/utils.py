@@ -2,12 +2,14 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from magriculture.fncs.models.actors import (
     FarmerGroup, Farmer, Agent, MarketMonitor, FarmerBusinessAdvisor, Actor,
-    Identity)
+    Identity, ExtensionOfficer)
 from magriculture.fncs.models.geo import (
     Province, RPIArea, District, Ward, Zone, Market)
 from magriculture.fncs.models.props import (Crop, CropUnit)
 import random
+import itertools
 
+PASSWORD = "pass123"
 
 NAMES = ['Aaliyah', 'Abayomi', 'Abebe', 'Abebi', 'Abena', 'Abeo', 'Ada',
          'Adah', 'Adana', 'Adanna', 'Adanya', 'Akili', 'Alika', 'Ama',
@@ -113,6 +115,7 @@ AGRICULTURE_QUOTES = [
     " Committee. - George Nethercutt",
 ]
 
+next_user_number = itertools.count().next
 
 def reload_record(record):
     return record.__class__.objects.get(pk=record.pk)
@@ -257,6 +260,18 @@ def create_fba(msisdn='27761234568', name='name', surname='surname'):
     fba, _ = FarmerBusinessAdvisor.objects.get_or_create(
         actor=user.get_profile())
     return fba
+
+def create_extension_officer():
+    user = create_generic_user()
+    officer = ExtensionOfficer.objects.create(actor=user.get_profile())
+    return officer
+
+
+def create_generic_user():
+    data = {"username": "user_%s" % next_user_number(),
+            "password": PASSWORD}
+    user = User.objects.create_user(**data)
+    return user
 
 
 def is_farmer(msisdn):

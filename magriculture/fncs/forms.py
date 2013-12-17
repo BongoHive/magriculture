@@ -245,3 +245,13 @@ class FarmerGroupCreateFilterForm(forms.Form):
                         queryset=District.objects.all(),
                         required=False,
                         label='Choose District')
+
+
+class MarketForm(forms.ModelForm):
+    name = forms.CharField(label='Name', required=True)
+    district = forms.ModelChoiceField(queryset=District.objects.all(),
+                                    label='Choose District',
+                                    required=True)
+
+    class Meta:
+        model = Market
