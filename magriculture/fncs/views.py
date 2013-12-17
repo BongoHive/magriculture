@@ -608,13 +608,6 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
 @login_required
 @extension_officer_required
 def market_new(request):
-    actor = request.user.get_profile()
-    ext_officer = actor.as_extensionofficer()
-
-    if not ext_officer:
-        messages.error(request, "You need to be an extension officer to add new market")
-        return redirect(reverse("fncs:home"))
-
     if request.method == "POST":
         form = forms.MarketForm(request.POST)
         if form.is_valid():
