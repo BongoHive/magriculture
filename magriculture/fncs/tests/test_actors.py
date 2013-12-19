@@ -181,7 +181,6 @@ class TestSendMessage(TestCase):
         self.assertEquals(form_data["district"], [])
         self.assertEquals(response.context["choose_district"],
                           True)
-        self.assertEqual(response.request["PATH_INFO"], url)
 
         dt_queryset = response.context["form"].fields["district"].queryset
         response_district = [(d.id, d.name) for d in dt_queryset]
@@ -200,8 +199,6 @@ class TestSendMessage(TestCase):
 
         response_3 = self.client.post(url, data=data_2, follow=True)
         self.assertIn("content", response_3.context["form"].fields)
-        self.assertEquals(response_3.request["QUERY_STRING"],
-                          "district=5&district=4&crop=1")
 
     def test_send_farmer_group_message_write_as_officer(self):
         self.client.login(username=self.officer.actor.user.username, password=utils.PASSWORD)
