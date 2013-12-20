@@ -355,7 +355,7 @@ def group_message_new(request):
 
 
                 # If the user is an agent dynamically generate select field.
-                if actor is not None and actor.is_agent():
+                if agent is not None:
                     included = (Crop.objects.filter(farmer_crop__agent_farmer=agent).
                                 all().distinct())
 
@@ -382,7 +382,7 @@ def group_message_new(request):
                 choose_district = True
             else:
                 # Dynamically setting the Crop queryset if form.is_invalid() if user is agent
-                if actor.is_agent():
+                if agent is not None:
                     form.fields["crop"].queryset = (Crop.objects.
                                                     filter(farmer_crop__agent_farmer=agent).
                                                     all().
@@ -391,7 +391,7 @@ def group_message_new(request):
     else:
         # If a get is done on the form render below
         form = forms.FarmerGroupCreateFilterForm()
-        if actor.is_agent():
+        if agent is not None:
             form.fields["crop"].queryset = (Crop.objects.
                                             filter(farmer_crop__agent_farmer=agent).
                                             all().
