@@ -371,7 +371,7 @@ def group_message_new(request):
                                                     all().
                                                     distinct())
 
-                    # Setting the total cound of farmers in the District
+                    # Setting the total count of farmers in the District
                     form.fields["district"].label_from_instance = (lambda obj: "%s (%s)" %
                                                                    (obj.name,
                                                                     obj.get_farmer_count(agent,
