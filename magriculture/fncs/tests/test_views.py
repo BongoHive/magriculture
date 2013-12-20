@@ -424,7 +424,15 @@ class AgentTestCase(FNCSTestCase):
         self.test_msisdn = '27861234567'
         self.login()
 
+        self.user = utils.create_generic_user()
+        self.user.is_superuser = True
+        self.user.save()
+
     def test_agent_creation(self):
+        # Agents can only be created by extension officers or super users
+        login = self.client.login(username=self.user.username, password=utils.PASSWORD)
+        self.assertTrue(login)
+
         self.assertFalse(utils.is_agent(self.test_msisdn))
         response = self.client.get(reverse('fncs:agent_new'))
         self.assertEqual(response.status_code, 200)
@@ -443,6 +451,10 @@ class AgentTestCase(FNCSTestCase):
         self.assertTrue(utils.is_agent(self.test_msisdn))
 
     def test_agent_edit(self):
+        # Agents can only be edited by extension officers or super users
+        login = self.client.login(username=self.user.username, password=utils.PASSWORD)
+        self.assertTrue(login)
+
         agent_url = reverse('fncs:agent', kwargs={'agent_pk': self.agent.pk})
         response = self.client.get(agent_url)
         user = self.agent.actor.user
@@ -632,7 +644,7 @@ class TestExtensionOfficerLogin(TestCase):
         response = self.client.get(reverse('fncs:market_new'), follow=True)
         self.assertRedirects(response, reverse("fncs:home"))
         self.assertEquals(response.context["messages"]._loaded_data[0].message,
-                          "You need to be an extension officer to view that.")
+                          "Sorry you don't have rights to view this part of the system.")
 
     def test_extension_officer_get_new_markets(self):
         officer = utils.create_extension_officer()
