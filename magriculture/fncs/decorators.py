@@ -5,9 +5,10 @@ from functools import wraps
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.views.generic import TemplateView
 
 
-class SpecificRightsRequired:
+class SpecificRightsRequired(TemplateView):
     """
     The purpose of this class decorator is to take variable arguments
     and determines if request.user has the rights to the function depending
