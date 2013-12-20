@@ -5,14 +5,19 @@ from functools import wraps
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.views.generic import TemplateView
 
 
-class SpecificRightsRequired(TemplateView):
+class SpecificRightsRequired(object):
     """
     The purpose of this class decorator is to take variable arguments
     and determines if request.user has the rights to the function depending
-     on the Object arguments and user status.
+    on the Object arguments and user status. Access is granted if
+    the user has one of the roles listed as required.
+
+    :param agent: boolean - checking if the actor is an Agent
+    :param ext_officer: boolean - checking if the actor is an Extension Officer
+    :param superuser: boolean - checking if the actor is a superuser/Admin 
+
     """
     def __init__(self, agent=False, ext_officer=False, superuser=False):
         self.agent = agent
