@@ -161,7 +161,7 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
         exclude = [
-            'sender', 'recipient'
+            'sender', 'recipient', 'group'
         ]
 
 
