@@ -200,6 +200,11 @@ class TestSendMessage(TestCase):
         response_3 = self.client.post(url, data=data_2, follow=True)
         self.assertIn("content", response_3.context["form"].fields)
 
+        url_get = reverse("fncs:group_message_new")
+        response_4 = self.client.get(url_get, follow=True)
+        self.assertContains(response_4, "New Message")
+
+
     def test_send_farmer_group_message_write_as_officer(self):
         self.client.login(username=self.officer.actor.user.username, password=utils.PASSWORD)
 
