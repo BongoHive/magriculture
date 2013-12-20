@@ -16,7 +16,7 @@ from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
                                             DirectSale)
 from magriculture.fncs.models.geo import Market, Ward, District
 from magriculture.fncs import forms
-from magriculture.fncs.decorators import extension_officer_required
+from magriculture.fncs.decorators import SpecificRightsRequired
 
 
 @login_required
@@ -26,6 +26,7 @@ def home(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmers(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -43,6 +44,7 @@ def farmers(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -106,6 +108,7 @@ def farmer_new(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_location_search(request, farmer_pk):
     """Search for a farmer's location."""
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
@@ -125,6 +128,7 @@ def farmer_location_search(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_location_save(request, farmer_pk):
     """Set the location of a farmer."""
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
@@ -147,6 +151,7 @@ def farmer_location_save(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer(request, farmer_pk):
     return HttpResponseRedirect(reverse('fncs:farmer_sales', kwargs={
         'farmer_pk': farmer_pk
@@ -154,6 +159,7 @@ def farmer(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_sales(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     agent = request.user.get_profile().as_agent()
@@ -167,6 +173,7 @@ def farmer_sales(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_sale(request, farmer_pk, sale_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     transaction = get_object_or_404(Transaction, crop_receipt__farmer=farmer,
@@ -178,6 +185,7 @@ def farmer_sale(request, farmer_pk, sale_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_new_sale(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -193,6 +201,7 @@ def farmer_new_sale(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_new_sale_detail(request, farmer_pk):
     crop_receipt = get_object_or_404(CropReceipt,
                                      pk=request.GET.get('crop_receipt'))
@@ -211,8 +220,6 @@ def farmer_new_sale_detail(request, farmer_pk):
             if form.is_valid():
                 price = form.cleaned_data['price']
                 amount = form.cleaned_data['amount']
-                # The function below was originally  (crop_receipt, price, amount)
-                # which doesn't correspond to the actual function args
                 agent.register_sale(crop_receipt, amount, price)
                 messages.success(request, "New sale registered and %s will be"
                                  " notified via SMS" % (farmer.actor.name,))
@@ -231,6 +238,7 @@ def farmer_new_sale_detail(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_messages(request, farmer_pk):
     actor = request.user.get_profile()
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
@@ -245,6 +253,7 @@ def farmer_messages(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_new_message(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -273,6 +282,7 @@ def farmer_new_message(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_notes(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -287,6 +297,7 @@ def farmer_notes(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_new_note(request, farmer_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -312,6 +323,7 @@ def farmer_new_note(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_profile(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     return render_to_response('farmers/profile.html', {
@@ -320,6 +332,7 @@ def farmer_profile(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def group_messages(request):
     actor = request.user.get_profile()
     paginator = Paginator(GroupMessage.objects.filter(sender=actor), 5)
@@ -332,6 +345,7 @@ def group_messages(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True, ext_officer=True)
 def group_message_new(request):
     actor = request.user.get_profile()
     agent = actor.as_agent() if actor.is_agent() else None
@@ -357,7 +371,7 @@ def group_message_new(request):
 
 
                 # If the user is an agent dynamically generate select field.
-                if actor.is_agent():
+                if agent is not None:
                     included = (Crop.objects.filter(farmer_crop__agent_farmer=agent).
                                 all().distinct())
 
@@ -373,7 +387,7 @@ def group_message_new(request):
                                                     all().
                                                     distinct())
 
-                    # Setting the total cound of farmers in the District
+                    # Setting the total count of farmers in the District
                     form.fields["district"].label_from_instance = (lambda obj: "%s (%s)" %
                                                                    (obj.name,
                                                                     obj.get_farmer_count(agent,
@@ -384,7 +398,7 @@ def group_message_new(request):
                 choose_district = True
             else:
                 # Dynamically setting the Crop queryset if form.is_invalid() if user is agent
-                if actor.is_agent():
+                if agent is not None:
                     form.fields["crop"].queryset = (Crop.objects.
                                                     filter(farmer_crop__agent_farmer=agent).
                                                     all().
@@ -393,7 +407,7 @@ def group_message_new(request):
     else:
         # If a get is done on the form render below
         form = forms.FarmerGroupCreateFilterForm()
-        if actor.is_agent():
+        if agent is not None:
             form.fields["crop"].queryset = (Crop.objects.
                                             filter(farmer_crop__agent_farmer=agent).
                                             all().
@@ -406,6 +420,7 @@ def group_message_new(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True, ext_officer=True)
 def group_message_write(request):
     actor = request.user.get_profile()
 
@@ -453,12 +468,14 @@ def group_message_write(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def sales(request):
     return render_to_response('sales.html', {
     }, context_instance=RequestContext(request))
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def sales_crops(request):
     agent = request.user.get_profile().as_agent()
     paginator = Paginator(agent.transactions(), 5)
@@ -471,18 +488,21 @@ def sales_crops(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def sales_agents(request):
     return render_to_response('sales_agents.html', {
     }, context_instance=RequestContext(request))
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def sales_agent_breakdown(request):
     return render_to_response('sales_agent_breakdown.html', {
     }, context_instance=RequestContext(request))
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_crops(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     if request.method == "POST":
@@ -505,6 +525,7 @@ def farmer_crops(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def farmer_edit(request, farmer_pk):
     farmer = get_object_or_404(Farmer, pk=farmer_pk)
     actor = farmer.actor
@@ -552,12 +573,14 @@ def farmer_edit(request, farmer_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def market_prices(request):
     return render_to_response('markets/prices.html', {
     }, context_instance=RequestContext(request))
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def market_sales(request):
     paginator = Paginator(Market.objects.all(), 5)
     page = paginator.page(request.GET.get('p', 1))
@@ -568,6 +591,7 @@ def market_sales(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def market_sale(request, market_pk):
     market = get_object_or_404(Market, pk=market_pk)
     paginator = Paginator(market.crops(), 5)
@@ -580,6 +604,7 @@ def market_sale(request, market_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def crop(request, market_pk, crop_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
@@ -594,6 +619,7 @@ def crop(request, market_pk, crop_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def crop_unit(request, market_pk, crop_pk, unit_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
@@ -614,15 +640,8 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
 
 
 @login_required
-@extension_officer_required
+@SpecificRightsRequired(ext_officer=True)
 def market_new(request):
-    actor = request.user.get_profile()
-    ext_officer = actor.as_extensionofficer()
-
-    if not ext_officer:
-        messages.error(request, "You need to be an extension officer to add new market")
-        return redirect(reverse("fncs:home"))
-
     if request.method == "POST":
         form = forms.MarketForm(request.POST)
         if form.is_valid():
@@ -639,7 +658,7 @@ def market_new(request):
 
 
 @login_required
-@extension_officer_required
+@SpecificRightsRequired(ext_officer=True)
 def market_view(request):
     paginator = Paginator(Market.objects.all(), 5)
     page = paginator.page(request.GET.get('p', 1))
@@ -662,6 +681,7 @@ def market_offers(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def market_offer(request, market_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crops = [offer.crop for offer in Offer.objects.filter(market=market)]
@@ -675,6 +695,7 @@ def market_offer(request, market_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def offer(request, market_pk, crop_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
@@ -691,6 +712,7 @@ def offer(request, market_pk, crop_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def offer_unit(request, market_pk, crop_pk, unit_pk):
     market = get_object_or_404(Market, pk=market_pk)
     crop = get_object_or_404(Crop, pk=crop_pk)
@@ -710,6 +732,7 @@ def offer_unit(request, market_pk, crop_pk, unit_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def market_new_offer(request, *args, **kwargs):
     paginator = Paginator(Market.objects.all(), 5)
     page = paginator.page(request.GET.get('p', 1))
@@ -720,6 +743,7 @@ def market_new_offer(request, *args, **kwargs):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def market_register_offer(request, market_pk):
     actor = request.user.get_profile()
     marketmonitor = actor.as_marketmonitor()
@@ -752,6 +776,7 @@ def market_register_offer(request, market_pk):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def inventory(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -765,6 +790,7 @@ def inventory(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def inventory_sale(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -785,6 +811,7 @@ def inventory_sale(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def inventory_sale_details(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -822,6 +849,7 @@ def inventory_sale_details(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def inventory_intake(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -835,6 +863,7 @@ def inventory_intake(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def inventory_intake_details(request):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -880,6 +909,7 @@ def inventory_intake_details(request):
 
 
 @login_required
+@SpecificRightsRequired(agent=True)
 def inventory_direct_sale(request, receipt_pk):
     actor = request.user.get_profile()
     agent = actor.as_agent()
@@ -916,7 +946,7 @@ def todo(request):
 def health(request):
     return HttpResponse('')
 
-
+@SpecificRightsRequired(ext_officer=True, superuser=True)
 def agents(request):
     agents = Agent.objects.all()
     q = request.GET.get('q', '')
@@ -931,6 +961,7 @@ def agents(request):
 
 
 @login_required
+@SpecificRightsRequired(ext_officer=True, superuser=True)
 def agent(request, agent_pk):
     agent = get_object_or_404(Agent, pk=agent_pk)
     actor = agent.actor
@@ -949,9 +980,7 @@ def agent(request, agent_pk):
             agent.save()
 
             messages.success(request, "Agent Profile has been updated")
-            return HttpResponseRedirect(reverse('fncs:agent', kwargs={
-                'agent_pk': agent.pk
-            }))
+            return HttpResponseRedirect(reverse("fncs:agents"))
     else:
         form = forms.AgentForm(initial={
             'name': user.first_name,
@@ -968,6 +997,7 @@ def agent(request, agent_pk):
 
 
 @login_required
+@SpecificRightsRequired(ext_officer=True, superuser=True)
 def agent_new(request):
     if request.method == "POST":
         form = forms.AgentForm(request.POST)
@@ -982,11 +1012,9 @@ def agent_new(request):
             if possible_matches:
                 messages.info(request, "This agent already exists.")
             else:
-                agent = Agent.create(msisdn, name, surname, farmers, markets)
+                Agent.create(msisdn, name, surname, farmers, markets)
                 messages.success(request, "Agent Created")
-                return HttpResponseRedirect(reverse("fncs:agent", kwargs={
-                    'agent_pk': agent.pk
-                }))
+                return HttpResponseRedirect(reverse("fncs:agents"))
     else:
         form = forms.AgentForm()
 

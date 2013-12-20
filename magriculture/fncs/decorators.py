@@ -7,13 +7,34 @@ from django.shortcuts import redirect
 from django.contrib import messages
 
 
-def extension_officer_required(function):
-    @wraps(function)
-    def decorated_function(request, *args, **kwargs):
-        if request.user.is_authenticated:
-            if not request.user.actor.as_extensionofficer():
-                messages.error(request, "You need to be an extension officer to view that.")
-                return redirect(reverse("fncs:home"))
+class SpecificRightsRequired(object):
+    """
+    The purpose of this class decorator is to take variable arguments
+    and determines if request.user has the rights to the function depending
+    on the Object arguments and user status. Access is granted if
+    the user has one of the roles listed as required.
 
-        return function(request, *args, **kwargs)
-    return decorated_function
+    :param agent: boolean - checking if the actor is an Agent
+    :param ext_officer: boolean - checking if the actor is an Extension Officer
+    :param superuser: boolean - checking if the actor is a superuser/Admin 
+
+    """
+    def __init__(self, agent=False, ext_officer=False, superuser=False):
+        self.agent = agent
+        self.ext_officer = ext_officer
+        self.superuser = superuser
+
+    def __call__(self, func):
+        @wraps(func)
+        def decorated_function(request, *args, **kwargs):
+            true_agent = self.agent and request.user.actor.is_agent()
+            true_ext_officer = self.ext_officer and request.user.actor.is_extensionofficer()
+            true_superuser = self.superuser and request.user.is_superuser
+
+            if request.user.is_authenticated:
+                if true_agent or true_ext_officer or true_superuser:
+                    return func(request, *args, **kwargs)
+
+            messages.error(request, "Sorry you don't have rights to view this part of the system.")
+            return redirect(reverse("fncs:home"))
+        return decorated_function

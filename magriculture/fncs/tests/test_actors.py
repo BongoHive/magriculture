@@ -181,7 +181,6 @@ class TestSendMessage(TestCase):
         self.assertEquals(form_data["district"], [])
         self.assertEquals(response.context["choose_district"],
                           True)
-        self.assertEqual(response.request["PATH_INFO"], url)
 
         dt_queryset = response.context["form"].fields["district"].queryset
         response_district = [(d.id, d.name) for d in dt_queryset]
@@ -200,8 +199,11 @@ class TestSendMessage(TestCase):
 
         response_3 = self.client.post(url, data=data_2, follow=True)
         self.assertIn("content", response_3.context["form"].fields)
-        self.assertEquals(response_3.request["QUERY_STRING"],
-                          "district=5&district=4&crop=1")
+
+        url_get = reverse("fncs:group_message_new")
+        response_4 = self.client.get(url_get, follow=True)
+        self.assertContains(response_4, "New Message")
+
 
     def test_send_farmer_group_message_write_as_officer(self):
         self.client.login(username=self.officer.actor.user.username, password=utils.PASSWORD)
@@ -346,17 +348,12 @@ class AgentTestCase(TestCase):
 
     @raises(errors.ActorException)
     def test_actor_without_agent(self):
-        """
-        This should raise an ActorException for agent doesn't exist
-        """
+        # This should raise an ActorException for agent doesn't exist
+
         user = User.objects.create_user("27721111111",
                                         "27721111111@mail.com",
                                         "pass123")
-        login = self.client.login(username=user.username,
-                                  password="pass123")
-        self.assertTrue(login)
-        url_messages = reverse("fncs:farmers")
-        self.client.get(url_messages)
+        user.actor.as_agent()
 
     def test_agent_crop_receipt_inventory(self):
         farmer1 = utils.create_farmer(msisdn="27700000000")
