@@ -1,5 +1,5 @@
 {
-    "url": "http://qa/api/v1/price_history/?market=market1&crop=crop2&limit=5",
+    "url": "http://qa/api/v1/transaction/?crop_receipt__market=10&crop_receipt__crop=2&limit=5",
     "method": "GET",
     "body": {
         "meta": {
@@ -10,7 +10,6 @@
             "total_count": 1
         },
         "objects": [
-            {}
         ]
     }
 }

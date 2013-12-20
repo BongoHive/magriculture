@@ -220,7 +220,7 @@ def farmer_new_sale_detail(request, farmer_pk):
             if form.is_valid():
                 price = form.cleaned_data['price']
                 amount = form.cleaned_data['amount']
-                agent.register_sale(crop_receipt, price, amount)
+                agent.register_sale(crop_receipt, amount, price)
                 messages.success(request, "New sale registered and %s will be"
                                  " notified via SMS" % (farmer.actor.name,))
                 return redirect_to_farmer
@@ -371,7 +371,7 @@ def group_message_new(request):
 
 
                 # If the user is an agent dynamically generate select field.
-                if actor.is_agent():
+                if agent is not None:
                     included = (Crop.objects.filter(farmer_crop__agent_farmer=agent).
                                 all().distinct())
 
@@ -387,7 +387,7 @@ def group_message_new(request):
                                                     all().
                                                     distinct())
 
-                    # Setting the total cound of farmers in the District
+                    # Setting the total count of farmers in the District
                     form.fields["district"].label_from_instance = (lambda obj: "%s (%s)" %
                                                                    (obj.name,
                                                                     obj.get_farmer_count(agent,
@@ -398,7 +398,7 @@ def group_message_new(request):
                 choose_district = True
             else:
                 # Dynamically setting the Crop queryset if form.is_invalid() if user is agent
-                if actor.is_agent():
+                if agent is not None:
                     form.fields["crop"].queryset = (Crop.objects.
                                                     filter(farmer_crop__agent_farmer=agent).
                                                     all().
@@ -407,7 +407,7 @@ def group_message_new(request):
     else:
         # If a get is done on the form render below
         form = forms.FarmerGroupCreateFilterForm()
-        if actor.is_agent():
+        if agent is not None:
             form.fields["crop"].queryset = (Crop.objects.
                                             filter(farmer_crop__agent_farmer=agent).
                                             all().
@@ -642,13 +642,6 @@ def crop_unit(request, market_pk, crop_pk, unit_pk):
 @login_required
 @SpecificRightsRequired(ext_officer=True)
 def market_new(request):
-    actor = request.user.get_profile()
-    ext_officer = actor.as_extensionofficer()
-
-    if not ext_officer:
-        messages.error(request, "You need to be an extension officer to add new market")
-        return redirect(reverse("fncs:home"))
-
     if request.method == "POST":
         form = forms.MarketForm(request.POST)
         if form.is_valid():

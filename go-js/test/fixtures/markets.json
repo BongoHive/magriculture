@@ -1,18 +1,42 @@
 {
-    "url": "http://qa/api/v1/markets/?limit=10",
+    "url": "http://qa/api/v1/market/?limit=10",
     "method": "GET",
     "body": {
         "meta": {
-            "limit": 20,
+            "limit": 10,
             "next": null,
             "offset": 0,
             "previous": null,
-            "total_count": 1
+            "total_count": 2
         },
         "objects": [
-            ["market1", "Kitwe"],
-            ["market2", "Ndola"],
-            ["market3", "Masala"]
+            {
+                "altitude": null,
+                "id": 10,
+                "latitude": null,
+                "longitude": null,
+                "name": "Kitwe",
+                "resource_uri": "",
+                "volume": "unknown"
+            },
+            {
+                "altitude": null,
+                "id": 8,
+                "latitude": null,
+                "longitude": null,
+                "name": "Ndola",
+                "resource_uri": "",
+                "volume": "unknown"
+            },
+            {
+                "altitude": null,
+                "id": 1,
+                "latitude": null,
+                "longitude": null,
+                "name": "Masala",
+                "resource_uri": "",
+                "volume": "unknown"
+            }
         ]
     }
 }

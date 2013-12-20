@@ -1,5 +1,5 @@
 {
-    "url": "http://qa/api/v1/price_history/?market=market1&crop=crop1&limit=5",
+    "url": "http://qa/api/v1/transaction/?crop_receipt__market=10&crop_receipt__crop=1&limit=5",
     "method": "GET",
     "body": {
         "meta": {
@@ -11,12 +11,179 @@
         },
         "objects": [
             {
-                "unit1": { 
-                    "unit_name": "boxes", "prices": [ 1.2, 1.1, 1.5 ] 
+                "amount": 12,
+                "crop_receipt": {
+                    "amount": 12,
+                    "crop": {
+                        "description": "",
+                        "id": 1,
+                        "name": "Beans",
+                        "resource_uri": ""
+                    },
+                    "id": 4259,
+                    "market": {
+                        "altitude": null,
+                        "id": 10,
+                        "latitude": null,
+                        "longitude": null,
+                        "name": "Chisokone Kitwe",
+                        "resource_uri": "",
+                        "volume": "unknown"
+                    },
+                    "quality": 10,
+                    "reconciled": false,
+                    "resource_uri": "",
+                    "unit": {
+                        "description": "Standard Sacks approx 50kg",
+                        "id": 2,
+                        "name": "Big Bags",
+                        "resource_uri": ""
+                    }
                 },
-                "unit2": { 
-                    "unit_name": "crates", "prices": [ 1.6, 1.7, 1.8 ] 
-                } 
+                "id": 4496,
+                "price": 120,
+                "resource_uri": "",
+                "total": 1440
+            },
+            {
+                "amount": 1,
+                "crop_receipt": {
+                    "amount": 120,
+                    "crop": {
+                        "description": "",
+                        "id": 1,
+                        "name": "Beans",
+                        "resource_uri": ""
+                    },
+                    "id": 4260,
+                    "market": {
+                        "altitude": null,
+                        "id": 10,
+                        "latitude": null,
+                        "longitude": null,
+                        "name": "Chisokone Kitwe",
+                        "resource_uri": "",
+                        "volume": "unknown"
+                    },
+                    "quality": 10,
+                    "reconciled": false,
+                    "resource_uri": "",
+                    "unit": {
+                        "description": "Standard Sacks approx 25kg",
+                        "id": 1,
+                        "name": "Bags",
+                        "resource_uri": ""
+                    }
+                },
+                "id": 4495,
+                "price": 1,
+                "resource_uri": "",
+                "total": 1
+            },
+            {
+                "amount": 5,
+                "crop_receipt": {
+                    "amount": 55,
+                    "crop": {
+                        "description": "",
+                        "id": 1,
+                        "name": "Beans",
+                        "resource_uri": ""
+                    },
+                    "id": 3959,
+                    "market": {
+                        "altitude": null,
+                        "id": 10,
+                        "latitude": null,
+                        "longitude": null,
+                        "name": "Chisokone Kitwe",
+                        "resource_uri": "",
+                        "volume": "unknown"
+                    },
+                    "quality": 10,
+                    "reconciled": false,
+                    "resource_uri": "",
+                    "unit": {
+                        "description": "Standard Sacks approx 50kg",
+                        "id": 2,
+                        "name": "Big Bags",
+                        "resource_uri": ""
+                    }
+                },
+                "id": 4195,
+                "price": 10,
+                "resource_uri": "",
+                "total": 50
+            },
+            {
+                "amount": 8,
+                "crop_receipt": {
+                    "amount": 8,
+                    "crop": {
+                        "description": "",
+                        "id": 1,
+                        "name": "Beans",
+                        "resource_uri": ""
+                    },
+                    "id": 3761,
+                    "market": {
+                        "altitude": null,
+                        "id": 10,
+                        "latitude": null,
+                        "longitude": null,
+                        "name": "Chisokone Kitwe",
+                        "resource_uri": "",
+                        "volume": "unknown"
+                    },
+                    "quality": 10,
+                    "reconciled": true,
+                    "resource_uri": "",
+                    "unit": {
+                        "description": "Standard Sacks approx 25kg",
+                        "id": 1,
+                        "name": "Bags",
+                        "resource_uri": ""
+                    }
+                },
+                "id": 3958,
+                "price": 50,
+                "resource_uri": "",
+                "total": 400
+            },
+            {
+                "amount": 5,
+                "crop_receipt": {
+                    "amount": 5,
+                    "crop": {
+                        "description": "",
+                        "id": 1,
+                        "name": "Beans",
+                        "resource_uri": ""
+                    },
+                    "id": 3762,
+                    "market": {
+                        "altitude": null,
+                        "id": 10,
+                        "latitude": null,
+                        "longitude": null,
+                        "name": "Chisokone Kitwe",
+                        "resource_uri": "",
+                        "volume": "unknown"
+                    },
+                    "quality": 10,
+                    "reconciled": true,
+                    "resource_uri": "",
+                    "unit": {
+                        "description": "Standard Sacks approx 25kg",
+                        "id": 1,
+                        "name": "Bags",
+                        "resource_uri": ""
+                    }
+                },
+                "id": 3957,
+                "price": 40,
+                "resource_uri": "",
+                "total": 200
             }
         ]
     }

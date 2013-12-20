@@ -7,7 +7,7 @@ from magriculture.fncs.models.geo import (
     Province, RPIArea, District, Ward, Zone, Market)
 from magriculture.fncs.models.props import (Crop, CropUnit)
 import random
-import time
+import itertools
 
 PASSWORD = "pass123"
 
@@ -115,8 +115,7 @@ AGRICULTURE_QUOTES = [
     " Committee. - George Nethercutt",
 ]
 
-def random_int_value():
-    return int(time.time() * 100000)
+next_user_number = itertools.count().next
 
 def reload_record(record):
     return record.__class__.objects.get(pk=record.pk)
@@ -269,7 +268,7 @@ def create_extension_officer():
 
 
 def create_generic_user():
-    data = {"username": "user_%s" % random_int_value(),
+    data = {"username": "user_%s" % next_user_number(),
             "password": PASSWORD}
     user = User.objects.create_user(**data)
     return user
