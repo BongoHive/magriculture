@@ -451,7 +451,7 @@ class AgentTestCase(FNCSTestCase):
         self.assertTrue(utils.is_agent(self.test_msisdn))
 
     def test_agent_edit(self):
-        # Agents can only be created by extension officers or super users
+        # Agents can only be edited by extension officers or super users
         login = self.client.login(username=self.user.username, password=utils.PASSWORD)
         self.assertTrue(login)
 
