@@ -355,7 +355,7 @@ def group_message_new(request):
 
 
                 # If the user is an agent dynamically generate select field.
-                if actor.is_agent():
+                if actor is not None and actor.is_agent():
                     included = (Crop.objects.filter(farmer_crop__agent_farmer=agent).
                                 all().distinct())
 
