@@ -59,3 +59,57 @@ class ExportAsCSV:
             writer.writerow([unicode(getattr(obj, field)).encode('utf-8')
                             for field in field_names])
         return response
+
+
+class ExportAsCSVWithFK:
+    def __init__(self, description="Export selected records as CSV file", fields=None, exclude=None, header=True):
+        self.description = description
+        self.fields = fields
+        self.exclude = exclude
+        self.header = header
+
+    def __call__(self, modeladmin, request, queryset):
+        """
+        Generic csv export admin action.
+        based on http://djangosnippets.org/snippets/1697/
+        """
+        opts = modeladmin.model._meta
+        field_names = [field.name for field in opts.fields]
+
+        field_names = [k for k, v in self.fields]
+        labels = [v for k, v in self.fields]
+
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = ('attachment; filename=%s.csv'
+                                           % unicode(opts).replace('.', '_'))
+
+        writer = csv.writer(response)
+        if self.header:
+            if labels:
+                writer.writerow(labels)
+            else:
+                writer.writerow(field_names)
+
+        for obj in queryset:
+            data = []
+            for field_name in field_names:
+                field_obj = None
+                if "__" in field_name:
+                    field_list = field_name.split("__")
+                    field_obj = obj
+                    for fk_field_name in field_list:
+                        if hasattr(field_obj, fk_field_name):
+                            field_obj = getattr(field_obj, fk_field_name)
+                else:
+                    if hasattr(obj, field_name):
+                        field_obj = getattr(obj, field_name)
+
+                if field_obj == None:
+                    # Using if None specifically as if not "" == True, due to the database
+                    # returning empty strings which needs to be printed out
+                    field_obj = "ERROR!"
+
+                data.append(field_obj)
+            data = [unicode(entry).encode('utf-8') for entry in data]
+            writer.writerow(data)
+        return response
