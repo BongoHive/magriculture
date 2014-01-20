@@ -1,5 +1,7 @@
+celery=3.1.8
 Django==1.4.2
 django-nose
+django-celery==3.1.1
 supervisor
 South==0.7.3
 gunicorn==0.15
