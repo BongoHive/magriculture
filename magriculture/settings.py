@@ -178,3 +178,23 @@ SMS_CONFIG = {
 }
 
 API_LIMIT_PER_PAGE = 0
+
+
+# Celery configuration
+from datetime import timedelta
+import djcelery
+
+djcelery.setup_loader()
+BROKER_URL = "amqp://guest:guest@localhost:5672/"
+
+from datetime import timedelta
+
+CELERY_RESULT_BACKEND = "database"
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+CELERYBEAT_SCHEDULE = {
+    'query_crop_receipt_for_old_crops-every-60-minutes': {
+        'task': 'magriculture.fncs.query_crop_receipt_for_old_crops',
+        'schedule': timedelta(minutes=60),
+    },
+}
