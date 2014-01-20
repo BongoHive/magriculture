@@ -3,7 +3,7 @@ from django.contrib import admin
 
 # Project
 from magriculture.fncs.models import actors, props, geo
-from magriculture.fncs.actions import ExportAsCSV
+from magriculture.fncs.actions import ExportAsCSV, ExportAsCSVWithFK
 
 # ==========================================================================
 # Actors
@@ -23,6 +23,29 @@ class AgentAdmin(admin.ModelAdmin):
     search_fields = ('actor__name',)
 
 
+class TransactionAdmin(admin.ModelAdmin):
+    def get_actions(self, request):
+        actions = super(TransactionAdmin, self).get_actions(request)
+        if "Export selected records as CSV file" in actions:
+            # action format acccording to django docs
+            # `(function, name, short_description) tuple`
+            fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
+                      ("crop_receipt__farmer__gender", "Gender"),
+                      # It is assumed that created_at is the same as the Transaction Date
+                      ("crop_receipt__created_at", "Transaction Date"),
+                      ("crop_receipt__crop", "Crop"),
+                      ("crop_receipt__unit", "Unit"),
+                      ("amount", "No of Units"),
+                      ("total", "Total Price Achieved"),
+                      ("crop_receipt__market", "Market"),
+                      ("crop_receipt__agent__actor__name", "Agent"),
+                      ("crop_receipt__agent__actor__gender", "Agent Gender")]
+            actions["Export selected records as CSV file"] = (ExportAsCSVWithFK(fields=fields),
+                                                             "Export selected records as CSV file",
+                                                             "Export selected records as CSV file")
+        return actions
+
+
 admin.site.register(actors.Actor, ActorAdmin)
 admin.site.register(actors.Farmer, FarmerAdmin)
 admin.site.register(actors.Agent, AgentAdmin)
@@ -37,7 +60,7 @@ admin.site.register(actors.Identity)
 # ==========================================================================
 admin.site.register(props.Crop)
 admin.site.register(props.CropUnit)
-admin.site.register(props.Transaction)
+admin.site.register(props.Transaction, TransactionAdmin)
 admin.site.register(props.Offer)
 admin.site.register(props.Message)
 admin.site.register(props.GroupMessage)
