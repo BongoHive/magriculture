@@ -9,8 +9,7 @@ from magriculture.fncs.models.actors import (
     Identity, ExtensionOfficer)
 from magriculture.fncs.models.geo import (
     Province, RPIArea, District, Ward, Zone, Market)
-from magriculture.fncs.models.props import (Crop, CropUnit, CROP_QUALITY_CHOICES,
-                                            Transaction, CropReceipt)
+from magriculture.fncs.models.props import (Crop, CropUnit)
 
 # Python
 import random
@@ -221,26 +220,6 @@ def create_crop(name, units=["boxes", "bunches", "kilos"]):
 def create_crop_unit(name):
     unit, _ = CropUnit.objects.get_or_create(name=name)
     return unit
-
-def create_transaction(crop_receipt):
-    data = {"amount": random.randint(10,100),
-            "price": random.randint(10,100),
-            "crop_receipt": crop_receipt,
-            "created_at": datetime.now()}
-    transaction, _ = Transaction.objects.get_or_create(**data)
-    return transaction
-
-def create_crop_receipt(crop, unit, farmer, agent, market):
-    data = {"crop": crop,
-            "unit": unit,
-            "farmer": farmer,
-            "agent": agent,
-            "market": market,
-            "quality": random.choice(CROP_QUALITY_CHOICES)[0],
-            "amount": random.randint(10,100),
-            "created_at": datetime.now()}
-    crop_receipt, _ = CropReceipt.objects.get_or_create(**data)
-    return crop_receipt
 
 
 def create_farmer(msisdn='27761234567', name="name", surname="surname",
