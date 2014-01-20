@@ -133,6 +133,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'sentry',
     'raven.contrib.django',
+    'djcelery',
 )
 
 # A sample logging configuration. The only tangible logging
