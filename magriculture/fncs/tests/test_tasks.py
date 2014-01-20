@@ -1,30 +1,72 @@
 # Python
-from datetime import datetime
-import itertools
-import random
+from datetime import datetime, timedelta
 
 # Django
 from django.test import TestCase
 
 # Project
-from magriculture.fncs.tests import utils
 from magriculture.fncs import tasks
-from magriculture.fncs.models.props import CropReceipt, CROP_QUALITY_CHOICES
+from magriculture.fncs.tests import utils
+from magriculture.fncs.models.props import Message
+from magriculture.fncs.models.props import CropReceipt
 
-next_user_number = itertools.count().next
+from django.test.utils import override_settings
 
+
+# Settings override to allows for exceptions to be caught and change the test runner
+@override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS = True,
+                   CELERY_ALWAYS_EAGER = True,
+                   TEST_RUNNER='djcelery.contrib.test_runner.CeleryTestSuiteRunner')
 class TestTasksFunction(TestCase):
-    def create_crop_reciept(self):
-        data = {"crop": utils.create_crop("crop_%s" % next_user_number()),
-            "unit": utils.create_crop_unit("unit_%s" % next_user_number()),
-            "farmer": utils.create_farmer(),
-            "agent": utils.create_agent(),
-            "market": utils.create_market("market_%s" % next_user_number(), "" % next_user_number()),
-            "quality": random.choice(CROP_QUALITY_CHOICES)[0],
-            "amount": random.randint(10,100),
-            "created_at": datetime.now()}
-
-        crop_receipt, _ = CropReceipt.objects.get_or_create(**data)
-
     def test_query_function_works(self):
-        result = tasks.query_crop_receipt_for_old_crops.delay()
+        # Creating Crop Receipts
+        days_4 = utils.create_crop_receipt(created_at=datetime.today() - timedelta(days=4))
+        days_2 = utils.create_crop_receipt(created_at=datetime.today() - timedelta(days=2))
+
+        crop_receipts = CropReceipt.objects.all()
+
+        # Assert that all reconciled is false
+        (self.assertEqual(obj.reconciled, False) for obj in crop_receipts)
+        tasks.query_crop_receipt_for_old_crops.delay()
+
+        days_4 = CropReceipt.objects.get(id=days_4.id)
+        self.assertEqual(days_4.reconciled, True)
+
+        days_2 = CropReceipt.objects.get(id=days_2.id)
+        self.assertEqual(days_2.reconciled, False)
+
+        # Getting and testing the messages
+        message = Message.objects.all()
+        self.assertEqual(message.count(), 1)
+
+        crop = days_4.crop.name
+        remaining = days_4.remaining_inventory()
+        self.assertEqual(message[0].content,
+                         "Sorry but %s of %s have not been sold" % (remaining, crop))
+        self.assertEqual(message[0].recipient,
+                         days_4.farmer.actor)
+        self.assertEqual(message[0].sender,
+                         days_4.agent.actor)
+
+
+    def test_check_inventory_left_works(self):
+        days_4 = utils.create_crop_receipt(created_at=datetime.today() - timedelta(days=4))
+        self.assertEqual(days_4.reconciled, False)
+
+        tasks.check_inventory_left(days_4)
+        days_4 = CropReceipt.objects.get(id=days_4.id)
+        self.assertEqual(days_4.reconciled, True)
+
+        # Getting and testing the messages
+        message = Message.objects.all()
+        self.assertEqual(message.count(), 1)
+
+        crop = days_4.crop.name
+        # Not sure why the following is being cast into an integer in the message
+        remaining = int(days_4.remaining_inventory())
+        self.assertEqual(message[0].content,
+                         "Sorry but %s of %s have not been sold" % (remaining, crop))
+        self.assertEqual(message[0].recipient,
+                         days_4.farmer.actor)
+        self.assertEqual(message[0].sender,
+                         days_4.agent.actor)
