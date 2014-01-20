@@ -230,15 +230,45 @@ def create_transaction(crop_receipt):
     transaction, _ = Transaction.objects.get_or_create(**data)
     return transaction
 
-def create_crop_receipt(crop, unit, farmer, agent, market):
+def create_crop_receipt(crop=None, unit=None, farmer=None,
+                        agent=None, market=None, created_at=None,
+                        amount=None, reconciled=False):
+    """
+    Creating the function is such a way that no parameters can be
+    passed to the function and the crop reciept can still be created.
+    """
+    if not crop:
+        crop = create_crop("crop_%s" % next_user_number())
+
+    if not unit:
+        unit = create_crop_unit("unit_%s" % next_user_number())
+
+    if not farmer:
+        farmer = create_farmer()
+
+    if not agent:
+        agent = create_agent()
+
+    if not market:
+        province = create_province("province_%s" % next_user_number())
+        district = create_district("district_%s" % next_user_number(), province)
+        market = create_market("market_%s" % next_user_number(), district)
+
+    if not created_at:
+        created_at = datetime.now()
+
+    if not amount:
+        amount = random.randint(10,100)
+
     data = {"crop": crop,
             "unit": unit,
             "farmer": farmer,
             "agent": agent,
             "market": market,
             "quality": random.choice(CROP_QUALITY_CHOICES)[0],
-            "amount": random.randint(10,100),
-            "created_at": datetime.now()}
+            "amount": amount,
+            "created_at": created_at,
+            "reconciled": reconciled}
     crop_receipt, _ = CropReceipt.objects.get_or_create(**data)
     return crop_receipt
 
