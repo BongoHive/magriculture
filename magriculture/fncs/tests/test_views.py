@@ -201,7 +201,7 @@ class FarmersTestCase(FNCSTestCase):
         self.assertEquals('/farmers/%s/location/%s/delete/confirm' % (self.farmer.pk,
                                                                       self.district.pk),
                           response.request["PATH_INFO"])
-        self.assertEquals(response.context["form"].data["district_pk"],
+        self.assertEquals(response.context["location_delete_form"].data["district_pk"],
                           unicode(self.district.pk))
 
     def test_farmer_location_delete_district(self):
