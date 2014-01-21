@@ -33,7 +33,7 @@ def check_inventory_left(crop_receipt):
     Function that checks inventory to see if there
     is any inventory left.
     """
-    logger.info("Running the inventory chekcer and send message")
+    logger.info("Running the inventory checker and send message")
 
     # Assuming that something went wrong and Reciepts with 0 crops is not reconciled
     if crop_receipt.remaining_inventory() > 0:
