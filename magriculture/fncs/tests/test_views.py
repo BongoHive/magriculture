@@ -190,6 +190,63 @@ class FarmersTestCase(FNCSTestCase):
         self.assertTrue(districts.get(name=self.district.name))
         self.assertRedirects(response, self.farmer_url('sales'))
 
+
+    def test_farmer_location_delete_confirm_district(self):
+        response = self.client.get(self.farmer_url('location_delete_confirm',
+                                                    district_pk=self.district.pk),
+                                   follow=True)
+
+        districts = self.farmer.districts.all()
+        self.assertEqual(districts.count(), 1)
+        self.assertEquals('/farmers/%s/location/%s/delete/confirm' % (self.farmer.pk,
+                                                                      self.district.pk),
+                          response.request["PATH_INFO"])
+        self.assertEquals(response.context["form"].data["district_pk"],
+                          unicode(self.district.pk))
+
+    def test_farmer_location_delete_district(self):
+        # Making sure that a farmer has a district
+        districts = self.farmer.districts.all()
+        self.assertEqual(districts.count(), 1)
+
+        # District name that will be used
+        district_name = districts[0].name
+
+        response = self.client.post(self.farmer_url('location_delete'), {
+            'district_pk': districts[0].pk}, follow=True)
+
+        districts = self.farmer.districts.all()
+        self.assertEqual(districts.count(), 0)
+        self.assertEquals(response.context["messages"]._loaded_data[0].message,
+                          "%s district has been deleted from %s" %
+                          (district_name, self.farmer.actor.name))
+
+
+    def test_farmer_location_delete_district_no_post_data(self):
+        # Testing to see if district is not actually deleted
+        districts = self.farmer.districts.all()
+        self.assertEqual(districts.count(), 1)
+
+        response = self.client.post(self.farmer_url('location_delete'), follow=True)
+
+        districts = self.farmer.districts.all()
+        self.assertEqual(districts.count(), 1)
+        self.assertEquals(response.context["messages"]._loaded_data[0].message,
+                          "Please select a district for deletion.")
+
+    def test_farmer_location_delete_district_on_get(self):
+        # Testing to see that district is not actally deleted
+
+        districts = self.farmer.districts.all()
+        self.assertEqual(districts.count(), 1)
+
+        response = self.client.get(self.farmer_url('location_delete'), follow=True)
+
+        districts = self.farmer.districts.all()
+        self.assertEqual(districts.count(), 1)
+        self.assertEquals(response.context["messages"]._loaded_data[0].message,
+                          "Please select a district for deletion.")
+
     def test_farmer_id_number(self):
         response = self.client.post(self.farmer_url('edit'), {
             'msisdn1': self.test_msisdn,
