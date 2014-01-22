@@ -27,7 +27,7 @@ class TestTasksFunction(TestCase):
 
         # Assert that all reconciled is false
         (self.assertEqual(obj.reconciled, False) for obj in crop_receipts)
-        tasks.query_crop_receipt_for_old_crops.delay()
+        tasks.query_crop_receipt_for_old_crops.delay(3)
 
         days_4 = CropReceipt.objects.get(id=days_4.id)
         self.assertEqual(days_4.reconciled, True)
@@ -47,6 +47,27 @@ class TestTasksFunction(TestCase):
                          days_4.farmer.actor)
         self.assertEqual(message[0].sender,
                          days_4.agent.actor)
+
+    def test_query_function_works_with_day_is_one(self):
+        # Creating Crop Receipts
+        days_4 = utils.create_crop_receipt(created_at=datetime.today() - timedelta(days=4))
+        days_2 = utils.create_crop_receipt(created_at=datetime.today() - timedelta(days=2))
+
+        crop_receipts = CropReceipt.objects.all()
+
+        # Assert that all reconciled is false
+        (self.assertEqual(obj.reconciled, False) for obj in crop_receipts)
+        tasks.query_crop_receipt_for_old_crops.delay(1)
+
+        days_4 = CropReceipt.objects.get(id=days_4.id)
+        self.assertEqual(days_4.reconciled, True)
+
+        days_2 = CropReceipt.objects.get(id=days_2.id)
+        self.assertEqual(days_2.reconciled, True)
+
+        # Getting and testing the messages
+        message = Message.objects.all()
+        self.assertEqual(message.count(), 2)
 
 
     def test_check_inventory_left_works(self):
