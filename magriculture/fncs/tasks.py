@@ -1,4 +1,5 @@
-# Python
+# Django
+from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, timedelta
 
 # Project
@@ -36,11 +37,13 @@ def check_inventory_left(crop_receipt):
     logger.info("Running the inventory checker and send message")
 
     # Assuming that something went wrong and Reciepts with 0 crops is not reconciled
-    if crop_receipt.remaining_inventory() > 0:
+    remaining = crop_receipt.remaining_inventory()
+
+    if remaining > 0:
         recipient = crop_receipt.farmer.actor
         crop = crop_receipt.crop.name
-        remaining = crop_receipt.remaining_inventory()
-        message = "Sorry but %s of %s have not been sold" % (remaining, crop)
+        message = (_("Sorry but %(remaining)s %(units)s of %(crop)s have not been sold") %
+                   {'remaining': remaining, 'units': crop_receipt.unit.name, 'crop': crop})
         crop_receipt.agent.actor.send_message(recipient, message, None)
         crop_receipt.reconciled = True
         crop_receipt.save()

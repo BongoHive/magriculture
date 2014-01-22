@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 
 # Django
+from django.utils.translation import ugettext_lazy as _
 from django.test import TestCase
 
 # Project
@@ -42,7 +43,8 @@ class TestTasksFunction(TestCase):
         crop = days_4.crop.name
         remaining = days_4.remaining_inventory()
         self.assertEqual(message[0].content,
-                         "Sorry but %s of %s have not been sold" % (remaining, crop))
+                         (_("Sorry but %(remaining)s %(units)s of %(crop)s have not been sold") %
+                          {'remaining': remaining, 'units': days_4.unit.name, 'crop': crop}))
         self.assertEqual(message[0].recipient,
                          days_4.farmer.actor)
         self.assertEqual(message[0].sender,
@@ -86,7 +88,8 @@ class TestTasksFunction(TestCase):
         # Not sure why the following is being cast into an integer in the message
         remaining = int(days_4.remaining_inventory())
         self.assertEqual(message[0].content,
-                         "Sorry but %s of %s have not been sold" % (remaining, crop))
+                         (_("Sorry but %(remaining)s %(units)s of %(crop)s have not been sold") %
+                          {'remaining': remaining, 'units': days_4.unit.name, 'crop': crop}))
         self.assertEqual(message[0].recipient,
                          days_4.farmer.actor)
         self.assertEqual(message[0].sender,
