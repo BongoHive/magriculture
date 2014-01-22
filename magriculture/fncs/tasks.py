@@ -12,13 +12,13 @@ from celery.decorators import task
 logger = get_task_logger(__name__)
 
 @task
-def query_crop_receipt_for_old_crops():
+def query_crop_receipt_for_old_crops(days):
     """
     This will form the celery worker that will be run to query
     the crop reciept for old stock
     """
     logger.info("Performing query for old Receipts")
-    days_3_ago = datetime.today() - timedelta(days=3)
+    days_3_ago = datetime.today() - timedelta(days=days)
     crop_receipts = (CropReceipt.objects.
                     filter(reconciled=False).
                     filter(created_at__lt=days_3_ago).
