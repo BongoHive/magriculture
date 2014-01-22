@@ -94,6 +94,7 @@ class ExportAsCSVWithFK:
             data = []
             for field_name in field_names:
                 field_obj = None
+                # uses the "__" to separate into foreign keys
                 if "__" in field_name:
                     field_list = field_name.split("__")
                     field_obj = obj

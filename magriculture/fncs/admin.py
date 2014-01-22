@@ -27,11 +27,10 @@ class TransactionAdmin(admin.ModelAdmin):
     def get_actions(self, request):
         actions = super(TransactionAdmin, self).get_actions(request)
         if "Export selected records as CSV file" in actions:
-            # action format acccording to django docs
+            # action in format described by django docs
             # `(function, name, short_description) tuple`
             fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
                       ("crop_receipt__farmer__gender", "Gender"),
-                      # It is assumed that created_at is the same as the Transaction Date
                       ("crop_receipt__created_at", "Transaction Date"),
                       ("crop_receipt__crop", "Crop"),
                       ("crop_receipt__unit", "Unit"),
