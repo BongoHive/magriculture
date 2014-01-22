@@ -233,10 +233,6 @@ def create_transaction(crop_receipt):
 def create_crop_receipt(crop=None, unit=None, farmer=None,
                         agent=None, market=None, created_at=None,
                         amount=None, reconciled=False):
-    """
-    Creating the function is such a way that no parameters can be
-    passed to the function and the crop reciept can still be created.
-    """
     if not crop:
         crop = create_crop("crop_%s" % next_user_number())
 
