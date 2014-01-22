@@ -19,10 +19,10 @@ def query_crop_receipt_for_old_crops(days):
     the crop reciept for old stock
     """
     logger.info("Performing query for old Receipts")
-    days_3_ago = datetime.today() - timedelta(days=days)
+    days_ago = datetime.today() - timedelta(days=days)
     crop_receipts = (CropReceipt.objects.
                     filter(reconciled=False).
-                    filter(created_at__lt=days_3_ago).
+                    filter(created_at__lt=days_ago).
                     all())
 
     for crop_receipt in crop_receipts:
