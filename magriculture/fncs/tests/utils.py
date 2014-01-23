@@ -9,7 +9,8 @@ from magriculture.fncs.models.actors import (
     Identity, ExtensionOfficer)
 from magriculture.fncs.models.geo import (
     Province, RPIArea, District, Ward, Zone, Market)
-from magriculture.fncs.models.props import (Crop, CropUnit)
+from magriculture.fncs.models.props import (Crop, CropUnit, CROP_QUALITY_CHOICES,
+                                            Transaction, CropReceipt)
 
 # Python
 import random
@@ -220,6 +221,52 @@ def create_crop(name, units=["boxes", "bunches", "kilos"]):
 def create_crop_unit(name):
     unit, _ = CropUnit.objects.get_or_create(name=name)
     return unit
+
+def create_transaction(crop_receipt):
+    data = {"amount": random.randint(10,100),
+            "price": random.randint(10,100),
+            "crop_receipt": crop_receipt,
+            "created_at": datetime.now()}
+    transaction, _ = Transaction.objects.get_or_create(**data)
+    return transaction
+
+def create_crop_receipt(crop=None, unit=None, farmer=None,
+                        agent=None, market=None, created_at=None,
+                        amount=None, reconciled=False):
+    if not crop:
+        crop = create_crop("crop_%s" % next_user_number())
+
+    if not unit:
+        unit = create_crop_unit("unit_%s" % next_user_number())
+
+    if not farmer:
+        farmer = create_farmer()
+
+    if not agent:
+        agent = create_agent()
+
+    if not market:
+        province = create_province("province_%s" % next_user_number())
+        district = create_district("district_%s" % next_user_number(), province)
+        market = create_market("market_%s" % next_user_number(), district)
+
+    if not created_at:
+        created_at = datetime.now()
+
+    if not amount:
+        amount = random.randint(10,100)
+
+    data = {"crop": crop,
+            "unit": unit,
+            "farmer": farmer,
+            "agent": agent,
+            "market": market,
+            "quality": random.choice(CROP_QUALITY_CHOICES)[0],
+            "amount": amount,
+            "created_at": created_at,
+            "reconciled": reconciled}
+    crop_receipt, _ = CropReceipt.objects.get_or_create(**data)
+    return crop_receipt
 
 
 def create_farmer(msisdn='27761234567', name="name", surname="surname",
