@@ -74,7 +74,6 @@ class ExportAsCSVWithFK:
         based on http://djangosnippets.org/snippets/1697/
         """
         opts = modeladmin.model._meta
-        field_names = [field.name for field in opts.fields]
 
         field_names = [k for k, v in self.fields]
         labels = [v for k, v in self.fields]
