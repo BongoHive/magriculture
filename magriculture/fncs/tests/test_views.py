@@ -217,8 +217,7 @@ class FarmersTestCase(FNCSTestCase):
 
         districts = self.farmer.districts.all()
         self.assertEqual(districts.count(), 0)
-        self.assertEquals(response.context["messages"]._loaded_data[0].message,
-                          "%s district has been deleted from %s" %
+        self.assertContains(response, "%s district has been deleted from %s" %
                           (district_name, self.farmer.actor.name))
 
 
@@ -231,8 +230,7 @@ class FarmersTestCase(FNCSTestCase):
 
         districts = self.farmer.districts.all()
         self.assertEqual(districts.count(), 1)
-        self.assertEquals(response.context["messages"]._loaded_data[0].message,
-                          "Please select a district for deletion.")
+        self.assertContains(response, "Please select a district for deletion.")
 
     def test_farmer_location_delete_district_on_get(self):
         # Testing to see that district is not actally deleted
@@ -244,8 +242,7 @@ class FarmersTestCase(FNCSTestCase):
 
         districts = self.farmer.districts.all()
         self.assertEqual(districts.count(), 1)
-        self.assertEquals(response.context["messages"]._loaded_data[0].message,
-                          "Please select a district for deletion.")
+        self.assertContains(response, "Please select a district for deletion.")
 
     def test_farmer_id_number(self):
         response = self.client.post(self.farmer_url('edit'), {
