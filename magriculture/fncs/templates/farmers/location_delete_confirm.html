@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include "includes/messages.html" %}
+<div class="content">
+
+    <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a></div>
+
+    <div class="h2">Confirm Delete Location</div>
+    <div class="list">
+        <div class="item"> Delete {{ district.name }} district from {{farmer.actor.name}} </div>
+    </div>
+
+    <form class="standard" method="post" action="{% url fncs:farmer_location_delete farmer_pk=farmer.pk %}">
+        {% if search_form.errors %}
+            <div class="error">Please see error below.</div>
+        {% endif %}
+        {{location_delete_form}}
+        <input type="submit" name="submit" class="submit" value="Yes &raquo;" />
+        {% csrf_token %}
+    </form>
+
+    <div class="h2">Menu</div>
+    {% include "includes/menu.html" %}
+</div> <!-- /.content -->{% endblock %}

@@ -148,6 +148,9 @@ class FarmerLocationForm(forms.Form):
         locations = ngram_index.search(search)[:self.num_choices]
         return [self._location_to_choice(l) for l, _score in locations]
 
+class FarmerLocationDeleteConfirmForm(forms.Form):
+    district_pk = forms.CharField(widget=HiddenInput())
+
 
 class CropsForm(forms.Form):
     crops = forms.ModelMultipleChoiceField(label='Crops', required=True,
@@ -161,7 +164,7 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
         exclude = [
-            'sender', 'recipient'
+            'sender', 'recipient', 'group'
         ]
 
 
