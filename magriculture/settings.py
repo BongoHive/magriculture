@@ -133,6 +133,7 @@ INSTALLED_APPS = (
     'gunicorn',
     'sentry',
     'raven.contrib.django',
+    'djcelery',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -177,3 +178,24 @@ SMS_CONFIG = {
 }
 
 API_LIMIT_PER_PAGE = 0
+
+
+# Celery configuration
+from datetime import timedelta
+import djcelery
+
+djcelery.setup_loader()
+BROKER_URL = "amqp://guest:guest@localhost:5672/"
+
+DAYS_PRODUCE_IS_FRESH = 3  # Length of time produce is fresh for
+
+CELERY_RESULT_BACKEND = "database"
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+CELERYBEAT_SCHEDULE = {
+    'query_crop_receipt_for_old_crops-every-60-minutes': {
+        'task': 'magriculture.fncs.query_crop_receipt_for_old_crops',
+        'schedule': timedelta(minutes=60),
+        'args': (DAYS_PRODUCE_IS_FRESH,),
+    },
+}
