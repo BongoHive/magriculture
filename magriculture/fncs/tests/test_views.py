@@ -286,6 +286,18 @@ class FarmersTestCase(FNCSTestCase):
         response = self.client.get(self.farmer_url('sale', sale_pk=sale.pk))
         self.assertContains(response, '10 boxes of tomato', status_code=200)
 
+    def test_farmer_new_message(self):
+        # Check that messages table is empty
+        self.assertEqual(Message.objects.all().count(), 0)
+        response = self.client.post(self.farmer_url('new_message',
+                                                    farmer_pk=self.farmer.pk),
+                                    {"content": "This is the content"},
+                                    follow=True)
+        messages = Message.objects.all()
+        self.assertEqual(messages.count(), 1)
+        self.assertEqual(messages[0].content, "This is the content")
+        self.assertRedirects(response, self.farmer_url('sales', farmer_pk=self.farmer.pk))
+
     def test_farmer_new_sale(self):
         # create sample crop data
         crop_names = ["onion", "potato", "apple"]

@@ -312,7 +312,7 @@ def farmer_new_message(request, farmer_pk):
 
         form = forms.MessageForm(request.POST)
         if form.is_valid():
-            agent.send_message_to_farmer(farmer, form.cleaned_data['content'])
+            agent.actor.send_message_to_farmer(farmer, form.cleaned_data['content'])
             messages.success(request, 'The message has been sent to %s via SMS'
                              % farmer.actor.name)
             return redirect_to_farmer
