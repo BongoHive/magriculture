@@ -152,6 +152,49 @@ def farmer_location_save(request, farmer_pk):
 
 @login_required
 @SpecificRightsRequired(agent=True)
+def farmer_location_delete_confirm(request, farmer_pk, district_pk):
+    """ Confirm delete for the location """
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    initial = {"district_pk": district_pk}
+    location_delete_form = forms.FarmerLocationDeleteConfirmForm(initial)
+    return render_to_response('farmers/location_delete_confirm.html', {
+        'farmer': farmer,
+        'district': get_object_or_404(District, pk=district_pk),
+        'location_delete_form': location_delete_form,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+@SpecificRightsRequired(agent=True)
+def farmer_location_delete(request, farmer_pk):
+    """ Delete actual farmer location """
+    farmer = get_object_or_404(Farmer, pk=farmer_pk)
+    if request.method == "POST":
+        location_delete_form = forms.FarmerLocationDeleteConfirmForm(request.POST)
+        if location_delete_form.is_valid():
+            district_pk = location_delete_form.cleaned_data["district_pk"]
+            district = District.objects.get(pk=district_pk)
+            farmer.districts.remove(district)
+            messages.success(request,
+                             "%s district has been deleted from %s" %
+                             (district.name, farmer.actor.name))
+        else:
+            messages.error(request, 'Please select a district for deletion.')
+    else:
+        messages.error(request, 'Please select a district for deletion.')
+
+    # Redirecting back to the location save form
+    search_form = forms.FarmerLocationSearchForm()
+    location_form = None
+    return render_to_response('farmers/location.html', {
+        'farmer': farmer,
+        'search_form': search_form,
+        'location_form': location_form,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+@SpecificRightsRequired(agent=True)
 def farmer(request, farmer_pk):
     return HttpResponseRedirect(reverse('fncs:farmer_sales', kwargs={
         'farmer_pk': farmer_pk

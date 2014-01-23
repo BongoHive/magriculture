@@ -6,6 +6,18 @@
 
     <div class="breadcrumb"><a href="{% url fncs:home %}">Home</a> &gt; <a href="{% url fncs:farmers %}">Farmers</a></div>
 
+    {% if farmer.districts.exists %}
+        <div class="h2">Delete Farmer's Location</div>
+        <div class="list">
+            {% for district in farmer.districts.all %}
+                <div class="item"> {{ district.name }} <a class="pagination del" href="{% url fncs:farmer_location_delete_confirm farmer_pk=farmer.pk district_pk=district.pk %}">[x] Remove this Location</a></div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <div class="error">You must set the district below for this farmer to be able to send messages to the farmer</div>
+    {% endif %}
+
     <div class="h2">Set Farmer's Location</div>
 
     {% if location_form %}
