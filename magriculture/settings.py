@@ -196,6 +196,6 @@ CELERYBEAT_SCHEDULE = {
     'query_crop_receipt_for_old_crops-every-60-minutes': {
         'task': 'magriculture.fncs.query_crop_receipt_for_old_crops',
         'schedule': timedelta(minutes=60),
-        'args': (DAYS_PRODUCE_IS_FRESH),
+        'args': (DAYS_PRODUCE_IS_FRESH,),
     },
 }
