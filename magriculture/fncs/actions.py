@@ -62,10 +62,9 @@ class ExportAsCSV(object):
 
 
 class ExportAsCSVWithFK(object):
-    def __init__(self, description="Export selected records as CSV file", fields=None, exclude=None, header=True):
+    def __init__(self, description="Export selected records as CSV file", fields=None, header=True):
         self.description = description
         self.fields = fields
-        self.exclude = exclude
         self.header = header
 
     def __call__(self, modeladmin, request, queryset):
