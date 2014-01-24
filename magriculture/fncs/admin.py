@@ -26,22 +26,25 @@ class AgentAdmin(admin.ModelAdmin):
 class TransactionAdmin(admin.ModelAdmin):
     def get_actions(self, request):
         actions = super(TransactionAdmin, self).get_actions(request)
-        if "Export selected records as CSV file" in actions:
-            # action in format described by django docs
-            # `(function, name, short_description) tuple`
-            fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
-                      ("crop_receipt__farmer__gender", "Gender"),
-                      ("crop_receipt__created_at", "Transaction Date"),
-                      ("crop_receipt__crop", "Crop"),
-                      ("crop_receipt__unit", "Unit"),
-                      ("amount", "No of Units"),
-                      ("total", "Total Price Achieved"),
-                      ("crop_receipt__market", "Market"),
-                      ("crop_receipt__agent__actor__name", "Agent"),
-                      ("crop_receipt__agent__actor__gender", "Agent Gender")]
-            actions["Export selected records as CSV file"] = (ExportAsCSVWithFK(fields=fields),
-                                                             "Export selected records as CSV file",
-                                                             "Export selected records as CSV file")
+        if "export_csv" in actions:
+            del actions["export_csv"]
+
+        # action in format described by django docs
+        # `(function, name, short_description) tuple`
+        fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
+                  ("crop_receipt__farmer__gender", "Gender"),
+                  ("crop_receipt__created_at", "Transaction Date"),
+                  ("crop_receipt__crop", "Crop"),
+                  ("crop_receipt__unit", "Unit"),
+                  ("amount", "No of Units"),
+                  ("total", "Total Price Achieved"),
+                  ("crop_receipt__market", "Market"),
+                  ("crop_receipt__agent__actor__name", "Agent"),
+                  ("crop_receipt__agent__actor__gender", "Agent Gender")]
+        farmer_export = ExportAsCSVWithFK(fields=fields)
+        actions["farmer_export"] = (farmer_export,
+                                    "farmer_export",
+                                    "Export selected records as CSV file")
         return actions
 
 
@@ -75,4 +78,5 @@ admin.site.register(geo.Ward)
 admin.site.register(geo.Market)
 
 export_records_as_csv = ExportAsCSV()
-admin.site.add_action(export_records_as_csv, "Export selected records as CSV file")
+export_records_as_csv.short_description = "Export selected records as CSV file"
+admin.site.add_action(export_records_as_csv, "export_csv")
