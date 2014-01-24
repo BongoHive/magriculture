@@ -2,7 +2,7 @@ import csv
 from django.http import HttpResponse
 
 
-class ExportAsCSV:
+class ExportAsCSV(object):
     """
     This Class returns an export csv action
 
@@ -61,7 +61,7 @@ class ExportAsCSV:
         return response
 
 
-class ExportAsCSVWithFK:
+class ExportAsCSVWithFK(object):
     def __init__(self, description="Export selected records as CSV file", fields=None, exclude=None, header=True):
         self.description = description
         self.fields = fields
