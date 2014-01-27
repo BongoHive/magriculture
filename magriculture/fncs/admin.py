@@ -44,7 +44,7 @@ class TransactionAdmin(admin.ModelAdmin):
         farmer_export = ExportAsCSVWithFK(fields)
         actions["farmer_export"] = (farmer_export,
                                     "farmer_export",
-                                    "Export selected records as CSV file")
+                                    farmer_export.short_description)
         return actions
 
 

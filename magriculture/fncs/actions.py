@@ -24,6 +24,7 @@ class ExportAsCSV(object):
 
     Based on: http://djangosnippets.org/snippets/2020/
     """
+    short_description = "Export selected records as CSV file"
 
     def __init__(self, description="Export selected records as CSV file", fields=None, exclude=None, header=True):
         self.description = description
@@ -60,12 +61,10 @@ class ExportAsCSV(object):
                             for field in field_names])
         return response
 
-    @property
-    def short_description(self):
-        return "Export selected records as CSV file"
-
 
 class ExportAsCSVWithFK(object):
+    short_description = "Export selected records as CSV file"
+
     def __init__(self, fields, header=True):
         self.fields = fields
         self.header = header
