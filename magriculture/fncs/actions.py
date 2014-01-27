@@ -2,7 +2,7 @@ import csv
 from django.http import HttpResponse
 
 
-class ExportAsCSV:
+class ExportAsCSV(object):
     """
     This Class returns an export csv action
 
@@ -24,6 +24,7 @@ class ExportAsCSV:
 
     Based on: http://djangosnippets.org/snippets/2020/
     """
+    short_description = "Export selected records as CSV file"
 
     def __init__(self, description="Export selected records as CSV file", fields=None, exclude=None, header=True):
         self.description = description
@@ -58,4 +59,46 @@ class ExportAsCSV:
         for obj in queryset:
             writer.writerow([unicode(getattr(obj, field)).encode('utf-8')
                             for field in field_names])
+        return response
+
+
+class ExportAsCSVWithFK(object):
+    short_description = "Export selected records as CSV file"
+
+    def __init__(self, fields, header=True):
+        self.fields = fields
+        self.header = header
+
+    def __call__(self, modeladmin, request, queryset):
+        """
+        Generic csv export admin action.
+        based on http://djangosnippets.org/snippets/1697/
+        """
+        opts = modeladmin.model._meta
+
+        field_names = [k for k, v in self.fields]
+        labels = [v for k, v in self.fields]
+
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = ('attachment; filename=%s.csv'
+                                           % unicode(opts).replace('.', '_'))
+
+        writer = csv.writer(response)
+        if self.header:
+            writer.writerow(labels)
+
+        for obj in queryset:
+            data = []
+            for field_name in field_names:
+                field_obj = obj
+                for name in field_name.split("__"):
+                    if hasattr(field_obj, name):
+                        field_obj = getattr(field_obj, name)
+                    else:
+                        field_obj = "ERROR!"
+                        break
+
+                data.append(field_obj)
+            data = [unicode(entry).encode('utf-8') for entry in data]
+            writer.writerow(data)
         return response
