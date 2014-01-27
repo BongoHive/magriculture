@@ -5,6 +5,20 @@ from django.contrib import admin
 from magriculture.fncs.models import actors, props, geo
 from magriculture.fncs.actions import ExportAsCSV, ExportAsCSVWithFK
 
+# Setting the fields and ExportAsCSV Outside the class
+
+fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
+                  ("crop_receipt__farmer__gender", "Gender"),
+                  ("crop_receipt__created_at", "Transaction Date"),
+                  ("crop_receipt__crop", "Crop"),
+                  ("crop_receipt__unit", "Unit"),
+                  ("amount", "No of Units"),
+                  ("total", "Total Price Achieved"),
+                  ("crop_receipt__market", "Market"),
+                  ("crop_receipt__agent__actor__name", "Agent"),
+                  ("crop_receipt__agent__actor__gender", "Agent Gender")]
+farmer_export = ExportAsCSVWithFK(fields)
+
 # ==========================================================================
 # Actors
 # ==========================================================================
@@ -31,17 +45,6 @@ class TransactionAdmin(admin.ModelAdmin):
 
         # action in format described by django docs
         # `(function, name, short_description) tuple`
-        fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
-                  ("crop_receipt__farmer__gender", "Gender"),
-                  ("crop_receipt__created_at", "Transaction Date"),
-                  ("crop_receipt__crop", "Crop"),
-                  ("crop_receipt__unit", "Unit"),
-                  ("amount", "No of Units"),
-                  ("total", "Total Price Achieved"),
-                  ("crop_receipt__market", "Market"),
-                  ("crop_receipt__agent__actor__name", "Agent"),
-                  ("crop_receipt__agent__actor__gender", "Agent Gender")]
-        farmer_export = ExportAsCSVWithFK(fields)
         actions["farmer_export"] = (farmer_export,
                                     "farmer_export",
                                     farmer_export.short_description)
