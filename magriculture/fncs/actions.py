@@ -82,8 +82,7 @@ class ExportAsCSVWithFK(object):
 
         writer = csv.writer(response)
         if self.header:
-            if labels:
-                writer.writerow(labels)
+            writer.writerow(labels)
 
         for obj in queryset:
             data = []
