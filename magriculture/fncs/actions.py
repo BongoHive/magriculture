@@ -90,21 +90,13 @@ class ExportAsCSVWithFK(object):
         for obj in queryset:
             data = []
             for field_name in field_names:
-                field_obj = None
-                # uses the "__" to separate into foreign keys
-                if "__" in field_name:
-                    field_obj = obj
-                    for fk_field_name in field_name.split("__"):
-                        if hasattr(field_obj, fk_field_name):
-                            field_obj = getattr(field_obj, fk_field_name)
-                        else:
-                            field_obj = "ERROR!"
-                            break
-                else:
-                    if hasattr(obj, field_name):
-                        field_obj = getattr(obj, field_name)
+                field_obj = obj
+                for name in field_name.split("__"):
+                    if hasattr(field_obj, name):
+                        field_obj = getattr(field_obj, name)
                     else:
                         field_obj = "ERROR!"
+                        break
 
                 data.append(field_obj)
             data = [unicode(entry).encode('utf-8') for entry in data]

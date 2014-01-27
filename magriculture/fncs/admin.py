@@ -9,7 +9,7 @@ from magriculture.fncs.actions import ExportAsCSV, ExportAsCSVWithFK
 
 fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
                   ("crop_receipt__farmer__gender", "Gender"),
-                  ("crop_receipt__created_at", "Transaction Date"),
+                  ("created_at", "Transaction Date"),
                   ("crop_receipt__crop", "Crop"),
                   ("crop_receipt__unit", "Unit"),
                   ("amount", "No of Units"),
@@ -65,6 +65,7 @@ admin.site.register(actors.Identity)
 # ==========================================================================
 admin.site.register(props.Crop)
 admin.site.register(props.CropUnit)
+admin.site.register(props.CropReceipt)
 admin.site.register(props.Transaction, TransactionAdmin)
 admin.site.register(props.Offer)
 admin.site.register(props.Message)
