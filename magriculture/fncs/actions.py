@@ -100,11 +100,8 @@ class ExportAsCSVWithFK(object):
                 else:
                     if hasattr(obj, field_name):
                         field_obj = getattr(obj, field_name)
-
-                if field_obj == None:
-                    # Using if None specifically as if not "" == True, due to the database
-                    # returning empty strings which needs to be printed out
-                    field_obj = "ERROR!"
+                    else:
+                        field_obj = "ERROR!"
 
                 data.append(field_obj)
             data = [unicode(entry).encode('utf-8') for entry in data]
