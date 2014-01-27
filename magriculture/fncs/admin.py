@@ -41,7 +41,7 @@ class TransactionAdmin(admin.ModelAdmin):
                   ("crop_receipt__market", "Market"),
                   ("crop_receipt__agent__actor__name", "Agent"),
                   ("crop_receipt__agent__actor__gender", "Agent Gender")]
-        farmer_export = ExportAsCSVWithFK(fields=fields)
+        farmer_export = ExportAsCSVWithFK(fields)
         actions["farmer_export"] = (farmer_export,
                                     "farmer_export",
                                     "Export selected records as CSV file")
