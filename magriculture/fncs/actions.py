@@ -60,6 +60,10 @@ class ExportAsCSV(object):
                             for field in field_names])
         return response
 
+    @property
+    def short_description(self):
+        return "Export selected records as CSV file"
+
 
 class ExportAsCSVWithFK(object):
     def __init__(self, fields, header=True):

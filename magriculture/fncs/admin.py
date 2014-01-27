@@ -78,5 +78,4 @@ admin.site.register(geo.Ward)
 admin.site.register(geo.Market)
 
 export_records_as_csv = ExportAsCSV()
-export_records_as_csv.short_description = "Export selected records as CSV file"
 admin.site.add_action(export_records_as_csv, "export_csv")
