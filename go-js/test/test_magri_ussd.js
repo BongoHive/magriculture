@@ -534,10 +534,60 @@ describe("As a registered farmer", function() {
             response: ("^Select a crop:[^]" +
                        "1. Beans[^]" +
                        "2. Cabbage[^]" +
-                       "3. Carrots$")
+                       "3. Carrots[^]" +
+                       "4. Cassava[^]" +
+                       "5. Cauliflower[^]" +
+                       "6. Chinese Cabbage[^]" +
+                       "7. Coffee[^]" +
+                       "8. Eggplant[^]" +
+                       "9. More$")
         });
         p.then(done, done);
     });
+
+    it("selecting market prices should ask for crop choice from my crops", function(done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "select_service"
+            },
+            content: "1",
+            next_state: "select_crop",
+            response: ("^Select a crop:[^]" +
+                       "1. Beans[^]" +
+                       "2. Cabbage[^]" +
+                       "3. Carrots[^]" +
+                       "4. Cassava[^]" +
+                       "5. Cauliflower[^]" +
+                       "6. Chinese Cabbage[^]" +
+                       "7. Coffee[^]" +
+                       "8. Eggplant[^]" +
+                       "9. More$")
+        });
+        p.then(done, done);
+    });
+
+    it("selecting more should ask for crop choice from full crop list", function(done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "select_crop"
+            },
+            content: "9",
+            next_state: "select_crop",
+            response: "^Select a crop:[^]" +
+                        "1. Fruit[^]" +
+                        "2. Green Maize[^]" +
+                        "3. Green Pepper[^]" +
+                        "4. Impwa[^]" +
+                        "5. Kalembula[^]" +
+                        "6. Maize[^]" +
+                        "7. Millet[^]" +
+                        "8. Okra[^]" +
+                        "9. More[^]" +
+                        "10. Back$"
+        });
+        p.then(done, done);
+    });
+
     it("choosing beans from crop choice should ask which markets for", function(done) {
         var p = tester.check_state({
             user: {

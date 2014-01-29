@@ -631,14 +631,32 @@ function MagriWorker() {
         var _ = im.i18n;
         var lima_links_api = self.lima_links_api(im);
         var p = self.get_contact();
+        var choices;
+        var choice_ids = [];
         p.add_callback(function(result){
             return lima_links_api.get_farmer(im.user_addr);
         });
-        p.add_callback(function (farmer) {
-            var choices = farmer.crops.map(function (crop) {
+        p.add_callback(function(farmer){
+            // First populate with the farmers crops
+            choices = farmer.crops.map(function (crop) {
+                choice_ids.push(crop.id);
                 return new Choice(crop.id, crop.name);
             });
-            return new ChoiceState(
+            return lima_links_api.all_crops();
+        });
+        p.add_callback(function (result) {
+            // Then populate all crops
+            var crops = result;
+            var cropchoices = crops.map(function (crop) {
+                return new Choice(crop.id, crop.name);
+            });
+            // Then concat the two after removing dupes
+            function isNotInFarmerCrops(crop){
+                return (choice_ids.indexOf(crop.value) === -1);
+            }
+            choices = choices.concat(cropchoices.filter(isNotInFarmerCrops));
+
+            return new PaginatedChoiceState(
                 state_name,
                 function (choice) {
                     self.set_user_item(im.user, "chosen_crop_name",
@@ -647,7 +665,9 @@ function MagriWorker() {
                 },
                 _.gettext("Select a crop:"),
                 choices,
-                _.gettext("Please enter the number of the crop.")
+                _.gettext("Please enter the number of the crop."),
+                null,
+                {}
             );
         });
         return p;
