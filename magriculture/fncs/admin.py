@@ -38,6 +38,7 @@ class AgentAdmin(admin.ModelAdmin):
 
 
 class TransactionAdmin(admin.ModelAdmin):
+    readonly_fields = ('crop_receipt',)
     def get_actions(self, request):
         actions = super(TransactionAdmin, self).get_actions(request)
         if "export_csv" in actions:
