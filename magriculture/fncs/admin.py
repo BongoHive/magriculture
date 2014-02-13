@@ -4,6 +4,8 @@ from django.contrib import admin
 # Project
 from magriculture.fncs.models import actors, props, geo
 from magriculture.fncs.actions import ExportAsCSV, ExportAsCSVWithFK
+from magriculture.fncs.actions import ExportAsCSVWithFKTask
+from magriculture.fncs.tasks import export_transactions
 
 # Setting the fields and ExportAsCSV Outside the class
 
@@ -18,6 +20,7 @@ fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
                   ("crop_receipt__agent__actor__name", "Agent"),
                   ("crop_receipt__agent__actor__gender", "Agent Gender")]
 farmer_export = ExportAsCSVWithFK(fields)
+farmer_export_task = ExportAsCSVWithFKTask(fields)
 
 # ==========================================================================
 # Actors
@@ -49,6 +52,9 @@ class TransactionAdmin(admin.ModelAdmin):
         actions["farmer_export"] = (farmer_export,
                                     "farmer_export",
                                     farmer_export.short_description)
+        actions["farmer_export_task"] = (farmer_export_task,
+                                    "farmer_export_task",
+                                    farmer_export_task.short_description)
         return actions
 
 

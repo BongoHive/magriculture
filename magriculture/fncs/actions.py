@@ -1,6 +1,8 @@
 import csv
 from django.http import HttpResponse
 
+from magriculture.fncs.tasks import export_transactions
+
 
 class ExportAsCSV(object):
     """
@@ -102,3 +104,27 @@ class ExportAsCSVWithFK(object):
             data = [unicode(entry).encode('utf-8') for entry in data]
             writer.writerow(data)
         return response
+
+class ExportAsCSVWithFKTask(object):
+    short_description = "Export selected records as CSV file via Email"
+
+    def __init__(self, fields, header=True):
+        self.fields = fields
+        self.header = header
+
+    def __call__(self, modeladmin, request, queryset):
+        """
+        Generic csv export admin action.
+        based on http://djangosnippets.org/snippets/1697/
+        """
+        # opts = modeladmin.model._meta
+
+        field_names = [k for k, v in self.fields]
+        labels = [v for k, v in self.fields]
+
+        # response = HttpResponse(mimetype='text/csv')
+        # response['Content-Disposition'] = ('attachment; filename=%s.csv'
+        #                                    % unicode(opts).replace('.', '_'))
+
+        
+        return export_transactions.delay(field_names, labels, queryset, request.user)
