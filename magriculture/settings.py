@@ -199,3 +199,5 @@ CELERYBEAT_SCHEDULE = {
         'args': (DAYS_PRODUCE_IS_FRESH,),
     },
 }
+
+DEFAULT_FROM_EMAIL = "no-reply@limalinks.co.zm"
