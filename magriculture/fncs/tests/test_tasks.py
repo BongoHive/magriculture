@@ -20,49 +20,6 @@ from magriculture.fncs.models.props import CropReceipt
 from magriculture.fncs.tasks import export_transactions
 
 
-# def create_farmer_for_agent(agent, market, **kwargs):
-#     farmer = utils.create_farmer(**kwargs)
-#     farmer.operates_at(market, agent)
-#     return farmer
-
-# def create_random_farmers(amount, agent, market):
-#     for i in range(amount):
-#         yield create_farmer_for_agent(agent, market, msisdn=27731234567 + i)
-
-# class FNCSTestCase(TestCase):
-
-#     def setUp(self):
-#         self.client = Client()
-#         self.pin = '1234'
-#         self.province = utils.create_province('test province')
-#         self.district = utils.create_district('test district', self.province)
-#         self.ward = utils.create_ward('test ward', self.district)
-#         self.market = utils.create_market('test market', self.district)
-
-#         self.agent = utils.create_agent()
-#         self.msisdn = self.agent.actor.user.username
-
-#         identity = self.agent.actor.get_identity(self.msisdn)
-#         identity.set_pin(self.pin)
-#         identity.save()
-
-#         self.login_url = '%s?next=%s' % (reverse('login'), reverse('fncs:home'))
-#         self.farmers = list(create_random_farmers(10, self.agent, self.market))
-#         self.farmer = self.farmers[0]
-
-#     def farmer_url(self, *args, **kwargs):
-#         return utils.farmer_url(self.farmer.pk, *args, **kwargs)
-
-#     def take_in(self, *args):
-#         return utils.take_in(self.market, self.agent, self.farmer, *args)
-
-#     def login(self):
-#         self.client.login(username=self.msisdn, password=self.pin)
-
-#     def logout(self):
-#         self.client.logout()
-
-
 # Settings override to allows for exceptions to be caught and change the test runner
 @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS = True,
                    CELERY_ALWAYS_EAGER = True,
