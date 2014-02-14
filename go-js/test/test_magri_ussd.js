@@ -147,27 +147,10 @@ describe("as an unregistered farmer", function() {
         p.then(done, done);
     });
 
-    it("Entering gender I should be asked for location", function (done) {
+    it("Entering gender I should be asked for district", function (done) {
         var p = tester.check_state({
             user: {
                 current_state: "registration_gender",
-                answers: {
-                    registration_start: "registration_name_first",
-                    registration_name_first: "Bob",
-                    registration_name_last: "Marley"
-                }
-            },
-            content: "1",
-            next_state: "registration_town",
-            response: "^What is the town your farm is in\\?$"
-        });
-        p.then(done, done);
-    });
-
-    it("Entering town I should be asked for district", function (done) {
-        var p = tester.check_state({
-            user: {
-                current_state: "registration_town",
                 answers: {
                     registration_start: "registration_name_first",
                     registration_name_first: "Bob",
@@ -175,9 +158,9 @@ describe("as an unregistered farmer", function() {
                     registration_gender: "M"
                 }
             },
-            content: "Choma",
+            content: "1",
             next_state: "registration_district",
-            response: "^What is the district your farm is in\\?$"
+            response: "^In what district is your farm\\?$"
         });
         p.then(done, done);
     });
@@ -190,8 +173,7 @@ describe("as an unregistered farmer", function() {
                     registration_start: "registration_name_first",
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
-                    registration_gender: "M",
-                    registration_town: "town one"
+                    registration_gender: "M"
                 }
             },
             content: "four",
@@ -210,8 +192,7 @@ describe("as an unregistered farmer", function() {
                     registration_start: "registration_name_first",
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
-                    registration_gender: "M",
-                    registration_town: "town one"
+                    registration_gender: "M"
                 }
             },
             content: "three",
@@ -230,8 +211,7 @@ describe("as an unregistered farmer", function() {
                     registration_start: "registration_name_first",
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
-                    registration_gender: "M",
-                    registration_town: "town one"
+                    registration_gender: "M"
                 }
             },
             content: "district",
@@ -253,7 +233,6 @@ describe("as an unregistered farmer", function() {
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
                     registration_gender: "M",
-                    registration_town: "town one",
                     registration_district: "one"
                 }
             },
@@ -282,7 +261,6 @@ describe("as an unregistered farmer", function() {
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
                     registration_gender: "M",
-                    registration_town: "town one",
                     registration_district: "one",
                     registration_district_confirm: 1
                 }
@@ -313,7 +291,6 @@ describe("as an unregistered farmer", function() {
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
                     registration_gender: "M",
-                    registration_town: "town one",
                     registration_district: "one",
                     registration_district_confirm: 1
                 },
@@ -347,7 +324,6 @@ describe("as an unregistered farmer", function() {
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
                     registration_gender: "M",
-                    registration_town: "town one",
                     registration_district: "one",
                     registration_district_confirm: 1
                 },
@@ -377,7 +353,6 @@ describe("as an unregistered farmer", function() {
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
                     registration_gender: "M",
-                    registration_town: "town one",
                     registration_district: "one",
                     registration_district_confirm: 1
                 },
@@ -403,7 +378,6 @@ describe("as an unregistered farmer", function() {
                     registration_name_first: "Bob",
                     registration_name_last: "Marley",
                     registration_gender: "M",
-                    registration_town: "town one",
                     registration_district: "one",
                     registration_district_confirm: 1,
                     registration_crop: "registration_crop_more"
@@ -432,7 +406,6 @@ describe("as an unregistered farmer", function() {
                         registration_name_first: "Bob",
                         registration_name_last: "Marley",
                         registration_gender: "M",
-                        registration_town: "town one",
                         registration_district: "one",
                         registration_district_confirm: 1,
                         registration_crop: "registration_crop_more"
