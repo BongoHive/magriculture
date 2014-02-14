@@ -1,6 +1,8 @@
 import csv
 from django.http import HttpResponse
 
+from magriculture.fncs.tasks import export_transactions
+
 
 class ExportAsCSV(object):
     """
@@ -102,3 +104,21 @@ class ExportAsCSVWithFK(object):
             data = [unicode(entry).encode('utf-8') for entry in data]
             writer.writerow(data)
         return response
+
+class ExportAsCSVWithFKTask(object):
+    short_description = "Export selected records as CSV file via Email"
+
+    def __init__(self, fields, header=True):
+        self.fields = fields
+        self.header = header
+
+    def __call__(self, modeladmin, request, queryset):
+        """
+        Fires off to celery for long running exports
+        """
+
+        field_names = [k for k, v in self.fields]
+        labels = [v for k, v in self.fields]
+        modeladmin.message_user(request, "Exporting records, will be sent via email to shortly")
+        
+        return export_transactions.delay(field_names, labels, queryset, request.user)

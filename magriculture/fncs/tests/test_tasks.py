@@ -1,17 +1,21 @@
 # Python
 from datetime import datetime, timedelta
+from StringIO import StringIO
+from zipfile import ZipFile
+import csv
 
 # Django
 from django.utils.translation import ugettext_lazy as _
 from django.test import TestCase
+from django.test.utils import override_settings
+from django.core import mail
 
 # Project
 from magriculture.fncs import tasks
 from magriculture.fncs.tests import utils
 from magriculture.fncs.models.props import Message
 from magriculture.fncs.models.props import CropReceipt
-
-from django.test.utils import override_settings
+from magriculture.fncs.tasks import export_transactions
 
 
 # Settings override to allows for exceptions to be caught and change the test runner
@@ -94,3 +98,49 @@ class TestTasksFunction(TestCase):
                          days_4.farmer.actor)
         self.assertEqual(message[0].sender,
                          days_4.agent.actor)
+
+class TransactionExportTestCase(TestCase):
+
+    def setUp(self):
+        self.user = utils.create_generic_user()
+        self.user.email = "test@example.com"
+        self.user.is_superuser = True
+        self.user.save()
+
+    def get_attachment(self, email, file_name):
+        for attachment in email.attachments:
+            fn, attachment_content, mime_type = attachment
+            if fn == file_name:
+                return StringIO(attachment_content)
+
+    def get_zipfile_attachment(
+            self, email, attachment_file_name, zipfile_file_name):
+        attachment = self.get_attachment(email, attachment_file_name)
+        zipfile = ZipFile(attachment, 'r')
+        return zipfile.open(zipfile_file_name, 'r')
+
+    def test_export_conversation_messages_unsorted(self):
+        receipt = utils.create_crop_receipt(amount=150)
+        transaction = utils.create_transaction(receipt)
+        transaction2 = utils.create_transaction(receipt)
+        self.assertEqual(receipt.id, transaction.crop_receipt.id)
+        field_names = ['id', 'crop_receipt__farmer__actor__name', 'crop_receipt__farmer__gender',
+                    'created_at', 'crop_receipt__crop', 'crop_receipt__unit', 'amount',
+                    'total', 'crop_receipt__market', 'crop_receipt__agent__actor__name',
+                    'crop_receipt__agent__actor__gender']
+        labels = ['TransactionID', 'Farmer Name', 'Gender', 'Transaction Date', 'Crop', 'Unit', 'No of Units',
+                    'Total Price Achieved', 'Market', 'Agent', 'Agent Gender']
+        queryset = [transaction, transaction2]
+        export_transactions(field_names, labels, queryset, self.user)
+        [email] = mail.outbox
+        self.assertEqual(
+            email.recipients(), [self.user.email])
+        self.assertEqual("LimaLinks Transaction export snapshot", email.subject)
+        self.assertEqual("Please find the transactions attached.", email.body)
+        fp = self.get_zipfile_attachment(
+            email, 'transactions-export.zip', 'transactions-export.csv')
+        reader = csv.DictReader(fp)
+        transaction_ids = [row['TransactionID'] for row in reader]
+        self.assertEqual(
+            set(transaction_ids),
+            set(['1','2']))

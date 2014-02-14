@@ -1,9 +1,13 @@
 # Django
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from datetime import datetime, timedelta
+from StringIO import StringIO
+from zipfile import ZipFile, ZIP_DEFLATED
+from django.core.mail import EmailMessage
+import csv
 
 # Project
-from magriculture.fncs.models.actors import Farmer, FarmerGroup, Agent
 from magriculture.fncs.models.props import CropReceipt
 
 # Celery
@@ -47,3 +51,56 @@ def check_inventory_left(crop_receipt):
         crop_receipt.agent.actor.send_message(recipient, message, None)
         crop_receipt.reconciled = True
         crop_receipt.save()
+
+
+def email_export(recipient, io):
+    zipio = StringIO()
+    zf = ZipFile(zipio, "a", ZIP_DEFLATED)
+    zf.writestr("transactions-export.csv", io.getvalue())
+    zf.close()
+
+    email = EmailMessage(
+        'LimaLinks Transaction export snapshot',
+        'Please find the transactions attached.',
+        settings.DEFAULT_FROM_EMAIL, [recipient])
+    email.attach('transactions-export.zip', zipio.getvalue(), 'application/zip')
+    email.send()
+
+
+@task(ignore_result=True)
+def export_transactions(field_names, labels, queryset, user):
+    """
+    Export the transactions in the system including related users info.
+
+    :param list field_names:
+        model field names
+    :param list labels:
+        headers for the csv
+    :param object queryset:
+        queryset from user select
+    :param User user:
+        logged in admin user
+    """
+    logger.info("Exporting transactions")
+    recipient = user.email
+    labels = [l.encode('utf-8') for l in labels]
+
+    io = StringIO()
+    writer = csv.writer(io)
+    writer.writerow(labels)
+
+    for obj in queryset:
+        data = []
+        for field_name in field_names:
+            field_obj = obj
+            for name in field_name.split("__"):
+                if hasattr(field_obj, name):
+                    field_obj = getattr(field_obj, name)
+                else:
+                    field_obj = "ERROR!"
+                    break
+
+            data.append(field_obj)
+        data = [unicode(entry).encode('utf-8') for entry in data]
+        writer.writerow(data)
+    email_export(recipient, io)

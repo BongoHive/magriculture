@@ -136,6 +136,9 @@ INSTALLED_APPS = (
     'djcelery',
 )
 
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.
@@ -199,3 +202,6 @@ CELERYBEAT_SCHEDULE = {
         'args': (DAYS_PRODUCE_IS_FRESH,),
     },
 }
+
+DEFAULT_FROM_EMAIL = "no-reply@limalinks.co.zm"
+
