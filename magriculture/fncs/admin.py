@@ -9,22 +9,24 @@ from magriculture.fncs.actions import ExportAsCSVWithFKTask
 # Setting the fields and ExportAsCSV Outside the class
 
 fields = [("id", "TransactionID"),
-                  ("crop_receipt__farmer__actor__name", "Farmer Name"),
-                  ("crop_receipt__farmer__gender", "Gender"),
-                  ("created_at", "Transaction Date"),
-                  ("crop_receipt__crop", "Crop"),
-                  ("crop_receipt__unit", "Unit"),
-                  ("amount", "No of Units"),
-                  ("total", "Total Price Achieved"),
-                  ("crop_receipt__market", "Market"),
-                  ("crop_receipt__agent__actor__name", "Agent"),
-                  ("crop_receipt__agent__actor__gender", "Agent Gender")]
+          ("crop_receipt__farmer__actor__name", "Farmer Name"),
+          ("crop_receipt__farmer__gender", "Gender"),
+          ("created_at", "Transaction Date"),
+          ("crop_receipt__crop", "Crop"),
+          ("crop_receipt__unit", "Unit"),
+          ("amount", "No of Units"),
+          ("total", "Total Price Achieved"),
+          ("crop_receipt__market", "Market"),
+          ("crop_receipt__agent__actor__name", "Agent"),
+          ("crop_receipt__agent__actor__gender", "Agent Gender")]
 farmer_export = ExportAsCSVWithFK(fields)
 farmer_export_task = ExportAsCSVWithFKTask(fields)
 
 # ==========================================================================
 # Actors
 # ==========================================================================
+
+
 class ActorAdmin(admin.ModelAdmin):
     list_display = ('user', 'name', 'gender')
     search_fields = ('name',)
@@ -42,6 +44,7 @@ class AgentAdmin(admin.ModelAdmin):
 
 class TransactionAdmin(admin.ModelAdmin):
     readonly_fields = ('crop_receipt',)
+
     def get_actions(self, request):
         actions = super(TransactionAdmin, self).get_actions(request)
         if "export_csv" in actions:
@@ -50,8 +53,8 @@ class TransactionAdmin(admin.ModelAdmin):
         # action in format described by django docs
         # `(function, name, short_description) tuple`
         actions["farmer_export_task"] = (farmer_export_task,
-                                        "farmer_export_task",
-                                        farmer_export_task.short_description)
+                                         "farmer_export_task",
+                                         farmer_export_task.short_description)
         return actions
 
 
