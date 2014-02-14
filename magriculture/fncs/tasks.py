@@ -83,6 +83,7 @@ def export_transactions(field_names, labels, queryset, user):
     """
     logger.info("Exporting transactions")
     recipient = user.email
+    labels = [l.encode('utf-8') for l in labels]
 
     io = StringIO()
     writer = csv.writer(io)

@@ -7,8 +7,6 @@ import csv
 # Django
 from django.utils.translation import ugettext_lazy as _
 from django.test import TestCase
-# from django.core.urlresolvers import reverse
-# from django.test.client import Client
 from django.test.utils import override_settings
 from django.core import mail
 
@@ -104,10 +102,6 @@ class TestTasksFunction(TestCase):
 class TransactionExportTestCase(TestCase):
 
     def setUp(self):
-    #     super(TransactionExportTestCase, self).setUp()
-    #     self.test_msisdn = '27861234567'
-    #     self.login()
-
         self.user = utils.create_generic_user()
         self.user.email = "test@example.com"
         self.user.is_superuser = True
