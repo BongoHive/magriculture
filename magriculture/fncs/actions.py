@@ -114,16 +114,11 @@ class ExportAsCSVWithFKTask(object):
 
     def __call__(self, modeladmin, request, queryset):
         """
-        Generic csv export admin action.
-        based on http://djangosnippets.org/snippets/1697/
+        Fires off to celery for long running exports
         """
-        # opts = modeladmin.model._meta
 
         field_names = [k for k, v in self.fields]
         labels = [v for k, v in self.fields]
         modeladmin.message_user(request, "Exported records via email")
-        # response = HttpResponse(mimetype='text/csv')
-        # response['Content-Disposition'] = ('attachment; filename=%s.csv'
-        #                                    % unicode(opts).replace('.', '_'))
         
         return export_transactions.delay(field_names, labels, queryset, request.user)
