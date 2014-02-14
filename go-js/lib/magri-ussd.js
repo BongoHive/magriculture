@@ -473,18 +473,12 @@ function MagriWorker() {
 
     self.add_state(new ChoiceState(
         'registration_gender',
-        'registration_town',
+        'registration_district',
         "What is your gender?",
         [
             new Choice("M", "Male"),
             new Choice("F", "Female")
         ]
-    ));
-
-    self.add_state(new FreeText(
-        "registration_town",
-        "registration_district",
-        "What is the town your farm is in?"
     ));
 
     self.add_state(new FreeText(
