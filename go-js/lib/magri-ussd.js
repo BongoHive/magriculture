@@ -484,7 +484,7 @@ function MagriWorker() {
     self.add_state(new FreeText(
         "registration_district",
         "registration_district_confirm",
-        "What is the district your farm is in?"
+        "In what district is your farm?"
     ));
 
     self.add_creator('registration_district_confirm', function(state_name, im) {

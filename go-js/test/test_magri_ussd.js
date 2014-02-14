@@ -160,7 +160,7 @@ describe("as an unregistered farmer", function() {
             },
             content: "1",
             next_state: "registration_district",
-            response: "^What is the district your farm is in\\?$"
+            response: "^In what district is your farm\\?$"
         });
         p.then(done, done);
     });
