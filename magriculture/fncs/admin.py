@@ -5,7 +5,6 @@ from django.contrib import admin
 from magriculture.fncs.models import actors, props, geo
 from magriculture.fncs.actions import ExportAsCSV, ExportAsCSVWithFK
 from magriculture.fncs.actions import ExportAsCSVWithFKTask
-from magriculture.fncs.tasks import export_transactions
 
 # Setting the fields and ExportAsCSV Outside the class
 
