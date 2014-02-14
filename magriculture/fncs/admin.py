@@ -50,8 +50,8 @@ class TransactionAdmin(admin.ModelAdmin):
         # action in format described by django docs
         # `(function, name, short_description) tuple`
         actions["farmer_export_task"] = (farmer_export_task,
-                                    "farmer_export_task",
-                                    farmer_export_task.short_description)
+                                        "farmer_export_task",
+                                        farmer_export_task.short_description)
         return actions
 
 
