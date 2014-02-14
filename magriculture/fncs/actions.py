@@ -119,6 +119,6 @@ class ExportAsCSVWithFKTask(object):
 
         field_names = [k for k, v in self.fields]
         labels = [v for k, v in self.fields]
-        modeladmin.message_user(request, "Exported records via email")
+        modeladmin.message_user(request, "Exporting records, will be sent via email to shortly")
         
         return export_transactions.delay(field_names, labels, queryset, request.user)
