@@ -9,7 +9,8 @@ from magriculture.fncs.tasks import export_transactions
 
 # Setting the fields and ExportAsCSV Outside the class
 
-fields = [("crop_receipt__farmer__actor__name", "Farmer Name"),
+fields = [("id", "TransactionID"),
+                  ("crop_receipt__farmer__actor__name", "Farmer Name"),
                   ("crop_receipt__farmer__gender", "Gender"),
                   ("created_at", "Transaction Date"),
                   ("crop_receipt__crop", "Crop"),

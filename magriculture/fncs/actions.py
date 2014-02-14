@@ -121,10 +121,9 @@ class ExportAsCSVWithFKTask(object):
 
         field_names = [k for k, v in self.fields]
         labels = [v for k, v in self.fields]
-
+        modeladmin.message_user(request, "Exported records via email")
         # response = HttpResponse(mimetype='text/csv')
         # response['Content-Disposition'] = ('attachment; filename=%s.csv'
         #                                    % unicode(opts).replace('.', '_'))
-
         
         return export_transactions.delay(field_names, labels, queryset, request.user)
