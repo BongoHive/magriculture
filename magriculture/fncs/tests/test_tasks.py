@@ -2,12 +2,13 @@
 from datetime import datetime, timedelta
 from StringIO import StringIO
 from zipfile import ZipFile
+import csv
 
 # Django
 from django.utils.translation import ugettext_lazy as _
 from django.test import TestCase
-from django.core.urlresolvers import reverse
-from django.test.client import Client
+# from django.core.urlresolvers import reverse
+# from django.test.client import Client
 from django.test.utils import override_settings
 from django.core import mail
 
@@ -19,47 +20,47 @@ from magriculture.fncs.models.props import CropReceipt
 from magriculture.fncs.tasks import export_transactions
 
 
-def create_farmer_for_agent(agent, market, **kwargs):
-    farmer = utils.create_farmer(**kwargs)
-    farmer.operates_at(market, agent)
-    return farmer
+# def create_farmer_for_agent(agent, market, **kwargs):
+#     farmer = utils.create_farmer(**kwargs)
+#     farmer.operates_at(market, agent)
+#     return farmer
 
-def create_random_farmers(amount, agent, market):
-    for i in range(amount):
-        yield create_farmer_for_agent(agent, market, msisdn=27731234567 + i)
+# def create_random_farmers(amount, agent, market):
+#     for i in range(amount):
+#         yield create_farmer_for_agent(agent, market, msisdn=27731234567 + i)
 
-class FNCSTestCase(TestCase):
+# class FNCSTestCase(TestCase):
 
-    def setUp(self):
-        self.client = Client()
-        self.pin = '1234'
-        self.province = utils.create_province('test province')
-        self.district = utils.create_district('test district', self.province)
-        self.ward = utils.create_ward('test ward', self.district)
-        self.market = utils.create_market('test market', self.district)
+#     def setUp(self):
+#         self.client = Client()
+#         self.pin = '1234'
+#         self.province = utils.create_province('test province')
+#         self.district = utils.create_district('test district', self.province)
+#         self.ward = utils.create_ward('test ward', self.district)
+#         self.market = utils.create_market('test market', self.district)
 
-        self.agent = utils.create_agent()
-        self.msisdn = self.agent.actor.user.username
+#         self.agent = utils.create_agent()
+#         self.msisdn = self.agent.actor.user.username
 
-        identity = self.agent.actor.get_identity(self.msisdn)
-        identity.set_pin(self.pin)
-        identity.save()
+#         identity = self.agent.actor.get_identity(self.msisdn)
+#         identity.set_pin(self.pin)
+#         identity.save()
 
-        self.login_url = '%s?next=%s' % (reverse('login'), reverse('fncs:home'))
-        self.farmers = list(create_random_farmers(10, self.agent, self.market))
-        self.farmer = self.farmers[0]
+#         self.login_url = '%s?next=%s' % (reverse('login'), reverse('fncs:home'))
+#         self.farmers = list(create_random_farmers(10, self.agent, self.market))
+#         self.farmer = self.farmers[0]
 
-    def farmer_url(self, *args, **kwargs):
-        return utils.farmer_url(self.farmer.pk, *args, **kwargs)
+#     def farmer_url(self, *args, **kwargs):
+#         return utils.farmer_url(self.farmer.pk, *args, **kwargs)
 
-    def take_in(self, *args):
-        return utils.take_in(self.market, self.agent, self.farmer, *args)
+#     def take_in(self, *args):
+#         return utils.take_in(self.market, self.agent, self.farmer, *args)
 
-    def login(self):
-        self.client.login(username=self.msisdn, password=self.pin)
+#     def login(self):
+#         self.client.login(username=self.msisdn, password=self.pin)
 
-    def logout(self):
-        self.client.logout()
+#     def logout(self):
+#         self.client.logout()
 
 
 # Settings override to allows for exceptions to be caught and change the test runner
@@ -143,14 +144,15 @@ class TestTasksFunction(TestCase):
         self.assertEqual(message[0].sender,
                          days_4.agent.actor)
 
-class TransactionExportTestCase(FNCSTestCase):
+class TransactionExportTestCase(TestCase):
 
     def setUp(self):
-        super(TransactionExportTestCase, self).setUp()
-        self.test_msisdn = '27861234567'
-        self.login()
+    #     super(TransactionExportTestCase, self).setUp()
+    #     self.test_msisdn = '27861234567'
+    #     self.login()
 
         self.user = utils.create_generic_user()
+        self.user.email = "test@example.com"
         self.user.is_superuser = True
         self.user.save()
 
@@ -167,20 +169,27 @@ class TransactionExportTestCase(FNCSTestCase):
         return zipfile.open(zipfile_file_name, 'r')
 
     def test_export_conversation_messages_unsorted(self):
-        receipt = self.take_in(10, 'boxes', 'oranges')
-        transactions = utils.sell(receipt, 10, 10)
-        print transactions
-        self.assertEqual(True, True)
-        # export_transactions(field_names, labels, queryset, user)
-        # [email] = mail.outbox
-        # self.assertEqual(
-        #     email.recipients(), [self.user_helper.get_django_user().email])
-        # self.assertEqual("LimaLinks Transaction export snapshot", email.subject)
-        # self.assertEqual("Please find the transactions attached.", email.body)
-        # fp = self.get_zipfile_attachment(
-        #     email, 'transactions-export.zip', 'transactions-export.csv')
-        # reader = csv.DictReader(fp)
-        # transaction_ids = [row['transaction_id'] for row in reader]
-        # self.assertEqual(
-        #     set(transaction_ids),
-        #     set(transactions.keys()))
+        receipt = utils.create_crop_receipt(amount=150)
+        transaction = utils.create_transaction(receipt)
+        transaction2 = utils.create_transaction(receipt)
+        self.assertEqual(receipt.id, transaction.crop_receipt.id)
+        field_names = ['id', 'crop_receipt__farmer__actor__name', 'crop_receipt__farmer__gender',
+                    'created_at', 'crop_receipt__crop', 'crop_receipt__unit', 'amount',
+                    'total', 'crop_receipt__market', 'crop_receipt__agent__actor__name',
+                    'crop_receipt__agent__actor__gender']
+        labels = ['TransactionID', 'Farmer Name', 'Gender', 'Transaction Date', 'Crop', 'Unit', 'No of Units',
+                    'Total Price Achieved', 'Market', 'Agent', 'Agent Gender']
+        queryset = [transaction, transaction2]
+        export_transactions(field_names, labels, queryset, self.user)
+        [email] = mail.outbox
+        self.assertEqual(
+            email.recipients(), [self.user.email])
+        self.assertEqual("LimaLinks Transaction export snapshot", email.subject)
+        self.assertEqual("Please find the transactions attached.", email.body)
+        fp = self.get_zipfile_attachment(
+            email, 'transactions-export.zip', 'transactions-export.csv')
+        reader = csv.DictReader(fp)
+        transaction_ids = [row['TransactionID'] for row in reader]
+        self.assertEqual(
+            set(transaction_ids),
+            set(['1','2']))
