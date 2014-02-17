@@ -702,7 +702,7 @@ function MagriWorker() {
             else {
                 // if (market_list == "best_markets") {
                 var crop_id = im.get_user_answer("select_crop");
-                p = lima_links_api.highest_markets(crop_id, 5);
+                p = lima_links_api.highest_markets(crop_id, 3);
             }
             p.add_callback(function(markets) {
                 self.set_user_item(im.user, "chosen_markets", markets);
