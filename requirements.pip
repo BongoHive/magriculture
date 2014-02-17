@@ -16,3 +16,4 @@ django-sentry
 ngram
 raven>=2.0,<3.0
 django-tastypie<0.10.0
+django-celery-email==1.0.4

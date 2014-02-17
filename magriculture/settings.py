@@ -134,10 +134,13 @@ INSTALLED_APPS = (
     'sentry',
     'raven.contrib.django',
     'djcelery',
+    'djcelery_email'
 )
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -192,7 +195,8 @@ BROKER_URL = "amqp://guest:guest@localhost:5672/"
 
 DAYS_PRODUCE_IS_FRESH = 3  # Length of time produce is fresh for
 
-CELERY_RESULT_BACKEND = "database"
+CELERY_IMPORTS = ("magriculture.fncs.tasks",)
+CELERY_RESULT_BACKEND = "amqp"
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERYBEAT_SCHEDULE = {
