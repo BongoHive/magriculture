@@ -759,7 +759,7 @@ function MagriWorker() {
             page = (typeof page !== 'undefined') ? page : booklet.get_current_page(im.user);
             var market_id = markets[page][0];
             var market_name = markets[page][1];
-            var p = lima_links_api.price_history(market_id, crop_id, 5);
+            var p = lima_links_api.price_history(market_id, crop_id, 10);
             p.add_callback(function(prices) {
                 var title = _.translate("Prices of %1$s in %2$s:"
                                        ).fetch(crop_name, market_name);
