@@ -594,8 +594,7 @@ describe("As a registered farmer", function() {
             content: "2",
             next_state: "select_market",
             response: ("^Select a market:[^]" +
-                       "1. Kitwe[^]" +
-                       "2. Ndola$")
+                       "1. Kitwe$")
         });
         p.then(done, done);
     });
