@@ -518,27 +518,6 @@ describe("As a registered farmer", function() {
         p.then(done, done);
     });
 
-    it("selecting market prices should ask for crop choice from my crops", function(done) {
-        var p = tester.check_state({
-            user: {
-                current_state: "select_service"
-            },
-            content: "1",
-            next_state: "select_crop",
-            response: ("^Select a crop:[^]" +
-                       "1. Beans[^]" +
-                       "2. Cabbage[^]" +
-                       "3. Carrots[^]" +
-                       "4. Cassava[^]" +
-                       "5. Cauliflower[^]" +
-                       "6. Chinese Cabbage[^]" +
-                       "7. Coffee[^]" +
-                       "8. Eggplant[^]" +
-                       "9. More$")
-        });
-        p.then(done, done);
-    });
-
     it("selecting more should ask for crop choice from full crop list", function(done) {
         var p = tester.check_state({
             user: {
