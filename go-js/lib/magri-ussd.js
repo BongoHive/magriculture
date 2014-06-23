@@ -718,9 +718,6 @@ function MagriWorker() {
                 var market_name = crop[1];
                 return new Choice(market_id, market_name);
             });
-            var items_per_page = function(choices) {
-                
-            }
             return new PaginatedChoiceState(
                 state_name,
                 function (choice) {
