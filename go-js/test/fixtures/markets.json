@@ -42,7 +42,7 @@
                 "id": 12,
                 "latitude": null,
                 "longitude": null,
-                "name": "DummyMarket1",
+                "name": "DummyMarket4",
                 "resource_uri": "",
                 "volume": "unknown"
             },
@@ -51,7 +51,7 @@
                 "id": 13,
                 "latitude": null,
                 "longitude": null,
-                "name": "DummyMarket2",
+                "name": "DummyMarket5",
                 "resource_uri": "",
                 "volume": "unknown"
             },
@@ -60,7 +60,7 @@
                 "id": 14,
                 "latitude": null,
                 "longitude": null,
-                "name": "DummyMarket3",
+                "name": "DummyMarket6",
                 "resource_uri": "",
                 "volume": "unknown"
             },
@@ -69,7 +69,7 @@
                 "id": 15,
                 "latitude": null,
                 "longitude": null,
-                "name": "DummyMarket4",
+                "name": "DummyMarket7",
                 "resource_uri": "",
                 "volume": "unknown"
             },
@@ -78,7 +78,7 @@
                 "id": 16,
                 "latitude": null,
                 "longitude": null,
-                "name": "DummyMarket5",
+                "name": "DummyMarket8",
                 "resource_uri": "",
                 "volume": "unknown"
             },
@@ -87,7 +87,7 @@
                 "id": 17,
                 "latitude": null,
                 "longitude": null,
-                "name": "DummyMarket6",
+                "name": "DummyMarket9",
                 "resource_uri": "",
                 "volume": "unknown"
             }
