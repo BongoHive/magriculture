@@ -578,7 +578,7 @@ describe("As a registered farmer", function() {
         });
         p.then(done, done);
     });
-    it("choosing best market should show all market options", function(done) {
+    it("choosing all markets should show all market options", function(done) {
         var p = tester.check_state({
             user: {
                 current_state: "select_market_list",
