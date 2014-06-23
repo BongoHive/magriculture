@@ -578,7 +578,7 @@ describe("As a registered farmer", function() {
         });
         p.then(done, done);
     });
-    it("choosing all markets should show all market options", function(done) {
+    it("choosing all markets should show page 1 of all market options", function(done) {
         var p = tester.check_state({
             user: {
                 current_state: "select_market_list",
@@ -597,7 +597,35 @@ describe("As a registered farmer", function() {
             response: ("^Select a market:[^]" +
                        "1. Kitwe[^]" +
                        "2. Ndola[^]" +
-                       "3. Masala$")
+                       "3. Masala[^]" +
+                       "4. DummyMarket1[^]" +
+                       "5. DummyMarket2[^]" +
+                       "6. DummyMarket3[^]" +
+                       "7. DummyMarket4[^]" +
+                       "8. DummyMarket5[^]" +
+                       "9. More$")
+        });
+        p.then(done, done);
+    });
+    it("choosing More should show page 2 of all market options", function(done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "select_market",
+                answers: {
+                    select_service: 'select_crop',
+                    select_crop: 1,
+                    select_market_list: "all_markets"
+                },
+                custom: {
+                    chosen_crop_name: "Beans",
+                    chosen_markets: null
+                }
+            },
+            content: "9",
+            next_state: "select_market",
+            response: ("^Select a market:[^]" +
+                       "1. DummyMarket6[^]" +
+                       "2. Back$")
         });
         p.then(done, done);
     });
