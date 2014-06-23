@@ -573,7 +573,7 @@ describe("As a registered farmer", function() {
             next_state: "select_market_list",
             response: ("^Select which markets to view:[^]" +
                        "1. All markets[^]" +
-                       "2. Best markets for Beans$")
+                       "2. Best market for Beans$")
         });
         p.then(done, done);
     });

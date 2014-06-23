@@ -674,7 +674,7 @@ function MagriWorker() {
             new Choice("all_markets",
                        _.gettext("All markets")),
             new Choice("best_markets",
-                       _.translate("Best markets for %1$s").fetch(crop_name))
+                       _.translate("Best market for %1$s").fetch(crop_name))
         ];
         return new ChoiceState(
             state_name,
