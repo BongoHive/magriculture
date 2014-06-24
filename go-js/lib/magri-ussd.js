@@ -718,7 +718,7 @@ function MagriWorker() {
                 var market_name = crop[1];
                 return new Choice(market_id, market_name);
             });
-            return new ChoiceState(
+            return new PaginatedChoiceState(
                 state_name,
                 function (choice) {
                     var market_idxs = [];
@@ -733,7 +733,9 @@ function MagriWorker() {
                 },
                 _.gettext("Select a market:"),
                 choices,
-                _.gettext("Please enter the number of a market.")
+                _.gettext("Please enter the number of a market."),
+                null,
+                {"options_per_page": 5}
             );
         });
         return p;

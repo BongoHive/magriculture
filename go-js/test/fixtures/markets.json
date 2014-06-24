@@ -30,10 +30,64 @@
             },
             {
                 "altitude": null,
-                "id": 1,
+                "id": 11,
                 "latitude": null,
                 "longitude": null,
                 "name": "Masala",
+                "resource_uri": "",
+                "volume": "unknown"
+            },
+            {
+                "altitude": null,
+                "id": 12,
+                "latitude": null,
+                "longitude": null,
+                "name": "DummyMarket4",
+                "resource_uri": "",
+                "volume": "unknown"
+            },
+            {
+                "altitude": null,
+                "id": 13,
+                "latitude": null,
+                "longitude": null,
+                "name": "DummyMarket5",
+                "resource_uri": "",
+                "volume": "unknown"
+            },
+            {
+                "altitude": null,
+                "id": 14,
+                "latitude": null,
+                "longitude": null,
+                "name": "DummyMarket6",
+                "resource_uri": "",
+                "volume": "unknown"
+            },
+            {
+                "altitude": null,
+                "id": 15,
+                "latitude": null,
+                "longitude": null,
+                "name": "DummyMarket7",
+                "resource_uri": "",
+                "volume": "unknown"
+            },
+            {
+                "altitude": null,
+                "id": 16,
+                "latitude": null,
+                "longitude": null,
+                "name": "DummyMarket8",
+                "resource_uri": "",
+                "volume": "unknown"
+            },
+            {
+                "altitude": null,
+                "id": 17,
+                "latitude": null,
+                "longitude": null,
+                "name": "DummyMarket9",
                 "resource_uri": "",
                 "volume": "unknown"
             }

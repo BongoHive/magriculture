@@ -518,27 +518,6 @@ describe("As a registered farmer", function() {
         p.then(done, done);
     });
 
-    it("selecting market prices should ask for crop choice from my crops", function(done) {
-        var p = tester.check_state({
-            user: {
-                current_state: "select_service"
-            },
-            content: "1",
-            next_state: "select_crop",
-            response: ("^Select a crop:[^]" +
-                       "1. Beans[^]" +
-                       "2. Cabbage[^]" +
-                       "3. Carrots[^]" +
-                       "4. Cassava[^]" +
-                       "5. Cauliflower[^]" +
-                       "6. Chinese Cabbage[^]" +
-                       "7. Coffee[^]" +
-                       "8. Eggplant[^]" +
-                       "9. More$")
-        });
-        p.then(done, done);
-    });
-
     it("selecting more should ask for crop choice from full crop list", function(done) {
         var p = tester.check_state({
             user: {
@@ -598,7 +577,7 @@ describe("As a registered farmer", function() {
         });
         p.then(done, done);
     });
-    it("choosing best market should show all market options", function(done) {
+    it("choosing all markets should show page 1 of all market options", function(done) {
         var p = tester.check_state({
             user: {
                 current_state: "select_market_list",
@@ -615,9 +594,37 @@ describe("As a registered farmer", function() {
             content: "1",
             next_state: "select_market",
             response: ("^Select a market:[^]" +
-                       "1. Kitwe[^]" +
-                       "2. Ndola[^]" +
-                       "3. Masala$")
+                        "1. Kitwe[^]" +
+                        "2. Ndola[^]" +
+                        "3. Masala[^]" +
+                        "4. DummyMarket4[^]" +
+                        "5. DummyMarket5[^]" +
+                        "6. More$")
+        });
+        p.then(done, done);
+    });
+    it("choosing More should show page 2 of all market options", function(done) {
+        var p = tester.check_state({
+            user: {
+                current_state: "select_market",
+                answers: {
+                    select_service: 'select_crop',
+                    select_crop: 1,
+                    select_market_list: "all_markets"
+                },
+                custom: {
+                    chosen_crop_name: "Beans",
+                    chosen_markets: null
+                }
+            },
+            content: "6",
+            next_state: "select_market",
+            response: ("^Select a market:[^]" +
+                        "1. DummyMarket6[^]" +
+                        "2. DummyMarket7[^]" +
+                        "3. DummyMarket8[^]" +
+                        "4. DummyMarket9[^]" +
+                        "5. Back$")
         });
         p.then(done, done);
     });
