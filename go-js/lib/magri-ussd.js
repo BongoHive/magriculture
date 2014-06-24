@@ -735,7 +735,7 @@ function MagriWorker() {
                 choices,
                 _.gettext("Please enter the number of a market."),
                 null,
-                {"options_per_page": 7}
+                {"options_per_page": 5}
             );
         });
         return p;

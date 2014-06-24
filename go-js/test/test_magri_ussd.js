@@ -595,14 +595,12 @@ describe("As a registered farmer", function() {
             content: "1",
             next_state: "select_market",
             response: ("^Select a market:[^]" +
-                       "1. Kitwe[^]" +
-                       "2. Ndola[^]" +
-                       "3. Masala[^]" +
-                       "4. DummyMarket4[^]" +
-                       "5. DummyMarket5[^]" +
-                       "6. DummyMarket6[^]" +
-                       "7. DummyMarket7[^]" +
-                       "8. More$")
+                        "1. Kitwe[^]" +
+                        "2. Ndola[^]" +
+                        "3. Masala[^]" +
+                        "4. DummyMarket4[^]" +
+                        "5. DummyMarket5[^]" +
+                        "6. More$")
         });
         p.then(done, done);
     });
@@ -620,12 +618,14 @@ describe("As a registered farmer", function() {
                     chosen_markets: null
                 }
             },
-            content: "8",
+            content: "6",
             next_state: "select_market",
             response: ("^Select a market:[^]" +
-                        "1. DummyMarket8[^]" +
-                        "2. DummyMarket9[^]" +
-                        "3. Back$")
+                        "1. DummyMarket6[^]" +
+                        "2. DummyMarket7[^]" +
+                        "3. DummyMarket8[^]" +
+                        "4. DummyMarket9[^]" +
+                        "5. Back$")
         });
         p.then(done, done);
     });
