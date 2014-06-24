@@ -1,8 +1,7 @@
 {
-    "url": "http://qa/api/v1/highest_markets/?crop=1&limit=3",
+    "url": "http://qa/api/v1/highest_markets/?crop=1&limit=1",
     "method": "GET",
     "body": [
-            [10, "Kitwe"],
-            [8, "Ndola"]
+            [10, "Kitwe"]
         ]
 }
