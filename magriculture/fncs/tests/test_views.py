@@ -37,7 +37,7 @@ class FNCSTestCase(TestCase):
         self.ward = utils.create_ward('test ward', self.district)
         self.market = utils.create_market('test market', self.district)
 
-        self.agent = utils.create_agent()
+        self.agent = utils.create_agent(msisdn="+260761234568")
         self.msisdn = self.agent.actor.user.username
 
         identity = self.agent.actor.get_identity(self.msisdn)
@@ -698,7 +698,7 @@ class PricesTestCase(FNCSTestCase):
 
 class FarmerBusinessAdvisorTestCase(FNCSTestCase):
     def setUp(self):
-        self.msisdn = '1234567890'
+        self.msisdn = '+260234567890'
         self.pin = '1234'
         self.fba = utils.create_fba(msisdn=self.msisdn)
         identity = self.fba.actor.get_identity(self.msisdn)
@@ -716,11 +716,11 @@ class FarmerBusinessAdvisorTestCase(FNCSTestCase):
 
 class IdentityAuthenticationBackendTestCase(TestCase):
     def test_login_with_identity(self):
-        farmer = utils.create_farmer(msisdn='1234')
-        farmer.actor.add_identity('6789', '6789')
+        farmer = utils.create_farmer(msisdn='+260121231234')
+        farmer.actor.add_identity('+260676786789', '6789')
         # Log in with the new identity
         client = Client()
-        client.login(username='6789', password='6789')
+        client.login(username='+260676786789', password='6789')
         response = client.get(reverse('fncs:home'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['user'],
