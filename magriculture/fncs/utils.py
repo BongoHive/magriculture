@@ -19,6 +19,9 @@ def read_excel_sheet(filename):
 def read_excel_sheet_as_dict(filename):
     return [dict(row) for row in read_excel_sheet(filename)]
 
+def normalise_msisdn(msisdn, country_code='+260'):
+    return country_code + msisdn[-9:]
+
 
 class ImportCommand(BaseCommand):
     option_list = BaseCommand.option_list + (
