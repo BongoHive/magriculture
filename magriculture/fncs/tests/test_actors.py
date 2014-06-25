@@ -288,7 +288,7 @@ class TestCreateFarmerWithFixtureData(TestCase):
                   "gender": "M",
                   "markets": [1, 2]}
         self.client.post(url, data=data_1, follow=True)
-        farmer = Farmer.objects.get(actor__user__username="123456781")
+        farmer = Farmer.objects.get(actor__user__username="+260123456781")
         self.assertEquals(farmer.actor.user.first_name, "name_1")
         self.assertEquals(farmer.id_number, None)
 
