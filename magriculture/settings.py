@@ -170,6 +170,11 @@ AUTH_PROFILE_MODULE = 'fncs.Actor'
 SKIP_SOUTH_TESTS = True
 SOUTH_TESTS_MIGRATE = False
 
+# specify migration model applied to django auth.users
+SOUTH_MIGRATION_MODULES = {
+    'auth': 'magriculture.fncs.migrations',
+}
+
 AUTHENTICATION_BACKENDS = (
     'magriculture.fncs.auth.backends.IdentityBackend',
     'django.contrib.auth.backends.ModelBackend',
