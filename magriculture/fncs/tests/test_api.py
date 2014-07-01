@@ -48,8 +48,9 @@ class ApiTestCase(TestCase):
             })
         self.assertEqual(response.status_code, 200)
         highest_markets = json.loads(response.content)
+        reversed_markets = markets[::-1]
         self.assertEqual(highest_markets, [
-            [market.pk, market.name] for market in markets
+            [market.pk, market.name] for market in reversed_markets
             ])
 
     def test_get_highest_markets_with_limit(self):
@@ -60,8 +61,9 @@ class ApiTestCase(TestCase):
             })
         self.assertEqual(response.status_code, 200)
         highest_markets = json.loads(response.content)
+        reversed_markets = markets[::-1]
         self.assertEqual(highest_markets, [
-            [market.pk, market.name] for market in markets[:2]
+            [market.pk, market.name] for market in reversed_markets[:2]
             ])
 
 
