@@ -175,7 +175,8 @@ class Market(models.Model):
         for market in markets:
             prices = Transaction.objects.filter(crop_receipt__market=market,
                                                 crop_receipt__crop=crop
-                                                ).order_by('created_at')
+                                                ).order_by('-created_at')
+            # '-created_at' puts most recent price first
             prices = prices.values_list('price', flat=True)[:window_size]
             avg_prices[market.pk] = sum(prices) / float(window_size)
         return sorted(markets, key=lambda market: avg_prices[market.pk], reverse=True)
