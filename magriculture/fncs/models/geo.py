@@ -178,7 +178,7 @@ class Market(models.Model):
                                                 ).order_by('created_at')
             prices = prices.values_list('price', flat=True)[:window_size]
             avg_prices[market.pk] = sum(prices) / float(window_size)
-        return sorted(markets, key=lambda market: avg_prices[market.pk])
+        return sorted(markets, key=lambda market: avg_prices[market.pk], reverse=True)
 
     class Meta:
         ordering = ['name']
