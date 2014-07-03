@@ -1,6 +1,6 @@
 function manage() {
     cd ${INSTALLDIR}/magriculture
-    ${VENV}/bin/django-admin.py "$@" --settings=magriculture.settings
+    ${VENV}/bin/python ${INSTALLDIR}/magriculture/manage.py "$@"
     cd -
 }
 
