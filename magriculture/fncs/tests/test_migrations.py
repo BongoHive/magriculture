@@ -39,7 +39,14 @@ class TestDuplicatesDataMigration(TransactionTestCase):
         call_command('migrate', self.django_application, self.dest_migration,
                      verbosity=0)
 
-    def test_blah(self):
+    def test_migration(self):
         utils.create_farmer(msisdn='12345')
+        utils.create_farmer(msisdn='22222')
+        utils.create_farmer(msisdn='23333')
+        utils.create_farmer(msisdn='33333')
+        utils.create_farmer(msisdn='123.0')
+        utils.create_farmer(msisdn='12341234.0')
+        utils.create_farmer(msisdn='3563457337.0')
+        utils.create_farmer(msisdn='123412346666666.0')
         self.migrate_to_dest()
 

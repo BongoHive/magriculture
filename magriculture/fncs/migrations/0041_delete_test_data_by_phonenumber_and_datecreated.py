@@ -1,20 +1,31 @@
 # encoding: utf-8
 import datetime
-from south.db import db
+# from south.db import db
 from south.v2 import DataMigration
-from django.db import models
+# from django.db import models
+# from magriculture.fncs.models.farmer import Farmer
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
+        """Delete all the users that have an msisdn like 0975631237.0 (ending
+        in '.0') and that was created on 2012-03-16. This is test data
+        created prior to going live."""
 
-        mydata = orm['auth.User'].objects.filter()
-        print mydata
+        start_date = datetime.date(2012, 03, 16)
+        end_date = datetime.date(2012, 03, 17)
+        fake_users = orm['auth.User'].objects.filter(username__endswith='.0',
+            date_joined__range=(start_date, end_date))
+
+        for user in fake_users:
+            # farmer = orm['fncs.Farmer'].objects.get()
+            print user.username
+            user.delete()
 
 
     def backwards(self, orm):
-        "Write your backwards methods here."
+        """Not allowed"""
+        # raise RuntimeError("Cannot reverse this migration.")
 
 
     models = {
