@@ -136,7 +136,6 @@ INSTALLED_APPS = (
     'raven.contrib.django',
     'djcelery',
     'djcelery_email'
-    # 'django_extensions'
 )
 
 if DEBUG:
