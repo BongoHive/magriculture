@@ -284,11 +284,11 @@ class TestCreateFarmerWithFixtureData(TestCase):
         url = reverse("fncs:farmer_new")
         data_1 = {"name": "name_1",
                   "surname": "surname_1",
-                  "msisdn1": "123456781",
+                  "msisdn1": "0912345678",
                   "gender": "M",
                   "markets": [1, 2]}
         self.client.post(url, data=data_1, follow=True)
-        farmer = Farmer.objects.get(actor__user__username="+260123456781")
+        farmer = Farmer.objects.get(actor__user__username="+260912345678")
         self.assertEquals(farmer.actor.user.first_name, "name_1")
         self.assertEquals(farmer.id_number, None)
 
