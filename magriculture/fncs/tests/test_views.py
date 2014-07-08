@@ -81,6 +81,18 @@ class SessionTestCase(FNCSTestCase):
         response = self.client.get(reverse('fncs:home'))
         self.assertEqual(response.status_code, 200)
 
+    def test_login_with_spaces(self):
+        self.msisdn = " 096 123 456 8 "
+        self.login()
+        response = self.client.get(reverse('fncs:home'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_without_plus(self):
+        self.msisdn = "260961 234568"
+        self.login()
+        response = self.client.get(reverse('fncs:home'))
+        self.assertEqual(response.status_code, 200)
+
     def test_logout_redirect(self):
         self.login()
         response = self.client.get(reverse('logout'))
