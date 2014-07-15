@@ -29,3 +29,5 @@ class Command(BaseCommand):
             counter += 1
             self.stdout.write('Deleting %s (%s/%s users deleted)\n' %(user, counter, total))
             user.delete()
+
+        self.stdout.write('Done.\n')
