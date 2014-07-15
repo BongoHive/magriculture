@@ -46,10 +46,10 @@ class Command(BaseCommand):
 
                 if len(receipts) == 0:
                     self.stdout.write('Duplicate has no transactions...deleting duplicate\n')
-                    # duplicate_user.delete()
+                    duplicate_user.delete()
                     self.stdout.write('Updating number... %s is now saved as %s\n' %(user, new_username))
                     user.username = '+' + user.username
-                    # user.save()
+                    user.save()
                 else:
                     self.stdout.write('Warning! Problem with duplication!')
 
@@ -57,6 +57,6 @@ class Command(BaseCommand):
                 self.stdout.write('no duplicate found.\n')
                 self.stdout.write('Updating %s to +%s (%s/%s users updated)\n' %(user, user, counter, total))
                 user.username = '+' + user.username
-                # user.save()
+                user.save()
 
         self.stdout.write('Done.\n')
