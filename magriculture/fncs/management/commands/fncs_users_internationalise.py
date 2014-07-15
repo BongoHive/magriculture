@@ -32,7 +32,7 @@ class Command(BaseCommand):
 
             try:
                 duplicate_user = User.objects.get(username=international_username)
-                print 'Duplicate found!', user
+                print 'Duplicate found... ', user
                 duplicates_numbers.append(international_username)
 
                 # see if the duplicate has any crop_receipts, delete if not
@@ -56,10 +56,10 @@ class Command(BaseCommand):
                 user.username = international_username
                 user.save()
 
-        self.stdout.write('Transfer complete.\n')
+        self.stdout.write('\nTransfer complete.\n')
 
         if len(problems_numbers) == 0:
-            self.stdout.write('\nNo problems encountered.\n')
+            self.stdout.write('\nNo fatal problems encountered - OK.\n')
             self.stdout.write('\nDuplicates removed:\n')
             for num in duplicates_numbers:
                 self.stdout.write(num + '\n')
