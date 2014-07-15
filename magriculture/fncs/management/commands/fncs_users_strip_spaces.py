@@ -91,212 +91,212 @@ class Command(BaseCommand):
 
         print 'Done.'
 
+        print '\n\nDuplicates:'
+        for username in duplicated:
+            print username
 
-        # for username in duplicated:
-        #     print username
-
-        print '\nHandling duplication..........\n'
-
-
-
-
-        # print '-----------------------------------------------------'
-
-        # # strip space and save users
-        # users_strip_space = ['+260978 342416']
-
-        # for username in users_strip_space:
-        #     print 'Cleaning ', username
-        #     try:
-        #         user = User.objects.get(username=username)
-        #         user.username = username.replace(' ','')
-        #         user.save()
-        #         print 'Spaces removed.'
-        #     except:
-        #         print 'User not found - OK\n'
-
-        # print '-----------------------------------------------------'
+        print '\n\nHandling duplication..........\n'
 
 
 
 
+        print '-----------------------------------------------------'
 
-        # print '-----------------------------------------------------'
+        # strip space and save users
+        users_strip_space = ['+260978 342416']
 
-        # # delete these users
-        # users_delete = ['  0968535703', ' 0976727879', ' 0977244702',
-        #     ' 0965178414', ' 0972178866', ' 0979519388', '+260977 496544']
+        for username in users_strip_space:
+            try:
+                user = User.objects.get(username=username)
+                print 'Cleaning ', username
+                user.username = username.replace(' ','')
+                user.save()
+                print 'Spaces removed.'
+            except:
+                print 'User not found - OK\n'
 
-        # for username in users_delete:
-        #     print 'Deleting user ', username 
-        #     try:
-        #         user = User.objects.get(username=username)
-        #         user.delete()
-        #         print 'Deleted.\n'
-        #     except:
-        #         print 'User not found - OK\n'
-
-        # print '-----------------------------------------------------'
+        print '-----------------------------------------------------'
 
 
 
 
 
-        # print '-----------------------------------------------------'
+        print '-----------------------------------------------------'
 
-        # # delete '+2609' user, then rename ' 09' to '+2609...'
-        # # delete the first user, then rename the second user to that one
-        # users_delete_rename = [' 0979535304', ' 0977521089', ' 0966270705',
-        #                         ' 0965476912', ' 0965225080']
+        # delete these users
+        users_delete = ['  0968535703', ' 0976727879', ' 0977244702',
+            ' 0965178414', ' 0972178866', ' 0979519388', '+260977 496544']
 
-        # for username in users_delete_rename:
-        #     plus_username = '+26' + username.strip(' ')
-        #     print 'Deleting user ', plus_username
-        #     try:
-        #         user_target = User.objects.get(username=plus_username)
-        #         user_origin = User.objects.get(username=username)
+        for username in users_delete:
+            try:
+                user = User.objects.get(username=username)
+                print 'Deleting user ', username 
+                user.delete()
+                print 'Deleted.\n'
+            except:
+                print 'User not found - OK'
 
-        #         user_target.delete()
-        #         print 'Deleted.'
-
-        #         print 'Renaming user ', username
-        #         user_origin.username = plus_username
-        #         user_origin.save()
-        #         print 'Renamed'
-
-        #     except:
-        #         print 'User not found - OK'
-
-        # print '-----------------------------------------------------'
+        print '-----------------------------------------------------'
 
 
 
 
 
-        # print '-----------------------------------------------------'
+        print '-----------------------------------------------------'
 
-        # # merge ' 097...' into '+26097...' (receipts and messages only), then
-        # # delete ' 097...'
-        # merge_delete = ['  0976712188', ' 0964541673', ' 0979572717',
-        #                 ' 0978444239', ' 0977982058']
+        # delete '+2609' user, then rename ' 09' to '+2609...'
+        # delete the first user, then rename the second user to that one
+        users_delete_rename = [' 0979535304', ' 0977521089', ' 0966270705',
+                                ' 0965476912', ' 0965225080']
 
-        # for username_origin in merge_delete:
-        #     username_target = '+26' + username_origin.strip(' ')
+        for username in users_delete_rename:
+            plus_username = '+26' + username.strip(' ')
+            try:
+                user_target = User.objects.get(username=plus_username)
+                user_origin = User.objects.get(username=username)
 
-        #     # get the users
-        #     try:
-        #         user_origin = User.objects.get(username=username_origin)
-        #         farmer_target = Farmer.objects.get(
-        #                             actor__user__username=username_target)
+                print 'Deleting user ', plus_username
+                user_target.delete()
+                print 'Deleted.'
 
-        #         print '\n', user_origin
-        #         print '----------------'
+                print 'Renaming user ', username
+                user_origin.username = plus_username
+                user_origin.save()
+                print 'Renamed'
+
+            except:
+                print 'User not found - OK'
+
+        print '-----------------------------------------------------'
+
+
+
+
+
+        print '-----------------------------------------------------'
+
+        # merge ' 097...' into '+26097...' (receipts and messages only), then
+        # delete ' 097...'
+        merge_delete = ['  0976712188', ' 0964541673', ' 0979572717',
+                        ' 0978444239', ' 0977982058']
+
+        for username_origin in merge_delete:
+            username_target = '+26' + username_origin.strip(' ')
+
+            # get the users
+            try:
+                user_origin = User.objects.get(username=username_origin)
+                farmer_target = Farmer.objects.get(
+                                    actor__user__username=username_target)
+
+                print '\n', user_origin
+                print '----------------'
                 
-        #         merge_crop_receipts(username_origin, farmer_target)
-        #         merge_messages(username_origin, farmer_target)
+                merge_crop_receipts(username_origin, farmer_target)
+                merge_messages(username_origin, farmer_target)
 
-        #         print 'Deleting origin user'
-        #         user_origin.delete()
-        #         print 'Deleted.'
-
-
-        #     except:
-        #         print 'User not found - OK'
-
-        # print '-----------------------------------------------------'
+                print 'Deleting origin user'
+                user_origin.delete()
+                print 'Deleted.'
 
 
+            except:
+                print 'User not found - OK'
 
-
-
-        # print '-----------------------------------------------------'
-
-        # # Merge '+2609...' into ' 09...' (receipts and messages only),
-        # # then delete '+2609...', then rename ' 09...' to '+2609...'
-        # merge_delete_rename = [' 0963460484', ' 0978909306',
-        #                         ' 0977409931', ' 0979157826']
-
-        # for username_target in merge_delete_rename:
-        #     username_origin = '+26' + username_target.strip(' ')
-
-        #     # get the users
-        #     try:
-        #         user_origin = User.objects.get(username=username_origin)
-        #         user_target = User.objects.get(username=username_target)
-        #         farmer_target = Farmer.objects.get(
-        #                             actor__user__username=username_target)
-
-        #         print '\n', user_origin
-        #         print '----------------'
-
-        #         merge_crop_receipts(username_origin, farmer_target)
-        #         merge_messages(username_origin, farmer_target)
-
-        #         print 'Deleting origin user'
-        #         user_origin.delete()
-        #         print 'Deleted.'
-
-        #         print 'Renaming target user'
-        #         user_target.username = username_origin
-        #         user_target.save()
-        #         print 'Renamed.'
-
-        #     except:
-        #         print 'User not found - OK'
-
-        # print '-----------------------------------------------------'
+        print '-----------------------------------------------------'
 
 
 
 
 
-        # print '-----------------------------------------------------'
+        print '-----------------------------------------------------'
 
-        # # merge user2 into user1 (receipts and messages only)
-        # # merge user3 into user1 (receipts and messages only)
-        # # delete user2 and user 3
-        # # rename user1 to '+2609...'
-        # double_user_merge_delete_rename = [
-        # (' 0979339243', '   0979339243', '+260979339243'),
-        # ('     0969179963', '   0969179963', '+260969179963')]
+        # Merge '+2609...' into ' 09...' (receipts and messages only),
+        # then delete '+2609...', then rename ' 09...' to '+2609...'
+        merge_delete_rename = [' 0963460484', ' 0978909306',
+                                ' 0977409931', ' 0979157826']
 
-        # for user_tuple in double_user_merge_delete_rename:
-        #     username_target = user_tuple[0]
-        #     username_origin1 = user_tuple[1]
-        #     username_origin2 = user_tuple[2]
+        for username_target in merge_delete_rename:
+            username_origin = '+26' + username_target.strip(' ')
 
-        #     try:
-        #         user_target = User.objects.get(username=username_target)
-        #         user_origin1 = User.objects.get(username=username_origin1)
-        #         user_origin2 = User.objects.get(username=username_origin2)
-        #         farmer_target = Farmer.objects.get(
-        #                             actor__user__username=username_target)
+            # get the users
+            try:
+                user_origin = User.objects.get(username=username_origin)
+                user_target = User.objects.get(username=username_target)
+                farmer_target = Farmer.objects.get(
+                                    actor__user__username=username_target)
 
-        #         print '\n', user_origin1
-        #         print '----------------'
-        #         merge_crop_receipts(username_origin1, farmer_target)
-        #         merge_messages(username_origin1, farmer_target)
+                print '\n', user_origin
+                print '----------------'
 
-        #         print '\n', user_origin2
-        #         print '----------------'
-        #         merge_crop_receipts(username_origin2, farmer_target)
-        #         merge_messages(username_origin2, farmer_target)
+                merge_crop_receipts(username_origin, farmer_target)
+                merge_messages(username_origin, farmer_target)
+
+                print 'Deleting origin user'
+                user_origin.delete()
+                print 'Deleted.'
+
+                print 'Renaming target user'
+                user_target.username = username_origin
+                user_target.save()
+                print 'Renamed.'
+
+            except:
+                print 'User not found - OK'
+
+        print '-----------------------------------------------------'
 
 
-        #         print '\nDeleting origin users'
-        #         user_origin1.delete()
-        #         user_origin2.delete()
-        #         print 'Deleted.'
 
-        #         print 'Renaming target user'
-        #         user_target.username = username_origin2
-        #         user_target.save()
-        #         print 'Renamed.'
 
-        #     except:
-        #         print 'User not found - OK'
 
-        # print '-----------------------------------------------------'
+        print '-----------------------------------------------------'
+
+        # merge user2 into user1 (receipts and messages only)
+        # merge user3 into user1 (receipts and messages only)
+        # delete user2 and user 3
+        # rename user1 to '+2609...'
+        double_user_merge_delete_rename = [
+        (' 0979339243', '   0979339243', '+260979339243'),
+        ('     0969179963', '   0969179963', '+260969179963')]
+
+        for user_tuple in double_user_merge_delete_rename:
+            username_target = user_tuple[0]
+            username_origin1 = user_tuple[1]
+            username_origin2 = user_tuple[2]
+
+            try:
+                user_target = User.objects.get(username=username_target)
+                user_origin1 = User.objects.get(username=username_origin1)
+                user_origin2 = User.objects.get(username=username_origin2)
+                farmer_target = Farmer.objects.get(
+                                    actor__user__username=username_target)
+
+                print '\n', user_origin1
+                print '----------------'
+                merge_crop_receipts(username_origin1, farmer_target)
+                merge_messages(username_origin1, farmer_target)
+
+                print '\n', user_origin2
+                print '----------------'
+                merge_crop_receipts(username_origin2, farmer_target)
+                merge_messages(username_origin2, farmer_target)
+
+
+                print '\nDeleting origin users'
+                user_origin1.delete()
+                user_origin2.delete()
+                print 'Deleted.'
+
+                print 'Renaming target user'
+                user_target.username = username_origin2
+                user_target.save()
+                print 'Renamed.'
+
+            except:
+                print 'User not found - OK'
+
+        print '-----------------------------------------------------'
 
 
 
