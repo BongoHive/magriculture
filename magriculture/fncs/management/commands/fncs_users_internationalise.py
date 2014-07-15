@@ -17,7 +17,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         total = options['total']
 
-        counter = 0
         problems_numbers = []
         duplicates_numbers = []
 
