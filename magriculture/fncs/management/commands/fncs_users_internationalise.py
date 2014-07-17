@@ -21,9 +21,8 @@ class Command(BaseCommand):
         duplicates_numbers = []
 
         users = User.objects.filter(username__startswith='09')[0:total]
-        total = len(users)
 
-        if total == 0:
+        if len(users) == 0:
             self.stdout.write('No users starting with 09\n')
 
         # search for same number but starting with +2609
@@ -32,7 +31,7 @@ class Command(BaseCommand):
 
             try:
                 duplicate_user = User.objects.get(username=international_username)
-                print 'Duplicate found... ', user
+                self.stdout.write('Duplicate found... ' + user + '\n')
                 duplicates_numbers.append(international_username)
 
                 # see if the duplicate has any crop_receipts, delete if not
