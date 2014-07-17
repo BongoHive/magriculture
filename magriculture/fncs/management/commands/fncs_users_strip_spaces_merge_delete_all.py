@@ -19,10 +19,10 @@ class Command(BaseCommand):
         self.print_verbose('Crop Receipts:')
         crop_receipts_origin = CropReceipt.objects.filter(
                     farmer__actor__user__username=username_origin)
-        self.print_verbose('Moving to ', farmer_target)
+        self.print_verbose('Moving to ' + str(farmer_target))
         if len(crop_receipts_origin) != 0:
             for crop_receipt in crop_receipts_origin:
-                self.print_verbose(crop_receipt)
+                self.print_verbose(str(crop_receipt))
                 crop_receipt.farmer = farmer_target
                 crop_receipt.save()
             self.print_verbose('Crop receipts merged.')
@@ -33,10 +33,10 @@ class Command(BaseCommand):
         self.print_verbose('\nMessages:')
         messages_origin = Message.objects.filter(
                     recipient__user__username=username_origin)
-        self.print_verbose('Moving to ', farmer_target)
+        self.print_verbose('Moving to ' + str(farmer_target))
         if len(messages_origin) != 0:
             for message in messages_origin:
-                self.print_verbose(message)
+                self.print_verbose(str(message))
                 message.farmer = farmer_target
                 message.save()
             self.print_verbose('Messages merged.')
@@ -67,7 +67,7 @@ class Command(BaseCommand):
                 farmer_target = Farmer.objects.get(
                                     actor__user__username=username_target)
 
-                self.print_verbose('\n' + user_origin)
+                self.print_verbose('\n' + str(user_origin))
                 self.print_verbose('----------------')
                 
                 # merge crop receipts and messages
@@ -101,7 +101,7 @@ class Command(BaseCommand):
                     markets_target = farmer_target.markets.all()
 
                     for market in markets_origin:
-                        self.print_verbose(market)
+                        self.print_verbose(str(market))
                         if not (market in markets_target):
                             market_obj = Market.objects.get(name=market.name)
                             farmer_target.markets.add(market_obj)
@@ -118,7 +118,7 @@ class Command(BaseCommand):
                     fbas_target = farmer_target.fbas.all()
 
                     for fba in fbas_origin:
-                        self.print_verbose(fba)
+                        self.print_verbose(str(fba))
                         if not (fba in fbas_target):
                             fba_obj = FarmerBusinessAdvisor.objects.get(name=fba.name)
                             farmer_target.fbas.add(fba_obj)
@@ -135,7 +135,7 @@ class Command(BaseCommand):
                     wards_target = farmer_target.wards.all()
 
                     for ward in wards_origin:
-                        self.print_verbose(ward)
+                        self.print_verbose(str(ward))
                         if not (ward in wards_target):
                             ward_obj = Ward.objects.get(name=ward.name)
                             farmer_target.wards.add(ward_obj)
@@ -152,7 +152,7 @@ class Command(BaseCommand):
                     districts_target = farmer_target.districts.all()
 
                     for district in districts_origin:
-                        self.print_verbose(district)
+                        self.print_verbose(str(district))
                         if not (district in districts_target):
                             district_obj = District.objects.get(name=district.name)
                             farmer_target.districts.add(district_obj)
@@ -169,7 +169,7 @@ class Command(BaseCommand):
                     crops_target = farmer_target.crops.all()
 
                     for crop in crops_origin:
-                        self.print_verbose(crop)
+                        self.print_verbose(str(crop))
                         if not (crop in crops_target):
                             crop_obj = Crop.objects.get(name=crop.name)
                             farmer_target.crops.add(crop_obj)

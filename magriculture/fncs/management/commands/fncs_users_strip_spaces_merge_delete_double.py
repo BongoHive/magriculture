@@ -19,10 +19,10 @@ class Command(BaseCommand):
         self.print_verbose('Crop Receipts:')
         crop_receipts_origin = CropReceipt.objects.filter(
                     farmer__actor__user__username=username_origin)
-        self.print_verbose('Moving to ', farmer_target)
+        self.print_verbose('Moving to ' + str(farmer_target))
         if len(crop_receipts_origin) != 0:
             for crop_receipt in crop_receipts_origin:
-                self.print_verbose(crop_receipt)
+                self.print_verbose(str(crop_receipt))
                 crop_receipt.farmer = farmer_target
                 crop_receipt.save()
             self.print_verbose('Crop receipts merged.')
@@ -33,10 +33,10 @@ class Command(BaseCommand):
         self.print_verbose('\nMessages:')
         messages_origin = Message.objects.filter(
                     recipient__user__username=username_origin)
-        self.print_verbose('Moving to ', farmer_target)
+        self.print_verbose('Moving to ' + str(farmer_target))
         if len(messages_origin) != 0:
             for message in messages_origin:
-                self.print_verbose(message)
+                self.print_verbose(str(message))
                 message.farmer = farmer_target
                 message.save()
             self.print_verbose('Messages merged.')
@@ -77,12 +77,12 @@ class Command(BaseCommand):
                 farmer_target = Farmer.objects.get(
                                     actor__user__username=username_target)
 
-                self.print_verbose('\n' + user_origin1)
+                self.print_verbose('\n' + str(user_origin1))
                 self.print_verbose('----------------')
                 self.merge_crop_receipts(username_origin1, farmer_target)
                 self.merge_messages(username_origin1, farmer_target)
 
-                self.print_verbose('\n' + user_origin2)
+                self.print_verbose('\n' + str(user_origin2))
                 self.print_verbose('----------------')
                 self.merge_crop_receipts(username_origin2, farmer_target)
                 self.merge_messages(username_origin2, farmer_target)

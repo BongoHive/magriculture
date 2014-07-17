@@ -28,7 +28,7 @@ class Command(BaseCommand):
         for username in users_strip_space:
             try:
                 user = User.objects.get(username=username)
-                self.print_verbose('Cleaning ' + username)
+                self.print_verbose('Cleaning ' + str(username))
                 user.username = username.replace(' ','')
                 user.save()
                 self.print_verbose('Spaces removed.')

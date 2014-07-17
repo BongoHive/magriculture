@@ -61,15 +61,15 @@ class Command(BaseCommand):
                 if stripped[0:3] == '+26':
                     user.username = stripped
                     user.save()
-                    self.print_verbose(user.username + ' saved')
+                    self.print_verbose(str(user) + ' saved')
                 elif stripped[0:2] == '09':
                     user.username = '+26' + stripped
                     user.save()
-                    self.print_verbose(user.username + ' saved')
+                    self.print_verbose(str(user) + ' saved')
 
         self.stdout.write('Done.\n')
 
         # print list of duplicates if verbose
         self.print_verbose('\nDuplicates:')
         for username in duplicated:
-            self.print_verbose(username)
+            self.print_verbose(str(username))
