@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from optparse import make_option
 
-# [' 0979535304', ' 0977521089', ' 0966270705', ' 0965476912', ' 0965225080']
 
 class Command(BaseCommand):
     help = "Delete users that have ' ' in username"

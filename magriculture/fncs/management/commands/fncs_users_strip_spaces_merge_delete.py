@@ -4,8 +4,6 @@ from optparse import make_option
 from magriculture.fncs.models.actors import Farmer
 from magriculture.fncs.models.props import CropReceipt, Message
 
-# '  0976712188' ' 0964541673' ' 0979572717' ' 0978444239' ' 0977982058'
-
 
 class Command(BaseCommand):
     help = "Delete users that have ' ' in username"

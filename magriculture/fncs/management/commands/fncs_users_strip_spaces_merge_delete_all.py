@@ -5,8 +5,6 @@ from magriculture.fncs.models.actors import Farmer, FarmerBusinessAdvisor
 from magriculture.fncs.models.props import CropReceipt, Message, Crop
 from magriculture.fncs.models.geo import Market, Ward, District
 
-# [' 0979338243', ' 0979899912', '  0965050280']
-
 
 class Command(BaseCommand):
     help = "Delete users that have ' ' in username"
