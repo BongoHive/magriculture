@@ -22,7 +22,7 @@ class Command(BaseCommand):
         for user in users:
             counter += 1
 
-            self.stdout.write('Checking %s for duplicate user...' %(user))
+            self.stdout.write('Checking %s for duplicate user...' %(str(user)))
             try:
                 # Search for duplicate user
                 new_username = '+' + user.username
