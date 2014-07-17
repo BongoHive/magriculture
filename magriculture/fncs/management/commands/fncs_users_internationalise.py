@@ -30,17 +30,24 @@ class Command(BaseCommand):
             international_username = '+26' + user.username
 
             try:
-                duplicate_user = User.objects.get(username=international_username)
-                self.stdout.write('Duplicate found... ' + user + '\n')
+                duplicate_user = User.objects.get(
+                                            username=international_username)
+                self.stdout.write('Duplicate found... ' + user.username +
+                                    '\n')
                 duplicates_numbers.append(international_username)
 
                 # see if the duplicate has any crop_receipts, delete if not
-                receipts = CropReceipt.objects.filter(farmer__actor__user__username=international_username)
+                receipts = CropReceipt.objects.filter(
+                        farmer__actor__user__username=international_username)
 
                 if len(receipts) == 0:
-                    self.stdout.write('Duplicate has no transactions...deleting duplicate\n')
+                    self.stdout.write('Duplicate has no transactions...' +
+                                        'deleting duplicate\n')
                     duplicate_user.delete()
-                    self.stdout.write('Updating number... %s is now saved as %s\n' %(user, international_username))
+                    self.stdout.write(
+                        'Updating number... %s is now saved as %s\n'
+                        %(user, international_username)
+                    )
                     user.username = international_username
                     user.save()
 
@@ -51,7 +58,10 @@ class Command(BaseCommand):
 
             except:
                 self.stdout.write('No duplicates found...')
-                self.stdout.write('Updating number... %s is now saved as %s\n' %(user, international_username))
+                self.stdout.write(
+                    'Updating number... %s is now saved as %s\n'
+                    %(user, international_username)
+                )
                 user.username = international_username
                 user.save()
 
@@ -63,6 +73,7 @@ class Command(BaseCommand):
             for num in duplicates_numbers:
                 self.stdout.write(num + '\n')
         else:
-            self.stdout.write('\nThere were problems with the following users:\n')
+            self.stdout.write('\nThere were problems with the following ' +
+                                'users:\n')
             for number in problems_numbers:
                 self.stdout.write(number)
