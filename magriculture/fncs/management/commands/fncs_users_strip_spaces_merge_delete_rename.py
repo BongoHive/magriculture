@@ -4,7 +4,7 @@ from optparse import make_option
 from magriculture.fncs.models.actors import Farmer
 from magriculture.fncs.models.props import CropReceipt, Message
 
-# [' 0963460484', ' 0978909306', ' 0977409931', ' 0979157826']
+# ' 0963460484' ' 0978909306' ' 0977409931' ' 0979157826' ' 0964055510'
 
 class Command(BaseCommand):
     help = "Delete users that have ' ' in username"
@@ -17,10 +17,10 @@ class Command(BaseCommand):
         self.print_verbose('Crop Receipts:')
         crop_receipts_origin = CropReceipt.objects.filter(
                     farmer__actor__user__username=username_origin)
-        self.print_verbose('Moving to ', farmer_target)
+        self.print_verbose('Moving to ' + str(farmer_target))
         if len(crop_receipts_origin) != 0:
             for crop_receipt in crop_receipts_origin:
-                self.print_verbose(crop_receipt)
+                self.print_verbose(str(crop_receipt))
                 crop_receipt.farmer = farmer_target
                 crop_receipt.save()
             self.print_verbose('Crop receipts merged.')
@@ -31,10 +31,10 @@ class Command(BaseCommand):
         self.print_verbose('\nMessages:')
         messages_origin = Message.objects.filter(
                     recipient__user__username=username_origin)
-        self.print_verbose('Moving to ', farmer_target)
+        self.print_verbose('Moving to ' + str(farmer_target))
         if len(messages_origin) != 0:
             for message in messages_origin:
-                self.print_verbose(message)
+                self.print_verbose(str(message))
                 message.farmer = farmer_target
                 message.save()
             self.print_verbose('Messages merged.')
@@ -65,7 +65,7 @@ class Command(BaseCommand):
                 farmer_target = Farmer.objects.get(
                                     actor__user__username=username_target)
 
-                self.print_verbose('\n' + user_origin)
+                self.print_verbose('\n' + str(user_origin))
                 self.print_verbose('----------------')
 
                 self.merge_crop_receipts(username_origin, farmer_target)

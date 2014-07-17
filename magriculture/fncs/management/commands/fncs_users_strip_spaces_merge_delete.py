@@ -4,7 +4,7 @@ from optparse import make_option
 from magriculture.fncs.models.actors import Farmer
 from magriculture.fncs.models.props import CropReceipt, Message
 
-# ['  0976712188', ' 0964541673', ' 0979572717', ' 0978444239', ' 0977982058']
+# '  0976712188' ' 0964541673' ' 0979572717' ' 0978444239' ' 0977982058'
 
 
 class Command(BaseCommand):
@@ -18,10 +18,10 @@ class Command(BaseCommand):
         self.print_verbose('Crop Receipts:')
         crop_receipts_origin = CropReceipt.objects.filter(
                     farmer__actor__user__username=username_origin)
-        self.print_verbose('Moving to ', farmer_target)
+        self.print_verbose('Moving to ' + str(farmer_target))
         if len(crop_receipts_origin) != 0:
             for crop_receipt in crop_receipts_origin:
-                self.print_verbose(crop_receipt)
+                self.print_verbose(str(crop_receipt))
                 crop_receipt.farmer = farmer_target
                 crop_receipt.save()
             self.print_verbose('Crop receipts merged.')
@@ -32,10 +32,10 @@ class Command(BaseCommand):
         self.print_verbose('\nMessages:')
         messages_origin = Message.objects.filter(
                     recipient__user__username=username_origin)
-        self.print_verbose('Moving to ', farmer_target)
+        self.print_verbose('Moving to ' + str(farmer_target))
         if len(messages_origin) != 0:
             for message in messages_origin:
-                self.print_verbose(message)
+                self.print_verbose(str(message))
                 message.farmer = farmer_target
                 message.save()
             self.print_verbose('Messages merged.')
@@ -64,12 +64,16 @@ class Command(BaseCommand):
                 farmer_target = Farmer.objects.get(
                                     actor__user__username=username_target)
 
-                self.print_verbose('\n' + user_origin)
+                print '3'
+                print user_origin.id
+                self.print_verbose('\n' + str(user_origin))
                 self.print_verbose('----------------')
                 
+                print '2'
                 self.merge_crop_receipts(username_origin, farmer_target)
                 self.merge_messages(username_origin, farmer_target)
 
+                print '1'
                 self.print_verbose('Deleting origin user')
                 user_origin.delete()
                 self.print_verbose('Deleted.')
