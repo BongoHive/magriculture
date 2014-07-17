@@ -1,31 +1,19 @@
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
-from optparse import make_option
-from magriculture.fncs.models.actors import (Actor, Farmer, Agent)
-from magriculture.fncs.models.geo import Market
-from magriculture.fncs.models.props import (Message, CropReceipt)
+from magriculture.fncs.models.props import CropReceipt
 
 
 # Example usage:
 # Add '+' to 30 users:
-# python manage.py fncs_users_add_plus --total 30
-
-
-# def has_child(parent, child):
-#     try:
+# python manage.py fncs_users_add_plus
 
 
 class Command(BaseCommand):
     help = "Search for '260' numbers, change to '+260'"
-    option_list = BaseCommand.option_list + (
-        make_option('--total', dest='total', type='int', default=15000,
-                        help='How many users to delete'),
-    )
 
     def handle(self, *args, **options):
-        total = options['total']
         counter = 0
-        users = User.objects.filter(username__startswith='260')[0:total]
+        users = User.objects.filter(username__startswith='260')
         total = len(users)
 
         if total == 0:
