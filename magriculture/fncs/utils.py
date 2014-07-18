@@ -19,6 +19,16 @@ def read_excel_sheet(filename):
 def read_excel_sheet_as_dict(filename):
     return [dict(row) for row in read_excel_sheet(filename)]
 
+def normalise_msisdn(msisdn, country_code='+260'):
+    # replace all '09....' numbers with '+2609....' numbers,
+    # strip all spaces and add a '+' if missing from
+    # international number
+    msisdn = msisdn.replace(' ','')
+    if msisdn[0:2] == '09':
+        msisdn = country_code + msisdn[1:]
+    elif msisdn[0:3] == '260':
+        msisdn = '+' + msisdn
+    return msisdn
 
 class ImportCommand(BaseCommand):
     option_list = BaseCommand.option_list + (

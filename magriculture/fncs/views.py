@@ -16,6 +16,7 @@ from magriculture.fncs.models.props import (Transaction, Crop, GroupMessage,
                                             DirectSale)
 from magriculture.fncs.models.geo import Market, Ward, District
 from magriculture.fncs import forms
+from magriculture.fncs import utils
 from magriculture.fncs.decorators import SpecificRightsRequired
 
 
@@ -58,7 +59,16 @@ def farmer_new(request):
                 form.cleaned_data['msisdn2'],
                 form.cleaned_data['msisdn3'],
             ]
-            [msisdn1, msisdn2, msisdn3] = msisdns
+
+            normalised_msisdns = []
+
+            for msisdn in msisdns:
+                if msisdn != '':
+                    normalised_msisdns.append(utils.normalise_msisdn(msisdn))
+                else:
+                    normalised_msisdns.append(u'')
+
+            [msisdn1, msisdn2, msisdn3] = normalised_msisdns
 
             name = form.cleaned_data['name']
             surname = form.cleaned_data['surname']
@@ -80,7 +90,8 @@ def farmer_new(request):
                 })
                 return redirect(farmer_url)
 
-            possible_matches = Farmer.match(msisdns=msisdns,
+            # if all msisdns are normalised, line below should read msisdns=normalised_msisdns
+            possible_matches = Farmer.match(msisdns=normalised_msisdns,
                                             id_number=id_number)
             if possible_matches:
                 form.fields['matched_farmer'].queryset = possible_matches
@@ -90,7 +101,7 @@ def farmer_new(request):
             else:
                 farmer = Farmer.create(msisdn1, name, surname,
                                        id_number=id_number, gender=gender)
-                farmer.actor.update_msisdns(msisdns)
+                farmer.actor.update_msisdns(normalised_msisdns)
                 if agent:
                     for market in markets:
                         farmer.operates_at(market, agent)

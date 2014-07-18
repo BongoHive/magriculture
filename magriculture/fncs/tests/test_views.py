@@ -37,7 +37,7 @@ class FNCSTestCase(TestCase):
         self.ward = utils.create_ward('test ward', self.district)
         self.market = utils.create_market('test market', self.district)
 
-        self.agent = utils.create_agent()
+        self.agent = utils.create_agent(msisdn="+260961234568")
         self.msisdn = self.agent.actor.user.username
 
         identity = self.agent.actor.get_identity(self.msisdn)
@@ -71,6 +71,24 @@ class SessionTestCase(FNCSTestCase):
         self.assertRedirects(response, self.login_url)
 
     def test_login(self):
+        self.login()
+        response = self.client.get(reverse('fncs:home'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_non_normalised(self):
+        self.msisdn = "0961234568"
+        self.login()
+        response = self.client.get(reverse('fncs:home'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_with_spaces(self):
+        self.msisdn = " 096 123 456 8 "
+        self.login()
+        response = self.client.get(reverse('fncs:home'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_without_plus(self):
+        self.msisdn = "260961 234568"
         self.login()
         response = self.client.get(reverse('fncs:home'))
         self.assertEqual(response.status_code, 200)
@@ -116,7 +134,8 @@ class FarmersTestCase(FNCSTestCase):
 
     def setUp(self):
         super(FarmersTestCase, self).setUp()
-        self.test_msisdn = '27861234567'
+        self.test_msisdn = '09861234567'
+        self.normalised_test_msisdn = '+2609861234567'
         self.login()
 
     def test_farmer_listing(self):
@@ -133,24 +152,96 @@ class FarmersTestCase(FNCSTestCase):
         })
         self.assertNotContains(response, 'No farmers match')
 
-    def test_farmer_creation(self):
+    def test_farmer_creation1(self):
         self.assertFalse(utils.is_farmer(self.test_msisdn))
         response = self.client.get(reverse('fncs:farmer_new'))
         self.assertEqual(response.status_code, 200)
         response = self.client.post(reverse('fncs:farmer_new'), {
             'msisdn1': self.test_msisdn,
+            'msisdn2': '+260891231234',
             'name': 'name',
             'surname': 'surname',
             'markets': [self.market.pk],
             'gender': "M",
         })
-        farmer = Farmer.objects.get(actor__user__username=self.test_msisdn)
+        farmer = Farmer.objects.get(
+            actor__user__username=self.normalised_test_msisdn)
         self.assertEqual(farmer.actor.user.first_name, 'name')
         self.assertEqual(farmer.actor.user.last_name, 'surname')
         self.assertEqual(farmer.gender, 'M')
 
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(utils.is_farmer(self.test_msisdn))
+        self.assertTrue(utils.is_farmer(self.normalised_test_msisdn))
+        self.assertFalse(utils.is_farmer(self.test_msisdn))
+
+    def test_farmer_creation2(self):
+        # same test as above but with normalised msisdn
+        self.assertFalse(utils.is_farmer(self.normalised_test_msisdn))
+        response = self.client.get(reverse('fncs:farmer_new'))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': self.normalised_test_msisdn,
+            'msisdn2': '+260891231234',
+            'name': 'name',
+            'surname': 'surname',
+            'markets': [self.market.pk],
+            'gender': "M",
+        })
+        farmer = Farmer.objects.get(
+            actor__user__username=self.normalised_test_msisdn)
+        self.assertEqual(farmer.actor.user.first_name, 'name')
+        self.assertEqual(farmer.actor.user.last_name, 'surname')
+        self.assertEqual(farmer.gender, 'M')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(utils.is_farmer(self.normalised_test_msisdn))
+        self.assertFalse(utils.is_farmer(self.test_msisdn))
+
+    def test_farmer_creation3(self):
+        # same test as above but with spaces in the number
+        self.assertFalse(utils.is_farmer(self.normalised_test_msisdn))
+        response = self.client.get(reverse('fncs:farmer_new'))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': self.normalised_test_msisdn,
+            'msisdn2': '+260 89 123 1234',
+            'name': 'name',
+            'surname': 'surname',
+            'markets': [self.market.pk],
+            'gender': "M",
+        })
+        farmer = Farmer.objects.get(
+            actor__user__username=self.normalised_test_msisdn)
+        self.assertEqual(farmer.actor.user.first_name, 'name')
+        self.assertEqual(farmer.actor.user.last_name, 'surname')
+        self.assertEqual(farmer.gender, 'M')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(utils.is_farmer(self.normalised_test_msisdn))
+        self.assertFalse(utils.is_farmer(self.test_msisdn))
+
+    def test_farmer_creation4(self):
+        # same test as above but with a '+' missing for number
+        self.assertFalse(utils.is_farmer(self.normalised_test_msisdn))
+        response = self.client.get(reverse('fncs:farmer_new'))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': self.normalised_test_msisdn,
+            'msisdn2': '260 89 123 1234',
+            'name': 'name',
+            'surname': 'surname',
+            'markets': [self.market.pk],
+            'gender': "M",
+        })
+        farmer = Farmer.objects.get(
+            actor__user__username=self.normalised_test_msisdn)
+        self.assertEqual(farmer.actor.user.first_name, 'name')
+        self.assertEqual(farmer.actor.user.last_name, 'surname')
+        self.assertEqual(farmer.gender, 'M')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(utils.is_farmer(self.normalised_test_msisdn))
+        self.assertFalse(utils.is_farmer(self.test_msisdn))
 
     def test_farmer_location_search_no_query(self):
         response = self.client.get(self.farmer_url('location_search'))
@@ -429,14 +520,66 @@ class FarmersTestCase(FNCSTestCase):
         self.assertEqual([market.pk for market in farmer.markets.all()],
             [market.pk for market in Market.objects.filter(pk=self.market.pk)])
 
-    def test_farmer_matching_on_msisdn(self):
-        farmer = utils.create_farmer()
+    def test_farmer_matching_on_msisdn1(self):
+        farmer = utils.create_farmer(msisdn='+260961234567')
         msisdn = farmer.actor.get_msisdns()[0]
         self.assertTrue(utils.is_farmer(msisdn))
+        self.assertFalse(utils.is_farmer('0961234567'))
         # Now we try & recreate a farmer with a known MSISDN, should give us a
         # matching suggestion
         response = self.client.post(reverse('fncs:farmer_new'), {
             'msisdn1': msisdn,
+            'name': 'name',
+            'surname': 'surname',
+            'markets': [self.market.pk],
+            'gender': 'M',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, farmer.actor.name)
+
+    def test_farmer_matching_on_msisdn2(self):
+        # This test is identical to the one above, except we are checking with
+        # a non-normalised msisdn to ensure matching works then, too.
+        farmer = utils.create_farmer(msisdn='+260961234567')
+        msisdn = farmer.actor.get_msisdns()[0]
+        self.assertTrue(utils.is_farmer(msisdn))
+        self.assertFalse(utils.is_farmer('0961234567'))
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': '0961234567',
+            'name': 'name',
+            'surname': 'surname',
+            'markets': [self.market.pk],
+            'gender': 'M',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, farmer.actor.name)
+
+    def test_farmer_matching_on_msisdn3(self):
+        # This test is identical to the one above, except we are checking with
+        # a msisdn with spaces to ensure matching works then, too.
+        farmer = utils.create_farmer(msisdn='+260961234567')
+        msisdn = farmer.actor.get_msisdns()[0]
+        self.assertTrue(utils.is_farmer(msisdn))
+        self.assertFalse(utils.is_farmer('096 123 4567'))
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': '096 123 4567',
+            'name': 'name',
+            'surname': 'surname',
+            'markets': [self.market.pk],
+            'gender': 'M',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, farmer.actor.name)
+
+    def test_farmer_matching_on_msisdn4(self):
+        # This test is identical to the one above, except we are checking with
+        # a msisdn starting on 260 to ensure matching works then, too.
+        farmer = utils.create_farmer(msisdn='+260961234567')
+        msisdn = farmer.actor.get_msisdns()[0]
+        self.assertTrue(utils.is_farmer(msisdn))
+        self.assertFalse(utils.is_farmer('260 96 123 4567'))
+        response = self.client.post(reverse('fncs:farmer_new'), {
+            'msisdn1': '260 96 123 4567',
             'name': 'name',
             'surname': 'surname',
             'markets': [self.market.pk],
@@ -652,7 +795,7 @@ class PricesTestCase(FNCSTestCase):
 
 class FarmerBusinessAdvisorTestCase(FNCSTestCase):
     def setUp(self):
-        self.msisdn = '1234567890'
+        self.msisdn = '+260234567890'
         self.pin = '1234'
         self.fba = utils.create_fba(msisdn=self.msisdn)
         identity = self.fba.actor.get_identity(self.msisdn)
@@ -670,11 +813,11 @@ class FarmerBusinessAdvisorTestCase(FNCSTestCase):
 
 class IdentityAuthenticationBackendTestCase(TestCase):
     def test_login_with_identity(self):
-        farmer = utils.create_farmer(msisdn='1234')
-        farmer.actor.add_identity('6789', '6789')
+        farmer = utils.create_farmer(msisdn='+260121231234')
+        farmer.actor.add_identity('+260676786789', '6789')
         # Log in with the new identity
         client = Client()
-        client.login(username='6789', password='6789')
+        client.login(username='+260676786789', password='6789')
         response = client.get(reverse('fncs:home'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['user'],
