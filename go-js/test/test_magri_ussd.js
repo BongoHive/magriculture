@@ -783,33 +783,6 @@ describe("As a registered farmer", function() {
         });
         p.then(done, done);
     });
-    // it("Selecting 0 to exit should say goodbye", function(done) {
-    //     var p = tester.check_state({
-    //         user: {
-    //             current_state: "show_prices",
-    //             answers: {
-    //                 select_service: 'select_crop',
-    //                 select_crop: 1,
-    //                 select_market_list: "all_markets"
-    //             },
-    //             pages: {
-    //                 show_prices: 1
-    //             },
-    //             custom: {
-    //                 chosen_markets: [
-    //                     [10, "Kitwe"],
-    //                     [8, "Ndola"]
-    //                 ],
-    //                 chosen_crop_name: "Beans"
-    //             }
-    //         },
-    //         content: "0",
-    //         next_state: "end",
-    //         continue_session: false,
-    //         response: ("^Goodbye!")
-    //     });
-    //     p.then(done, done);
-    // });
 });
 
 describe("test sms sending", function() {
