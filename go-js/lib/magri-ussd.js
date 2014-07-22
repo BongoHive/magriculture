@@ -754,7 +754,7 @@ function MagriWorker() {
                          _.gettext("Enter 1 for next market," +
                                      " 2 for previous market.") + "\n"
                          : "");
-        var exit = _.gettext("Enter 0 to exit.");
+        var exit = _.gettext("Enter 0 to select another crop.");
         var footer_text = next_prev + exit;
 
         function page_changed(page) {
@@ -798,27 +798,21 @@ function MagriWorker() {
         }
 
         return new BookletState(state_name, {
-            next: "end",
+            next: "select_crop",
             pages: markets.length,
             page_text: page_changed,
             initial_page: initial_market_idx,
             buttons: {"1": -1, "2": +1, "0": "exit"},
-            footer_text: footer_text
+            footer_text: footer_text,
+            handlers: {
+                on_exit: function() {
+                    var im = this.im;
+                    var p = self.sms_session_summary(im);
+                    return p;
+                }
+            }
         });
     });
-
-    self.add_state(new EndState(
-        "end",
-        _.gettext("Goodbye!"),
-        "select_service",
-        {
-            on_enter: function() {
-                var im = this.im;
-                var p = self.sms_session_summary(im);
-                return p;
-            }
-        }
-    ));
 
     self.switch_state = function(state_name, im) {
         if (typeof state_name == "undefined")

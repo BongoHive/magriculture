@@ -651,7 +651,7 @@ describe("As a registered farmer", function() {
                        "  Big Bags: 65.00[^]" +
                        "  Bags: 30.33[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 0 to exit\\.$"),
+                       "Enter 0 to select another crop\\.$"),
             teardown: assert_summary_equal({
                 "Beans, Big Bags": { "Kitwe": "65.00" },
                 "Beans, Bags": { "Kitwe": "30.33" }
@@ -681,7 +681,7 @@ describe("As a registered farmer", function() {
             response: ("^Prices of Cabbage in Kitwe:[^]" +
                        "  No prices available\\.[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 0 to exit\\.$"),
+                       "Enter 0 to select another crop\\.$"),
             teardown: assert_summary_equal(undefined)
         });
         p.then(done, done);
@@ -713,7 +713,7 @@ describe("As a registered farmer", function() {
                        "  Big Bags: 10.00[^]" +
                        "  Bags: 30.33[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 0 to exit\\.$")
+                       "Enter 0 to select another crop\\.$")
         });
         p.then(done, done);
     });
@@ -744,11 +744,11 @@ describe("As a registered farmer", function() {
                        "  Big Bags: 65.00[^]" +
                        "  Bags: 30.33[^]" +
                        "Enter 1 for next market, 2 for previous market\\.[^]" +
-                       "Enter 0 to exit\\.$"),
+                       "Enter 0 to select another crop\\.$"),
         });
         p.then(done, done);
     });
-    it("Selecting 0 to exit should say goodbye", function(done) {
+    it("Selecting 0 should show select crop page", function(done) {
         var p = tester.check_state({
             user: {
                 current_state: "show_prices",
@@ -769,12 +769,47 @@ describe("As a registered farmer", function() {
                 }
             },
             content: "0",
-            next_state: "end",
-            continue_session: false,
-            response: ("^Goodbye!")
+            next_state: "select_crop",
+            response: ("^Select a crop:[^]" +
+                       "1. Beans[^]" +
+                       "2. Cabbage[^]" +
+                       "3. Carrots[^]" +
+                       "4. Cassava[^]" +
+                       "5. Cauliflower[^]" +
+                       "6. Chinese Cabbage[^]" +
+                       "7. Coffee[^]" +
+                       "8. Eggplant[^]" +
+                       "9. More$")
         });
         p.then(done, done);
     });
+    // it("Selecting 0 to exit should say goodbye", function(done) {
+    //     var p = tester.check_state({
+    //         user: {
+    //             current_state: "show_prices",
+    //             answers: {
+    //                 select_service: 'select_crop',
+    //                 select_crop: 1,
+    //                 select_market_list: "all_markets"
+    //             },
+    //             pages: {
+    //                 show_prices: 1
+    //             },
+    //             custom: {
+    //                 chosen_markets: [
+    //                     [10, "Kitwe"],
+    //                     [8, "Ndola"]
+    //                 ],
+    //                 chosen_crop_name: "Beans"
+    //             }
+    //         },
+    //         content: "0",
+    //         next_state: "end",
+    //         continue_session: false,
+    //         response: ("^Goodbye!")
+    //     });
+    //     p.then(done, done);
+    // });
 });
 
 describe("test sms sending", function() {
@@ -860,9 +895,17 @@ describe("test sms sending", function() {
         var p = tester.check_state({
             user: get_user(),
             content: "0",
-            next_state: "end",
-            continue_session: false,
-            response: ("^Goodbye!"),
+            next_state: "select_crop",
+            response: ("^Select a crop:[^]" +
+                       "1. Beans[^]" +
+                       "2. Cabbage[^]" +
+                       "3. Carrots[^]" +
+                       "4. Cassava[^]" +
+                       "5. Cauliflower[^]" +
+                       "6. Chinese Cabbage[^]" +
+                       "7. Coffee[^]" +
+                       "8. Eggplant[^]" +
+                       "9. More$"),
             teardown: assert_no_sms()
         });
         p.then(done, done);
@@ -882,9 +925,17 @@ describe("test sms sending", function() {
         var p = tester.check_state({
             user: user,
             content: "0",
-            next_state: "end",
-            continue_session: false,
-            response: ("^Goodbye!"),
+            next_state: "select_crop",
+            response: ("^Select a crop:[^]" +
+                       "1. Beans[^]" +
+                       "2. Cabbage[^]" +
+                       "3. Carrots[^]" +
+                       "4. Cassava[^]" +
+                       "5. Cauliflower[^]" +
+                       "6. Chinese Cabbage[^]" +
+                       "7. Coffee[^]" +
+                       "8. Eggplant[^]" +
+                       "9. More$"),
             teardown: assert_single_sms(
                 "Peas, boxes: Ndola K15500, Kitwe K15000\n" +
                 "Peas, crates: Kitwe K16000"
