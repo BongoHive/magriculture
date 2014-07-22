@@ -752,8 +752,7 @@ function MagriWorker() {
         var markets = self.get_user_item(im.user, "chosen_markets");
         var next_prev = (markets.length > 1 ?
                          _.gettext("Enter 1 for next market," +
-                                     " 2 for previous market," +
-                                     " 3 to select another crop.") + "\n"
+                                     " 2 for previous market,") + "\n"
                          : "");
         var exit = _.gettext("Enter 0 to exit.");
         var footer_text = next_prev + exit;

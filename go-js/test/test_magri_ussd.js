@@ -650,7 +650,7 @@ describe("As a registered farmer", function() {
             response: ("^Prices of Beans in Kitwe:[^]" +
                        "  Big Bags: 65.00[^]" +
                        "  Bags: 30.33[^]" +
-                       "Enter 1 for next market, 2 for previous market, 3 to select another crop\\.[^]" +
+                       "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$"),
             teardown: assert_summary_equal({
                 "Beans, Big Bags": { "Kitwe": "65.00" },
@@ -680,7 +680,7 @@ describe("As a registered farmer", function() {
             next_state: "show_prices",
             response: ("^Prices of Cabbage in Kitwe:[^]" +
                        "  No prices available\\.[^]" +
-                       "Enter 1 for next market, 2 for previous market, 3 to select another crop\\.[^]" +
+                       "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$"),
             teardown: assert_summary_equal(undefined)
         });
@@ -712,7 +712,7 @@ describe("As a registered farmer", function() {
             response: ("^Prices of Beans in Ndola:[^]" +
                        "  Big Bags: 10.00[^]" +
                        "  Bags: 30.33[^]" +
-                       "Enter 1 for next market, 2 for previous market, 3 to select another crop\\.[^]" +
+                       "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$")
         });
         p.then(done, done);
@@ -743,47 +743,11 @@ describe("As a registered farmer", function() {
             response: ("^Prices of Beans in Kitwe:[^]" +
                        "  Big Bags: 65.00[^]" +
                        "  Bags: 30.33[^]" +
-                       "Enter 1 for next market, 2 for previous market, 3 to select another crop\\.[^]" +
+                       "Enter 1 for next market, 2 for previous market\\.[^]" +
                        "Enter 0 to exit\\.$"),
         });
         p.then(done, done);
     });
-    // it("Selecting 3 should go back to selecting a new crop", function(done) {
-    //     var p = tester.check_state({
-    //         user: {
-    //             current_state: "show_prices",
-    //             answers: {
-    //                 select_service: 'select_crop',
-    //                 select_crop: 1,
-    //                 select_market_list: "all_markets"
-    //             },
-    //             pages: {
-    //                 show_prices: 1
-    //             },
-    //             custom: {
-    //                 chosen_markets: [
-    //                     [10, "Kitwe"],
-    //                     [8, "Ndola"]
-    //                 ],
-    //                 chosen_crop_name: "Beans",
-    //                 chosen_market_idx: 0,
-    //             }
-    //         },
-    //         content: "3",
-    //         next_state: "select_crop",
-    //         response: ("^Select a crop:[^]" +
-    //                    "1. Beans[^]" +
-    //                    "2. Cabbage[^]" +
-    //                    "3. Carrots[^]" +
-    //                    "4. Cassava[^]" +
-    //                    "5. Cauliflower[^]" +
-    //                    "6. Chinese Cabbage[^]" +
-    //                    "7. Coffee[^]" +
-    //                    "8. Eggplant[^]" +
-    //                    "9. More$")
-    //     });
-    //     p.then(done, done);
-    // });
     it("Selecting 0 to exit should say goodbye", function(done) {
         var p = tester.check_state({
             user: {
