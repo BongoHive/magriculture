@@ -8,7 +8,7 @@
                 "metric_type": "account",
                 "store": "default",
                 "name": "ussd_sessions",
-                "aggregator": "mzx"
+                "aggregator": "max"
                 }
         },
         {
@@ -22,40 +22,6 @@
                 "aggregator": "max"
                 }
         },
-        {
-            "type": "diamondash.widgets.lvalue.LValueWidget",
-            "time_range": "30d",
-            "name": "First Session Completed",
-            "target": {
-                "metric_type": "account",
-                "store": "default",
-                "name": "first_session_completed",
-                "aggregator": "max"
-                }
-        },
-        {
-            "type": "diamondash.widgets.lvalue.LValueWidget",
-            "time_range": "30d",
-            "name": "Second Session Completed",
-            "target": {
-                "metric_type": "account",
-                "store": "default",
-                "name": "second_session_completed",
-                "aggregator": "max"
-                }
-        },
-        {
-            "type": "diamondash.widgets.lvalue.LValueWidget",
-            "time_range": "30d",
-            "name": "Sessions to Register (average)",
-            "target": {
-                "metric_type": "account",
-                "store": "default",
-                "name": "sessions_taken_to_register",
-                "aggregator": "max"
-                }
-        },
-
         {
             "type": "diamondash.widgets.graph.GraphWidget",
             "name": "Unique Users Graph",
