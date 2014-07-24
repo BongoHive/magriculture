@@ -1,0 +1,15 @@
+{
+    "layout": [
+        {
+            "type": "diamondash.widgets.lvalue.LValueWidget",
+            "time_range": "30d",
+            "name": "USSD Sessions",
+            "target": {
+                "metric_type": "account",
+                "store": "default",
+                "name": "ussd_sessions",
+                "aggregator": "last"
+                }
+        }
+    ]
+}
