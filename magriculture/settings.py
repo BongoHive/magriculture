@@ -172,7 +172,7 @@ SOUTH_TESTS_MIGRATE = False
 
 AUTHENTICATION_BACKENDS = (
     'magriculture.fncs.auth.backends.IdentityBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    'magriculture.fncs.auth.backends.UserBackend',
 )
 
 # map of codes -> replacement prefix
