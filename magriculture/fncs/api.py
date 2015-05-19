@@ -1,8 +1,6 @@
 """FNCS HTTP API functions."""
 # Python
 import json
-import hashlib
-import random
 
 # Django
 from django.http import HttpResponse
@@ -12,7 +10,8 @@ from django.contrib.auth.hashers import make_password
 
 # Project
 from magriculture.fncs.models.actors import Actor, Farmer, Agent
-from magriculture.fncs.models.props import Transaction, Crop, CropReceipt, CropUnit
+from magriculture.fncs.models.props import (
+    Transaction, Crop, CropReceipt, CropUnit)
 from magriculture.fncs.models.geo import Market, Ward, District
 
 # Thirdparty

@@ -1,4 +1,5 @@
 import csv
+from collections import defaultdict
 from django.http import HttpResponse
 
 from magriculture.fncs.tasks import export_transactions
@@ -105,6 +106,7 @@ class ExportAsCSVWithFK(object):
             writer.writerow(data)
         return response
 
+
 class ExportAsCSVWithFKTask(object):
     short_description = "Export selected records as CSV file via Email"
 
@@ -119,6 +121,74 @@ class ExportAsCSVWithFKTask(object):
 
         field_names = [k for k, v in self.fields]
         labels = [v for k, v in self.fields]
-        modeladmin.message_user(request, "Exporting records, will be sent via email to shortly")
-        
-        return export_transactions.delay(field_names, labels, queryset, request.user)
+        modeladmin.message_user(
+            request, "Exporting records, will be sent via email to shortly")
+
+        return export_transactions.delay(
+            field_names, labels, queryset, request.user)
+
+
+class ExportFarmersAsCSV(object):
+    """
+    Return a custom exporter for farmers that includes:
+
+    * The farmer ID
+    * The actor ID
+    * The actor name
+    * The first MSISDN associated with the farmer
+    * The number of MSISDNs associated with the farmer
+    * The first markets associated with the farmer
+    * The number of markets associated with the farmer
+    * The ID and name of the crop which the farmer has sold the most often.
+    """
+    short_description = "Custom export of selected farmers as CSV file"
+
+    def _get_most_sold_crop(self, farmer):
+        """
+        Find the crop the farmer has sold the most often.
+        """
+        crops_sold = defaultdict(int)
+        most_sold_crop = None
+        most_amount_sold = 0
+
+        for receipt in farmer.cropreceipt_set.all():
+            crop = receipt.crop
+            crops_sold[crop.id] += 1
+            if crops_sold[crop.id] > most_amount_sold:
+                most_sold_crop = crop
+                most_amount_sold = crops_sold[crop.id]
+
+        return most_amount_sold, most_sold_crop
+
+    def __call__(self, modeladmin, request, queryset):
+        """
+        Export farmer records as CSV.
+        """
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = (
+            'attachment; filename=fncs_farmer.csv')
+
+        writer = csv.writer(response)
+        writer.writerow([
+            'FarmerID', 'ActorID', 'Farmer Name',
+            'First MSISDN', 'Number of MSISDNs',
+            'First Market', 'Number of Markets',
+            'Best CropID', 'Best Crop Name', 'Best Crop Amount',
+        ])
+        for farmer in queryset:
+            row = [farmer.id, farmer.actor.id, farmer.actor.name]
+            msisdns = farmer.actor.get_msisdns()
+            msisdn = msisdns[0] if msisdns else ''
+            row += [msisdn, len(msisdns)]
+            markets = farmer.market_set.all()
+            market = markets[0].name if markets else ''
+            row += [market, len(markets)]
+            amount, crop = self._get_most_sold_crop(farmer)
+            if crop:
+                row += [crop.id, crop.name, amount]
+            else:
+                row += ['', '', 0]
+
+            writer.writerow([
+                unicode(value).encode('utf-8') for value in row])
+        return response

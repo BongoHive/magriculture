@@ -8,19 +8,31 @@ from magriculture.fncs.actions import ExportAsCSVWithFKTask
 
 # Setting the fields and ExportAsCSV Outside the class
 
-fields = [("id", "TransactionID"),
-          ("crop_receipt__farmer__actor__name", "Farmer Name"),
-          ("crop_receipt__farmer__gender", "Gender"),
-          ("created_at", "Transaction Date"),
-          ("crop_receipt__crop", "Crop"),
-          ("crop_receipt__unit", "Unit"),
-          ("amount", "No of Units"),
-          ("total", "Total Price Achieved"),
-          ("crop_receipt__market", "Market"),
-          ("crop_receipt__agent__actor__name", "Agent"),
-          ("crop_receipt__agent__actor__gender", "Agent Gender")]
-farmer_export = ExportAsCSVWithFK(fields)
-farmer_export_task = ExportAsCSVWithFKTask(fields)
+fields = [
+    ("id", "TransactionID"),
+    ("crop_receipt__farmer__actor__name", "Farmer Name"),
+    ("crop_receipt__farmer__gender", "Gender"),
+    ("created_at", "Transaction Date"),
+    ("crop_receipt__crop", "Crop"),
+    ("crop_receipt__unit", "Unit"),
+    ("amount", "No of Units"),
+    ("total", "Total Price Achieved"),
+    ("crop_receipt__market", "Market"),
+    ("crop_receipt__agent__actor__name", "Agent"),
+    ("crop_receipt__agent__actor__gender", "Agent Gender"),
+]
+transaction_export = ExportAsCSVWithFK(fields)
+transaction_export_task = ExportAsCSVWithFKTask(fields)
+
+# Custom farmer export
+
+fields = [
+    ("id", "FarmerID"),
+    ("actor__id", "ActorID"),
+    ("actor__name", "Farmer Name"),
+    
+]
+
 
 # ==========================================================================
 # Actors
@@ -52,9 +64,10 @@ class TransactionAdmin(admin.ModelAdmin):
 
         # action in format described by django docs
         # `(function, name, short_description) tuple`
-        actions["farmer_export_task"] = (farmer_export_task,
-                                         "farmer_export_task",
-                                         farmer_export_task.short_description)
+        actions["farmer_export_task"] = (
+            transaction_export_task,
+            "farmer_export_task",
+            transaction_export_task.short_description)
         return actions
 
 
