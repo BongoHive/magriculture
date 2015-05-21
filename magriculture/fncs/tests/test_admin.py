@@ -31,12 +31,15 @@ class FarmerAdminTestCase(TestCase):
 
         return farmers
 
+    def create_crop_receipts(self, farmer, crops):
+        for crop in crops:
+            utils.create_crop_receipt(crop=crop, farmer=farmer)
+
     def login(self, username, password):
         self.client.login(username=username, password=password)
 
-    def test_custom_farmer_export(self):
+    def farmer_export_csv(self, farmers):
         self.login('admin', 'password')
-        farmers = self.create_farmers()
         action = {
             'action': 'custom_farmer_export_csv',
             '_selected_action': [unicode(f.pk) for f in farmers],
@@ -44,11 +47,33 @@ class FarmerAdminTestCase(TestCase):
         response = self.client.post(
             reverse('admin:fncs_farmer_changelist'), action)
         csv = response.content.splitlines()
+        return csv
+
+    def assert_farmer_csv(self, csv, rows):
         self.assertEqual(csv, [
             "FarmerID,ActorID,Farmer Name,First MSISDN,Number of MSISDNs,"
             "First Market,Number of Markets,Best CropID,Best Crop Name,"
-            "Best Crop Amount",
+            "Best Crop Amount"] + rows)
+
+    def test_custom_farmer_export_simple(self):
+        farmers = self.create_farmers()
+        csv = self.farmer_export_csv(farmers)
+        self.assert_farmer_csv(csv, [
             "3,5,name surname,27731234569,1,test market,1,,,0",
             "2,4,name surname,27731234568,1,test market,1,,,0",
             "1,3,name surname,27731234567,1,test market,1,,,0",
+        ])
+
+    def test_custom_farmer_export_with_crops(self):
+        farmers = self.create_farmers()
+        beans = utils.create_crop("beans")
+        peas = utils.create_crop("peas")
+        self.create_crop_receipts(farmers[0], [beans, beans, peas])
+        self.create_crop_receipts(farmers[1], [peas, peas, beans])
+
+        csv = self.farmer_export_csv(farmers)
+        self.assert_farmer_csv(csv, [
+            "3,5,name surname,27731234569,1,test market,1,,,0",
+            "2,4,name surname,27731234568,1,test market,1,2,peas,2",
+            "1,3,name surname,27731234567,1,test market,1,1,beans,2",
         ])
