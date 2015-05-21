@@ -13,6 +13,9 @@ class FarmerAdminTestCase(TestCase):
         self.create_user('admin', 'password')
         self.client = Client()
 
+    def login(self, username, password):
+        self.client.login(username=username, password=password)
+
     def create_user(self, username, password):
         User.objects.create_superuser(
             username, '%s@example.com' % username, password)
@@ -31,12 +34,19 @@ class FarmerAdminTestCase(TestCase):
 
         return farmers
 
-    def create_crop_receipts(self, farmer, crops):
+    def add_crop_receipts(self, farmer, crops):
         for crop in crops:
             utils.create_crop_receipt(crop=crop, farmer=farmer)
 
-    def login(self, username, password):
-        self.client.login(username=username, password=password)
+    def add_markets(self, farmer, markets):
+        district = farmer.districts.all()[0]
+        for name in markets:
+            market = utils.create_market(name, district)
+            farmer.markets.add(market)
+
+    def add_msisdns(self, farmer, msisdns):
+        for msisdn in msisdns:
+            farmer.actor.add_identity(msisdn)
 
     def farmer_export_csv(self, farmers):
         self.login('admin', 'password')
@@ -68,12 +78,36 @@ class FarmerAdminTestCase(TestCase):
         farmers = self.create_farmers()
         beans = utils.create_crop("beans")
         peas = utils.create_crop("peas")
-        self.create_crop_receipts(farmers[0], [beans, beans, peas])
-        self.create_crop_receipts(farmers[1], [peas, peas, beans])
+        self.add_crop_receipts(farmers[0], [beans, beans, peas])
+        self.add_crop_receipts(farmers[1], [peas, peas, beans])
 
         csv = self.farmer_export_csv(farmers)
         self.assert_farmer_csv(csv, [
             "3,5,name surname,27731234569,1,test market,1,,,0",
             "2,4,name surname,27731234568,1,test market,1,2,peas,2",
             "1,3,name surname,27731234567,1,test market,1,1,beans,2",
+        ])
+
+    def test_custom_farmer_export_with_multiple_msisdns(self):
+        farmers = self.create_farmers()
+        self.add_msisdns(farmers[0], ['+1234'])
+        self.add_msisdns(farmers[1], ['+5678', '+9011'])
+
+        csv = self.farmer_export_csv(farmers)
+        self.assert_farmer_csv(csv, [
+            "3,5,name surname,27731234569,1,test market,1,,,0",
+            "2,4,name surname,+9011,3,test market,1,,,0",
+            "1,3,name surname,+1234,2,test market,1,,,0",
+        ])
+
+    def test_custom_farmer_export_with_multiple_markets(self):
+        farmers = self.create_farmers()
+        self.add_markets(farmers[0], ['Kitwe'])
+        self.add_markets(farmers[1], ['Chingola', 'Ndola'])
+
+        csv = self.farmer_export_csv(farmers)
+        self.assert_farmer_csv(csv, [
+            "3,5,name surname,27731234569,1,test market,1,,,0",
+            "2,4,name surname,27731234568,1,Chingola,3,,,0",
+            "1,3,name surname,27731234567,1,Kitwe,2,,,0",
         ])
