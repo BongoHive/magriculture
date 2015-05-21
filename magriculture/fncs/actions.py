@@ -180,7 +180,7 @@ class ExportFarmersAsCSV(object):
             msisdns = farmer.actor.get_msisdns()
             msisdn = msisdns[0] if msisdns else ''
             row += [msisdn, len(msisdns)]
-            markets = farmer.market_set.all()
+            markets = farmer.markets.all()
             market = markets[0].name if markets else ''
             row += [market, len(markets)]
             amount, crop = self._get_most_sold_crop(farmer)
