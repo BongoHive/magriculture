@@ -238,7 +238,6 @@ class Actor(models.Model):
         """
         return self.agent_set.exists()
 
-
     def send_message_to_farmer(self, farmer, message, group=None):
         """
         Send a message to a farmer

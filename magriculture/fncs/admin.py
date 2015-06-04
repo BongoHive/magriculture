@@ -5,22 +5,35 @@ from django.contrib import admin
 from magriculture.fncs.models import actors, props, geo
 from magriculture.fncs.actions import ExportAsCSV, ExportAsCSVWithFK
 from magriculture.fncs.actions import ExportAsCSVWithFKTask
+from magriculture.fncs.actions import ExportFarmersAsCSV
 
 # Setting the fields and ExportAsCSV Outside the class
 
-fields = [("id", "TransactionID"),
-          ("crop_receipt__farmer__actor__name", "Farmer Name"),
-          ("crop_receipt__farmer__gender", "Gender"),
-          ("created_at", "Transaction Date"),
-          ("crop_receipt__crop", "Crop"),
-          ("crop_receipt__unit", "Unit"),
-          ("amount", "No of Units"),
-          ("total", "Total Price Achieved"),
-          ("crop_receipt__market", "Market"),
-          ("crop_receipt__agent__actor__name", "Agent"),
-          ("crop_receipt__agent__actor__gender", "Agent Gender")]
-farmer_export = ExportAsCSVWithFK(fields)
-farmer_export_task = ExportAsCSVWithFKTask(fields)
+fields = [
+    ("id", "TransactionID"),
+    ("crop_receipt__farmer__actor__name", "Farmer Name"),
+    ("crop_receipt__farmer__gender", "Gender"),
+    ("created_at", "Transaction Date"),
+    ("crop_receipt__crop", "Crop"),
+    ("crop_receipt__unit", "Unit"),
+    ("amount", "No of Units"),
+    ("total", "Total Price Achieved"),
+    ("crop_receipt__market", "Market"),
+    ("crop_receipt__agent__actor__name", "Agent"),
+    ("crop_receipt__agent__actor__gender", "Agent Gender"),
+]
+transaction_export = ExportAsCSVWithFK(fields)
+transaction_export_task = ExportAsCSVWithFKTask(fields)
+
+# Custom farmer export
+
+fields = [
+    ("id", "FarmerID"),
+    ("actor__id", "ActorID"),
+    ("actor__name", "Farmer Name"),
+    
+]
+
 
 # ==========================================================================
 # Actors
@@ -35,6 +48,14 @@ class ActorAdmin(admin.ModelAdmin):
 class FarmerAdmin(admin.ModelAdmin):
     list_display = ('__unicode__', 'actor')
     search_fields = ('actor__name',)
+
+    def get_actions(self, request):
+        actions = super(FarmerAdmin, self).get_actions(request)
+        custom_export = ExportFarmersAsCSV()
+        actions["custom_farmer_export_csv"] = (
+            custom_export, "custom_farmer_export_csv",
+            custom_export.short_description)
+        return actions
 
 
 class AgentAdmin(admin.ModelAdmin):
@@ -52,9 +73,10 @@ class TransactionAdmin(admin.ModelAdmin):
 
         # action in format described by django docs
         # `(function, name, short_description) tuple`
-        actions["farmer_export_task"] = (farmer_export_task,
-                                         "farmer_export_task",
-                                         farmer_export_task.short_description)
+        actions["farmer_export_task"] = (
+            transaction_export_task,
+            "farmer_export_task",
+            transaction_export_task.short_description)
         return actions
 
 
