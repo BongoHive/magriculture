@@ -5,6 +5,14 @@ from django.http import HttpResponse
 from magriculture.fncs.tasks import export_transactions
 
 
+class EchoWriter(object):
+    """
+    A CSV data writer that echos values back to a StreamingHttpResponse.
+    """
+    def write(self, value):
+        return value
+
+
 class ExportAsCSV(object):
     """
     This Class returns an export csv action
@@ -160,21 +168,17 @@ class ExportFarmersAsCSV(object):
 
         return most_amount_sold, most_sold_crop
 
-    def __call__(self, modeladmin, request, queryset):
+    def _csv_rows(self, queryset):
         """
-        Export farmer records as CSV.
+        Iterator over the rows of farmers.
         """
-        response = HttpResponse(mimetype='text/csv')
-        response['Content-Disposition'] = (
-            'attachment; filename=fncs_farmer.csv')
-
-        writer = csv.writer(response)
-        writer.writerow([
+        yield [
             'FarmerID', 'ActorID', 'Farmer Name',
             'First MSISDN', 'Number of MSISDNs',
             'First Market', 'Number of Markets',
             'Best CropID', 'Best Crop Name', 'Best Crop Amount',
-        ])
+        ]
+
         for farmer in queryset:
             row = [farmer.id, farmer.actor.id, farmer.actor.name]
             msisdns = farmer.actor.get_msisdns()
@@ -183,15 +187,24 @@ class ExportFarmersAsCSV(object):
             markets = list(farmer.markets.all())
             market = markets[0].name if markets else ''
             row += [market, len(markets)]
-            if markets:
-                amount, crop = self._get_most_sold_crop(farmer)
-            else:
-                amount, crop = 0, None
+            amount, crop = self._get_most_sold_crop(farmer)
             if crop:
                 row += [crop.id, crop.name, amount]
             else:
                 row += ['', '', 0]
 
-            writer.writerow([
-                unicode(value).encode('utf-8') for value in row])
+            yield [
+                unicode(value).encode('utf-8') for value in row]
+
+    def __call__(self, modeladmin, request, queryset):
+        """
+        Export farmer records as CSV.
+        """
+        writer = csv.writer(EchoWriter())
+
+        response = HttpResponse(
+            (writer.writerow(row) for row in self._csv_rows(queryset)),
+            content_type='text/csv')
+        response['Content-Disposition'] = (
+            'attachment; filename=fncs_farmer.csv')
         return response
